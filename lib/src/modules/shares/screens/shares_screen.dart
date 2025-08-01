@@ -1,118 +1,115 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/ceas_colors.dart';
 
-class IncomeExpenseReportScreen extends StatefulWidget {
-  const IncomeExpenseReportScreen({Key? key}) : super(key: key);
+class SharesScreen extends StatefulWidget {
+  const SharesScreen({Key? key}) : super(key: key);
 
   @override
-  State<IncomeExpenseReportScreen> createState() =>
-      _IncomeExpenseReportScreenState();
+  State<SharesScreen> createState() => _SharesScreenState();
 }
 
-class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
+class _SharesScreenState extends State<SharesScreen> {
   String search = '';
-  String tipoMovimiento = 'Todos';
-  String estado = 'Todos';
-  String club = 'Todos';
-  DateTimeRange? fechaRange;
+  String estadoAccion = 'Todos';
+  String tipoAccion = 'Todos';
+  final estadosAccion = ['Todos', 'Activa', 'Pagada', 'Vencida', 'Cancelada'];
+  final tiposAccion = ['Todos', 'Ordinaria', 'Preferencial', 'Especial'];
 
-  final tiposMovimiento = ['Todos', 'Ingreso', 'Egreso'];
-  final estadosMovimiento = ['Todos', 'Confirmado', 'Pendiente', 'Cancelado'];
-  final clubs = [
-    'Todos',
-    'Club Central',
-    'Club Norte',
-    'Club Sur',
-    'Club Este'
-  ];
-
-  final movimientos = [
+  final acciones = [
     {
-      'id': 'MOV-001',
-      'descripcion': 'Cuota mensual socio',
-      'tipo': 'Ingreso',
-      'monto': 500.0,
-      'estado': 'Confirmado',
-      'club': 'Club Central',
-      'fecha': '15/06/2024',
-      'categoria': 'Membresías',
-      'socio': 'Juan Carlos Pérez',
-      'comprobante': 'COMP-001.pdf',
+      'id': 'ACC-001',
+      'socioTitular': 'Juan Carlos Pérez López',
+      'tipoAccion': 'Ordinaria',
+      'estadoAccion': 'Activa',
+      'modalidadPago': 'Mensual',
+      'valorAccion': 1000.0,
+      'saldoPendiente': 800.0,
+      'fechaEmision': '15/01/2024',
+      'certificadoPdf': 'certificado_001.pdf',
+      'certificadoCifrado': 'certificado_001_cifrado.txt',
+      'pagosRealizados': 2,
+      'totalPagos': 5,
     },
     {
-      'id': 'MOV-002',
-      'descripcion': 'Mantenimiento piscina',
-      'tipo': 'Egreso',
-      'monto': 1200.0,
-      'estado': 'Confirmado',
-      'club': 'Club Central',
-      'fecha': '14/06/2024',
-      'categoria': 'Mantenimiento',
-      'proveedor': 'Servicios Acuáticos S.A.',
-      'comprobante': 'FACT-002.pdf',
+      'id': 'ACC-002',
+      'socioTitular': 'María Elena López Torres',
+      'tipoAccion': 'Preferencial',
+      'estadoAccion': 'Pagada',
+      'modalidadPago': 'Anual',
+      'valorAccion': 2000.0,
+      'saldoPendiente': 0.0,
+      'fechaEmision': '22/03/2024',
+      'certificadoPdf': 'certificado_002.pdf',
+      'certificadoCifrado': 'certificado_002_cifrado.txt',
+      'pagosRealizados': 1,
+      'totalPagos': 1,
     },
     {
-      'id': 'MOV-003',
-      'descripcion': 'Venta de acciones',
-      'tipo': 'Ingreso',
-      'monto': 2000.0,
-      'estado': 'Pendiente',
-      'club': 'Club Norte',
-      'fecha': '13/06/2024',
-      'categoria': 'Acciones',
-      'socio': 'María Elena López',
-      'comprobante': 'ACC-003.pdf',
+      'id': 'ACC-003',
+      'socioTitular': 'Carlos Alberto Gómez Silva',
+      'tipoAccion': 'Ordinaria',
+      'estadoAccion': 'Vencida',
+      'modalidadPago': 'Mensual',
+      'valorAccion': 1500.0,
+      'saldoPendiente': 1500.0,
+      'fechaEmision': '08/02/2024',
+      'certificadoPdf': 'certificado_003.pdf',
+      'certificadoCifrado': 'certificado_003_cifrado.txt',
+      'pagosRealizados': 0,
+      'totalPagos': 6,
     },
     {
-      'id': 'MOV-004',
-      'descripcion': 'Compra equipos deportivos',
-      'tipo': 'Egreso',
-      'monto': 3500.0,
-      'estado': 'Confirmado',
-      'club': 'Club Sur',
-      'fecha': '12/06/2024',
-      'categoria': 'Equipamiento',
-      'proveedor': 'Deportes Bolivia',
-      'comprobante': 'FACT-004.pdf',
+      'id': 'ACC-004',
+      'socioTitular': 'Ana Patricia Torres Vargas',
+      'tipoAccion': 'Especial',
+      'estadoAccion': 'Activa',
+      'modalidadPago': 'Trimestral',
+      'valorAccion': 3000.0,
+      'saldoPendiente': 2000.0,
+      'fechaEmision': '12/04/2024',
+      'certificadoPdf': 'certificado_004.pdf',
+      'certificadoCifrado': 'certificado_004_cifrado.txt',
+      'pagosRealizados': 1,
+      'totalPagos': 4,
     },
     {
-      'id': 'MOV-005',
-      'descripcion': 'Evento social',
-      'tipo': 'Ingreso',
-      'monto': 800.0,
-      'estado': 'Confirmado',
-      'club': 'Club Este',
-      'fecha': '11/06/2024',
-      'categoria': 'Eventos',
-      'socio': 'Carlos Alberto Gómez',
-      'comprobante': 'EVT-005.pdf',
+      'id': 'ACC-005',
+      'socioTitular': 'Luis Fernando Fernández Ruiz',
+      'tipoAccion': 'Ordinaria',
+      'estadoAccion': 'Activa',
+      'modalidadPago': 'Mensual',
+      'valorAccion': 1200.0,
+      'saldoPendiente': 600.0,
+      'fechaEmision': '05/05/2024',
+      'certificadoPdf': 'certificado_005.pdf',
+      'certificadoCifrado': 'certificado_005_cifrado.txt',
+      'pagosRealizados': 3,
+      'totalPagos': 6,
     },
   ];
 
   @override
   Widget build(BuildContext context) {
-    final filtered = movimientos.where((m) {
+    final filtered = acciones.where((a) {
+      final matchesEstado =
+          estadoAccion == 'Todos' || a['estadoAccion'] == estadoAccion;
       final matchesTipo =
-          tipoMovimiento == 'Todos' || m['tipo'] == tipoMovimiento;
-      final matchesEstado = estado == 'Todos' || m['estado'] == estado;
-      final matchesClub = club == 'Todos' || m['club'] == club;
+          tipoAccion == 'Todos' || a['tipoAccion'] == tipoAccion;
       final matchesSearch = search.isEmpty ||
-          (m['descripcion'] as String)
+          (a['socioTitular'] as String)
               .toLowerCase()
               .contains(search.toLowerCase()) ||
-          (m['id'] as String).toLowerCase().contains(search.toLowerCase());
-      return matchesTipo && matchesEstado && matchesClub && matchesSearch;
+          (a['id'] as String).toLowerCase().contains(search.toLowerCase());
+      return matchesEstado && matchesTipo && matchesSearch;
     }).toList();
 
-    final totalIngresos = movimientos
-        .where((m) => m['tipo'] == 'Ingreso' && m['estado'] == 'Confirmado')
-        .fold(0.0, (sum, m) => sum + (m['monto'] as double));
-
-    final totalEgresos = movimientos
-        .where((m) => m['tipo'] == 'Egreso' && m['estado'] == 'Confirmado')
-        .fold(0.0, (sum, m) => sum + (m['monto'] as double));
-
-    final balance = totalIngresos - totalEgresos;
+    final totalAcciones = acciones.length;
+    final accionesActivas =
+        acciones.where((a) => a['estadoAccion'] == 'Activa').length;
+    final accionesPagadas =
+        acciones.where((a) => a['estadoAccion'] == 'Pagada').length;
+    final accionesVencidas =
+        acciones.where((a) => a['estadoAccion'] == 'Vencida').length;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -151,7 +148,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
-                      Icons.account_balance_rounded,
+                      Icons.assignment_turned_in_rounded,
                       color: Colors.white,
                       size: 28,
                     ),
@@ -162,7 +159,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Gestión Financiera',
+                          'Gestión de Acciones',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -171,7 +168,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Administra ingresos, egresos y reportes financieros',
+                          'Administra las acciones emitidas y certificados del CEAS',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.white.withOpacity(0.9),
@@ -181,14 +178,16 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () => _showAgregarMovimientoDialog(context),
+                    onPressed: () {
+                      _showEmitirAccionDialog(context);
+                    },
                     icon: const Icon(Icons.add_rounded),
-                    label: const Text('Agregar Movimiento'),
+                    label: const Text('Emitir Acción'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: CeasColors.primaryBlue,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 16),
+                          horizontal: 24, vertical: 16),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
@@ -199,100 +198,33 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Estadísticas principales
+            // Estadísticas
             Row(
               children: [
                 _buildStatCard(
-                    'Balance Total',
-                    'Bs. ${balance.toStringAsFixed(0)}',
-                    Icons.account_balance_wallet_rounded,
-                    balance >= 0 ? Colors.green : Colors.red,
-                    'Saldo actual'),
+                    'Total Acciones',
+                    totalAcciones.toString(),
+                    Icons.assignment_rounded,
+                    CeasColors.kpiBlue,
+                    'Acciones emitidas'),
                 const SizedBox(width: 16),
                 _buildStatCard(
-                    'Ingresos',
-                    'Bs. ${totalIngresos.toStringAsFixed(0)}',
-                    Icons.trending_up_rounded,
-                    Colors.green,
-                    'Este mes'),
+                    'Activas',
+                    accionesActivas.toString(),
+                    Icons.check_circle_rounded,
+                    CeasColors.kpiGreen,
+                    'En proceso'),
                 const SizedBox(width: 16),
-                _buildStatCard(
-                    'Egresos',
-                    'Bs. ${totalEgresos.toStringAsFixed(0)}',
-                    Icons.trending_down_rounded,
-                    Colors.red,
-                    'Este mes'),
+                _buildStatCard('Pagadas', accionesPagadas.toString(),
+                    Icons.payment_rounded, CeasColors.kpiOrange, 'Completadas'),
                 const SizedBox(width: 16),
-                _buildStatCard(
-                    'Movimientos',
-                    filtered.length.toString(),
-                    Icons.swap_horiz_rounded,
-                    CeasColors.primaryBlue,
-                    'Filtrados'),
+                _buildStatCard('Vencidas', accionesVencidas.toString(),
+                    Icons.warning_rounded, CeasColors.kpiPurple, 'Pendientes'),
               ],
             ),
             const SizedBox(height: 24),
 
-            // Saldos mensuales por club
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: Colors.grey[200]!, width: 1),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: CeasColors.primaryBlue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.account_balance_rounded,
-                            color: CeasColors.primaryBlue,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Saldos Mensuales por Club',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: CeasColors.primaryBlue,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        _buildClubBalanceCard('Club Central', 2500.0, 1200.0,
-                            Icons.location_city_rounded, Colors.blue),
-                        const SizedBox(width: 16),
-                        _buildClubBalanceCard('Club Norte', 1800.0, 900.0,
-                            Icons.north_rounded, Colors.green),
-                        const SizedBox(width: 16),
-                        _buildClubBalanceCard('Club Sur', 3200.0, 2100.0,
-                            Icons.south_rounded, Colors.orange),
-                        const SizedBox(width: 16),
-                        _buildClubBalanceCard('Club Este', 1400.0, 800.0,
-                            Icons.east_rounded, Colors.purple),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Filtros
+            // Filtros y búsqueda
             Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -341,7 +273,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                             ),
                             child: TextField(
                               decoration: InputDecoration(
-                                hintText: 'Buscar por descripción o ID...',
+                                hintText: 'Buscar por socio o ID de acción...',
                                 hintStyle: TextStyle(color: Colors.grey[500]),
                                 prefixIcon: const Icon(Icons.search_rounded,
                                     color: Colors.grey),
@@ -354,34 +286,51 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        _buildFilterDropdown(
-                            'Tipo',
-                            tipoMovimiento,
-                            tiposMovimiento,
-                            (v) => setState(() => tipoMovimiento = v!)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey[200]!),
+                          ),
+                          child: DropdownButton<String>(
+                            value: estadoAccion,
+                            items: estadosAccion
+                                .map((e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (v) =>
+                                setState(() => estadoAccion = v ?? 'Todos'),
+                            underline: Container(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: CeasColors.primaryBlue),
+                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                          ),
+                        ),
                         const SizedBox(width: 16),
-                        _buildFilterDropdown(
-                            'Estado',
-                            estado,
-                            estadosMovimiento,
-                            (v) => setState(() => estado = v!)),
-                        const SizedBox(width: 16),
-                        _buildFilterDropdown('Club', club, clubs,
-                            (v) => setState(() => club = v!)),
-                        const SizedBox(width: 16),
-                        ElevatedButton.icon(
-                          onPressed: () => _showDateRangePicker(context),
-                          icon: const Icon(Icons.date_range_rounded),
-                          label: Text(fechaRange == null
-                              ? 'Fechas'
-                              : '${fechaRange!.start.day}/${fechaRange!.start.month} - ${fechaRange!.end.day}/${fechaRange!.end.month}'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: CeasColors.primaryBlue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey[200]!),
+                          ),
+                          child: DropdownButton<String>(
+                            value: tipoAccion,
+                            items: tiposAccion
+                                .map((e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)))
+                                .toList(),
+                            onChanged: (v) =>
+                                setState(() => tipoAccion = v ?? 'Todos'),
+                            underline: Container(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: CeasColors.primaryBlue),
+                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
                           ),
                         ),
                       ],
@@ -392,7 +341,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Tabla de movimientos financieros
+            // Tabla de acciones
             Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -400,6 +349,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                 side: BorderSide(color: Colors.grey[200]!, width: 1),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(20.0),
@@ -412,14 +362,14 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
-                            Icons.swap_horiz_rounded,
+                            Icons.table_chart_rounded,
                             color: CeasColors.primaryBlue,
                             size: 20,
                           ),
                         ),
                         const SizedBox(width: 12),
                         const Text(
-                          'Movimientos Financieros',
+                          'Acciones Emitidas',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -435,26 +385,12 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            '${filtered.length} movimientos encontrados',
+                            '${filtered.length} acciones encontradas',
                             style: const TextStyle(
                               color: CeasColors.primaryBlue,
                               fontWeight: FontWeight.w500,
                               fontSize: 12,
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        ElevatedButton.icon(
-                          onPressed: () => _exportarBalances(),
-                          icon: const Icon(Icons.download_rounded),
-                          label: const Text('Exportar'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: CeasColors.primaryBlue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ],
@@ -483,7 +419,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                               Expanded(flex: 1, child: _buildHeaderCell('ID')),
                               Expanded(
                                   flex: 2,
-                                  child: _buildHeaderCell('Descripción')),
+                                  child: _buildHeaderCell('Socio Titular')),
                               Expanded(
                                   flex: 1, child: _buildHeaderCell('Tipo')),
                               Flexible(
@@ -491,11 +427,14 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                                   child: Center(
                                       child: _buildHeaderCell('Estado'))),
                               Expanded(
-                                  flex: 1, child: _buildHeaderCell('Club')),
+                                  flex: 1,
+                                  child: _buildHeaderCell('Modalidad')),
                               Expanded(
-                                  flex: 1, child: _buildHeaderCell('Monto')),
+                                  flex: 1, child: _buildHeaderCell('Valor')),
                               Expanded(
-                                  flex: 1, child: _buildHeaderCell('Fecha')),
+                                  flex: 1, child: _buildHeaderCell('Saldo')),
+                              Expanded(
+                                  flex: 1, child: _buildHeaderCell('Progreso')),
                               Expanded(
                                   flex: 1, child: _buildHeaderCell('Acciones')),
                             ],
@@ -504,7 +443,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                         // Filas de la tabla
                         ...filtered.asMap().entries.map((entry) {
                           final index = entry.key;
-                          final m = entry.value;
+                          final a = entry.value;
                           return Container(
                             decoration: BoxDecoration(
                               color:
@@ -521,32 +460,39 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                                 children: [
                                   Expanded(
                                       flex: 1,
-                                      child: _buildCell(m['id'] as String)),
+                                      child: _buildCell(a['id'] as String)),
                                   Expanded(
                                       flex: 2,
                                       child: _buildCell(
-                                          m['descripcion'] as String)),
+                                          a['socioTitular'] as String)),
                                   Expanded(
                                       flex: 1,
-                                      child: _buildTipoMovimientoCell(
-                                          m['tipo'] as String)),
+                                      child: _buildTipoAccionCell(
+                                          a['tipoAccion'] as String)),
                                   Flexible(
                                       flex: 1,
                                       child: Center(
-                                          child: _buildEstadoMovimientoCell(
-                                              m['estado'] as String))),
+                                          child: _buildEstadoAccionCell(
+                                              a['estadoAccion'] as String))),
                                   Expanded(
                                       flex: 1,
-                                      child: _buildCell(m['club'] as String)),
+                                      child: _buildCell(
+                                          a['modalidadPago'] as String)),
                                   Expanded(
                                       flex: 1,
                                       child: _buildMoneyCell(
-                                          m['monto'] as double)),
+                                          a['valorAccion'] as double)),
                                   Expanded(
                                       flex: 1,
-                                      child: _buildCell(m['fecha'] as String)),
+                                      child: _buildMoneyCell(
+                                          a['saldoPendiente'] as double)),
                                   Expanded(
-                                      flex: 1, child: _buildAccionesCell(m)),
+                                      flex: 1,
+                                      child: _buildProgressCell(
+                                          a['pagosRealizados'] as int,
+                                          a['totalPagos'] as int)),
+                                  Expanded(
+                                      flex: 1, child: _buildAccionesCell(a)),
                                 ],
                               ),
                             ),
@@ -604,85 +550,6 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
     );
   }
 
-  Widget _buildClubBalanceCard(String clubName, double ingresos, double egresos,
-      IconData icon, Color color) {
-    final balance = ingresos - egresos;
-    return Expanded(
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, color: color, size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(clubName,
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                        Text('Saldo: Bs. ${balance.toStringAsFixed(0)}',
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: color)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _buildDetailRow(
-                      'Ingresos', 'Bs. ${ingresos.toStringAsFixed(0)}'),
-                  const SizedBox(width: 10),
-                  _buildDetailRow(
-                      'Egresos', 'Bs. ${egresos.toStringAsFixed(0)}'),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterDropdown(String label, String value, List<String> items,
-      Function(String?) onChanged) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: DropdownButton<String>(
-        value: value,
-        items: items
-            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-            .toList(),
-        onChanged: onChanged,
-        underline: Container(),
-        style: const TextStyle(
-            fontWeight: FontWeight.w500, color: CeasColors.primaryBlue),
-        icon: const Icon(Icons.keyboard_arrow_down_rounded),
-      ),
-    );
-  }
-
   Widget _buildHeaderCell(String text) {
     return Text(
       text,
@@ -717,28 +584,87 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
     );
   }
 
-  Widget _buildTipoMovimientoCell(String tipo) {
-    return _tipoMovimientoBadge(tipo);
+  Widget _buildTipoAccionCell(String tipo) {
+    return _tipoAccionBadge(tipo);
   }
 
-  Widget _buildEstadoMovimientoCell(String estado) {
-    return _estadoMovimientoBadge(estado);
+  Widget _buildEstadoAccionCell(String estado) {
+    return _estadoAccionBadge(estado);
   }
 
-  Widget _buildAccionesCell(Map<String, dynamic> movimiento) {
+  Widget _buildProgressCell(int realizados, int total) {
+    final porcentaje = total > 0 ? (realizados / total * 100).round() : 0;
+    return Column(
+      children: [
+        Text(
+          '$realizados/$total',
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        LinearProgressIndicator(
+          value: total > 0 ? realizados / total : 0,
+          backgroundColor: Colors.grey[300],
+          valueColor: AlwaysStoppedAnimation<Color>(
+            porcentaje >= 100 ? Colors.green : CeasColors.primaryBlue,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAccionesCell(Map<String, dynamic> accion) {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert, color: Colors.grey),
       onSelected: (value) {
         switch (value) {
-          case 'detalle':
-            _showDetalleMovimientoDialog(context, movimiento);
+          case 'certificado':
+            _showCertificadoDialog(context, accion);
             break;
-          case 'editar':
-            _showEditarMovimientoDialog(context, movimiento);
+          case 'estado':
+            _showCambiarEstadoDialog(context, accion);
+            break;
+          case 'pago':
+            _showRegistroPagoDialog(context, accion);
+            break;
+          case 'detalle':
+            _showDetalleAccionDialog(context, accion);
             break;
         }
       },
       itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'certificado',
+          child: Row(
+            children: [
+              Icon(Icons.picture_as_pdf, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Emitir Certificado'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'estado',
+          child: Row(
+            children: [
+              Icon(Icons.edit, color: Colors.orange),
+              SizedBox(width: 8),
+              Text('Cambiar Estado'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'pago',
+          child: Row(
+            children: [
+              Icon(Icons.payment, color: Colors.green),
+              SizedBox(width: 8),
+              Text('Registrar Pago'),
+            ],
+          ),
+        ),
         const PopupMenuItem(
           value: 'detalle',
           child: Row(
@@ -749,22 +675,25 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
             ],
           ),
         ),
-        const PopupMenuItem(
-          value: 'editar',
-          child: Row(
-            children: [
-              Icon(Icons.edit, color: Colors.orange),
-              SizedBox(width: 8),
-              Text('Editar'),
-            ],
-          ),
-        ),
       ],
     );
   }
 
-  Widget _tipoMovimientoBadge(String tipo) {
-    Color color = tipo == 'Ingreso' ? Colors.green : Colors.red;
+  Widget _tipoAccionBadge(String tipo) {
+    Color color;
+    switch (tipo) {
+      case 'Ordinaria':
+        color = Colors.blue;
+        break;
+      case 'Preferencial':
+        color = Colors.purple;
+        break;
+      case 'Especial':
+        color = Colors.orange;
+        break;
+      default:
+        color = Colors.grey;
+    }
     return IntrinsicWidth(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -779,20 +708,23 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
     );
   }
 
-  Widget _estadoMovimientoBadge(String estado) {
+  Widget _estadoAccionBadge(String estado) {
     Color color;
     switch (estado) {
-      case 'Confirmado':
+      case 'Activa':
         color = Colors.green;
         break;
-      case 'Pendiente':
-        color = Colors.orange;
+      case 'Pagada':
+        color = Colors.blue;
         break;
-      case 'Cancelado':
+      case 'Vencida':
         color = Colors.red;
         break;
-      default:
+      case 'Cancelada':
         color = Colors.grey;
+        break;
+      default:
+        color = Colors.blueGrey;
     }
     return IntrinsicWidth(
       child: Container(
@@ -808,24 +740,12 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
     );
   }
 
-  void _showDateRangePicker(BuildContext context) async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      initialDateRange: fechaRange,
-    );
-    if (picked != null) {
-      setState(() => fechaRange = picked);
-    }
-  }
-
-  void _showAgregarMovimientoDialog(BuildContext context) {
+  void _showEmitirAccionDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Agregar Movimiento'),
-        content: const Text('Funcionalidad de agregar movimiento (ficticia)'),
+        title: const Text('Emitir Nueva Acción'),
+        content: const Text('Funcionalidad de emisión de acciones (ficticia)'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -835,43 +755,183 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
             onPressed: () {
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Movimiento agregado (ficticio)')),
+                const SnackBar(content: Text('Acción emitida (ficticio)')),
               );
             },
-            child: const Text('Agregar'),
+            child: const Text('Emitir'),
           ),
         ],
       ),
     );
   }
 
-  void _showDetalleMovimientoDialog(
-      BuildContext context, Map<String, dynamic> movimiento) {
+  void _showCertificadoDialog(
+      BuildContext context, Map<String, dynamic> accion) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Detalle del Movimiento'),
+        title: const Text('Emitir Certificado'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRowForDialog('ID', movimiento['id'] as String),
-            _buildDetailRowForDialog(
-                'Descripción', movimiento['descripcion'] as String),
-            _buildDetailRowForDialog('Tipo', movimiento['tipo'] as String),
-            _buildDetailRowForDialog('Monto', 'Bs. ${movimiento['monto']}'),
-            _buildDetailRowForDialog('Estado', movimiento['estado'] as String),
-            _buildDetailRowForDialog('Club', movimiento['club'] as String),
-            _buildDetailRowForDialog('Fecha', movimiento['fecha'] as String),
-            _buildDetailRowForDialog(
-                'Categoría', movimiento['categoria'] as String),
-            if (movimiento['socio'] != null)
-              _buildDetailRowForDialog('Socio', movimiento['socio'] as String),
-            if (movimiento['proveedor'] != null)
-              _buildDetailRowForDialog(
-                  'Proveedor', movimiento['proveedor'] as String),
-            _buildDetailRowForDialog(
-                'Comprobante', movimiento['comprobante'] as String),
+            Text('Acción: ${accion['id']}'),
+            Text('Socio: ${accion['socioTitular']}'),
+            const SizedBox(height: 16),
+            const Text('Seleccione el tipo de certificado:'),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf, color: Colors.red),
+              title: const Text('Certificado PDF'),
+              subtitle: Text('${accion['certificadoPdf']}'),
+              onTap: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Certificado PDF generado (ficticio)')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.security, color: Colors.blue),
+              title: const Text('Certificado Cifrado'),
+              subtitle: Text('${accion['certificadoCifrado']}'),
+              onTap: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Certificado cifrado generado (ficticio)')),
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCambiarEstadoDialog(
+      BuildContext context, Map<String, dynamic> accion) {
+    String nuevoEstado = accion['estadoAccion'];
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Cambiar Estado de Acción'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Acción: ${accion['id']}'),
+              Text('Estado actual: ${accion['estadoAccion']}'),
+              const SizedBox(height: 16),
+              const Text('Nuevo estado:'),
+              ...estadosAccion.where((e) => e != 'Todos').map(
+                    (estado) => RadioListTile<String>(
+                      title: Text(estado),
+                      value: estado,
+                      groupValue: nuevoEstado,
+                      onChanged: (value) =>
+                          setState(() => nuevoEstado = value!),
+                    ),
+                  ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content:
+                          Text('Estado cambiado a $nuevoEstado (ficticio)')),
+                );
+              },
+              child: const Text('Cambiar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRegistroPagoDialog(
+      BuildContext context, Map<String, dynamic> accion) {
+    final montoController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Registrar Pago'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Acción: ${accion['id']}'),
+            Text('Saldo pendiente: Bs. ${accion['saldoPendiente']}'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: montoController,
+              decoration: const InputDecoration(
+                labelText: 'Monto del pago',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Pago registrado (ficticio)')),
+              );
+            },
+            child: const Text('Registrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDetalleAccionDialog(
+      BuildContext context, Map<String, dynamic> accion) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Detalle de Acción'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDetailRow('ID', accion['id']),
+            _buildDetailRow('Socio Titular', accion['socioTitular']),
+            _buildDetailRow('Tipo', accion['tipoAccion']),
+            _buildDetailRow('Estado', accion['estadoAccion']),
+            _buildDetailRow('Modalidad de Pago', accion['modalidadPago']),
+            _buildDetailRow('Valor', 'Bs. ${accion['valorAccion']}'),
+            _buildDetailRow(
+                'Saldo Pendiente', 'Bs. ${accion['saldoPendiente']}'),
+            _buildDetailRow('Fecha Emisión', accion['fechaEmision']),
+            _buildDetailRow('Certificado PDF', accion['certificadoPdf']),
+            _buildDetailRow(
+                'Certificado Cifrado', accion['certificadoCifrado']),
+            _buildDetailRow('Pagos',
+                '${accion['pagosRealizados']}/${accion['totalPagos']}'),
           ],
         ),
         actions: [
@@ -884,54 +944,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
     );
   }
 
-  void _showEditarMovimientoDialog(
-      BuildContext context, Map<String, dynamic> movimiento) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Editar Movimiento'),
-        content: const Text('Funcionalidad de editar movimiento (ficticia)'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Movimiento editado (ficticio)')),
-              );
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDetailRow(String label, String value) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRowForDialog(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -949,12 +962,6 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  void _exportarBalances() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Reporte financiero exportado (ficticio)')),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/ceas_colors.dart';
 
 class CeasHeader extends StatelessWidget {
   final String title;
@@ -8,7 +9,7 @@ class CeasHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-      color: const Color(0xFF1565C0),
+      color: CeasColors.headerBlue,
       child: Row(
         children: [
           Text(
@@ -61,7 +62,7 @@ class CeasHeader extends StatelessWidget {
               const SizedBox(width: 12),
               CircleAvatar(
                 backgroundColor: Colors.white,
-                child: Icon(Icons.person, color: Color(0xFF1565C0)),
+                child: Icon(Icons.person, color: CeasColors.headerBlue),
               ),
             ],
           ),
