@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'ceas_sidebar.dart';
 import '../../modules/dashboard/screens/dashboard_screen.dart';
-import '../../modules/shares/screens/shares_list_screen.dart';
+import '../../modules/shares/screens/shares_screen.dart';
 import '../../modules/finance/screens/income_expense_report_screen.dart';
 import '../../modules/staff/screens/staff_list_screen.dart';
-import '../../modules/shares/screens/shares_screen.dart';
 import '../../modules/members/screens/members_list_screen.dart';
-// Agrega más imports según módulos
+import '../../modules/users/screens/users_security_screen.dart';
+import '../../modules/settings/screens/settings_screen.dart';
+import '../../modules/purchases/screens/purchases_suppliers_screen.dart';
 
 class CeasMainLayout extends StatefulWidget {
   final String initialRoute;
@@ -36,16 +37,14 @@ class _CeasMainLayoutState extends State<CeasMainLayout> {
         return const SharesScreen();
       case '/finanzas_reportes':
         return const IncomeExpenseReportScreen();
+      case '/compras_proveedores':
+        return const PurchasesSuppliersScreen();
       case '/personal':
         return const StaffListScreen();
       case '/usuarios':
-        return const Center(
-            child: Text('Pantalla de Usuarios y Seguridad',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)));
+        return const UsersSecurityScreen();
       case '/configuracion':
-        return const Center(
-            child: Text('Pantalla de Configuración',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)));
+        return const SettingsScreen();
       default:
         return const Center(child: Text('Pantalla no encontrada'));
     }

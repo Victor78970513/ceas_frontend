@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/ceas_colors.dart';
-import '../../../core/widgets/ceas_header.dart';
 
 class StaffListScreen extends StatefulWidget {
   const StaffListScreen({Key? key}) : super(key: key);
@@ -13,6 +12,14 @@ class _StaffListScreenState extends State<StaffListScreen> {
   String search = '';
   String cargo = 'Todos';
   String estado = 'Todos';
+
+  // Variables de paginación para empleados
+  int currentPageEmpleados = 1;
+  int itemsPerPageEmpleados = 5;
+
+  // Variables de paginación para asistencia
+  int currentPageAsistencia = 1;
+  int itemsPerPageAsistencia = 5;
 
   final List<Map<String, dynamic>> empleados = [
     {
@@ -48,6 +55,105 @@ class _StaffListScreenState extends State<StaffListScreen> {
       'salario': 3800.0,
       'departamento': 'Deportes',
     },
+    {
+      'id': 'EMP004',
+      'nombre': 'María Rodríguez',
+      'cargo': 'Recepcionista',
+      'email': 'maria.rodriguez@ceas.com',
+      'telefono': '76543213',
+      'fechaIngreso': '05/09/2022',
+      'estado': 'Activo',
+      'salario': 3200.0,
+      'departamento': 'Administración',
+    },
+    {
+      'id': 'EMP005',
+      'nombre': 'Roberto Silva',
+      'cargo': 'Mantenimiento',
+      'email': 'roberto.silva@ceas.com',
+      'telefono': '76543214',
+      'fechaIngreso': '18/11/2021',
+      'estado': 'Activo',
+      'salario': 3500.0,
+      'departamento': 'Mantenimiento',
+    },
+    {
+      'id': 'EMP006',
+      'nombre': 'Carmen Vega',
+      'cargo': 'Instructora de Equitación',
+      'email': 'carmen.vega@ceas.com',
+      'telefono': '76543215',
+      'fechaIngreso': '12/04/2023',
+      'estado': 'Activo',
+      'salario': 3800.0,
+      'departamento': 'Deportes',
+    },
+    {
+      'id': 'EMP007',
+      'nombre': 'Diego Morales',
+      'cargo': 'Encargado de Ventas',
+      'email': 'diego.morales@ceas.com',
+      'telefono': '76543216',
+      'fechaIngreso': '08/07/2022',
+      'estado': 'Inactivo',
+      'salario': 4500.0,
+      'departamento': 'Ventas',
+    },
+    {
+      'id': 'EMP008',
+      'nombre': 'Patricia López',
+      'cargo': 'Contadora',
+      'email': 'patricia.lopez@ceas.com',
+      'telefono': '76543217',
+      'fechaIngreso': '25/02/2021',
+      'estado': 'Activo',
+      'salario': 5200.0,
+      'departamento': 'Finanzas',
+    },
+    {
+      'id': 'EMP009',
+      'nombre': 'Fernando Castro',
+      'cargo': 'Mantenimiento',
+      'email': 'fernando.castro@ceas.com',
+      'telefono': '76543218',
+      'fechaIngreso': '30/05/2023',
+      'estado': 'Activo',
+      'salario': 3500.0,
+      'departamento': 'Mantenimiento',
+    },
+    {
+      'id': 'EMP010',
+      'nombre': 'Isabel Ruiz',
+      'cargo': 'Recepcionista',
+      'email': 'isabel.ruiz@ceas.com',
+      'telefono': '76543219',
+      'fechaIngreso': '14/08/2022',
+      'estado': 'Activo',
+      'salario': 3200.0,
+      'departamento': 'Administración',
+    },
+    {
+      'id': 'EMP011',
+      'nombre': 'Ricardo Herrera',
+      'cargo': 'Instructor de Equitación',
+      'email': 'ricardo.herrera@ceas.com',
+      'telefono': '76543220',
+      'fechaIngreso': '03/12/2023',
+      'estado': 'Activo',
+      'salario': 3800.0,
+      'departamento': 'Deportes',
+    },
+    {
+      'id': 'EMP012',
+      'nombre': 'Sofía Jiménez',
+      'cargo': 'Encargado de Ventas',
+      'email': 'sofia.jimenez@ceas.com',
+      'telefono': '76543221',
+      'fechaIngreso': '20/01/2024',
+      'estado': 'Activo',
+      'salario': 4500.0,
+      'departamento': 'Ventas',
+    },
   ];
 
   final List<Map<String, dynamic>> asistencia = [
@@ -66,6 +172,78 @@ class _StaffListScreenState extends State<StaffListScreen> {
       'salida': '17:30',
       'estado': 'Retraso',
       'horas': 9.25,
+    },
+    {
+      'empleado': 'Luis Mendoza',
+      'fecha': '15/12/2024',
+      'entrada': '07:45',
+      'salida': '16:45',
+      'estado': 'Presente',
+      'horas': 9,
+    },
+    {
+      'empleado': 'María Rodríguez',
+      'fecha': '15/12/2024',
+      'entrada': '08:30',
+      'salida': '17:30',
+      'estado': 'Retraso',
+      'horas': 9,
+    },
+    {
+      'empleado': 'Roberto Silva',
+      'fecha': '15/12/2024',
+      'entrada': '07:30',
+      'salida': '16:30',
+      'estado': 'Presente',
+      'horas': 9,
+    },
+    {
+      'empleado': 'Carmen Vega',
+      'fecha': '15/12/2024',
+      'entrada': '08:00',
+      'salida': '17:00',
+      'estado': 'Presente',
+      'horas': 9,
+    },
+    {
+      'empleado': 'Patricia López',
+      'fecha': '15/12/2024',
+      'entrada': '08:10',
+      'salida': '17:10',
+      'estado': 'Retraso',
+      'horas': 9,
+    },
+    {
+      'empleado': 'Fernando Castro',
+      'fecha': '15/12/2024',
+      'entrada': '07:45',
+      'salida': '16:45',
+      'estado': 'Presente',
+      'horas': 9,
+    },
+    {
+      'empleado': 'Isabel Ruiz',
+      'fecha': '15/12/2024',
+      'entrada': '08:20',
+      'salida': '17:20',
+      'estado': 'Retraso',
+      'horas': 9,
+    },
+    {
+      'empleado': 'Ricardo Herrera',
+      'fecha': '15/12/2024',
+      'entrada': '08:00',
+      'salida': '17:00',
+      'estado': 'Presente',
+      'horas': 9,
+    },
+    {
+      'empleado': 'Sofía Jiménez',
+      'fecha': '15/12/2024',
+      'entrada': '08:05',
+      'salida': '17:05',
+      'estado': 'Retraso',
+      'horas': 9,
     },
   ];
 
@@ -308,6 +486,7 @@ class _StaffListScreenState extends State<StaffListScreen> {
     return Row(
       children: [
         Expanded(
+          flex: 2,
           child: TextField(
             onChanged: (value) => setState(() => search = value),
             decoration: InputDecoration(
@@ -339,71 +518,137 @@ class _StaffListScreenState extends State<StaffListScreen> {
   }
 
   Widget _buildEmpleadosTable() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              color: CeasColors.primaryBlue.withOpacity(0.05),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(flex: 1, child: _buildHeaderCell('ID')),
-                Expanded(flex: 3, child: _buildHeaderCell('Empleado')),
-                Expanded(flex: 2, child: _buildHeaderCell('Cargo')),
-                Expanded(flex: 2, child: _buildHeaderCell('Departamento')),
-                Expanded(flex: 1, child: _buildHeaderCell('F. Ingreso')),
-                Expanded(flex: 1, child: _buildHeaderCell('Salario')),
-                Expanded(
-                    flex: 1, child: Center(child: _buildHeaderCell('Estado'))),
-                Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
-              ],
-            ),
+    final filtered = filteredEmpleados;
+    final startIndex = (currentPageEmpleados - 1) * itemsPerPageEmpleados;
+    final endIndex =
+        (startIndex + itemsPerPageEmpleados).clamp(0, filtered.length);
+    final paginatedEmpleados = filtered.sublist(startIndex, endIndex);
+    final totalPages = (filtered.length / itemsPerPageEmpleados).ceil();
+
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
           ),
-          ...filteredEmpleados.asMap().entries.map((entry) {
-            final index = entry.key;
-            final empleado = entry.value;
-            return Container(
-              decoration: BoxDecoration(
-                color: index.isEven ? Colors.grey[50] : Colors.white,
-                border: Border(
-                    bottom: BorderSide(color: Colors.grey[100]!, width: 0.5)),
-              ),
-              child: Padding(
+          child: Column(
+            children: [
+              Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: CeasColors.primaryBlue.withOpacity(0.05),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                ),
                 child: Row(
                   children: [
-                    Expanded(flex: 1, child: _buildCell(empleado['id'])),
-                    Expanded(flex: 3, child: _buildEmpleadoCell(empleado)),
-                    Expanded(flex: 2, child: _buildCell(empleado['cargo'])),
-                    Expanded(
-                        flex: 2, child: _buildCell(empleado['departamento'])),
-                    Expanded(
-                        flex: 1, child: _buildCell(empleado['fechaIngreso'])),
-                    Expanded(
-                        flex: 1, child: _buildMoneyCell(empleado['salario'])),
+                    Expanded(flex: 1, child: _buildHeaderCell('ID')),
+                    Expanded(flex: 3, child: _buildHeaderCell('Empleado')),
+                    Expanded(flex: 2, child: _buildHeaderCell('Cargo')),
+                    Expanded(flex: 2, child: _buildHeaderCell('Departamento')),
+                    Expanded(flex: 1, child: _buildHeaderCell('F. Ingreso')),
+                    Expanded(flex: 1, child: _buildHeaderCell('Salario')),
                     Expanded(
                         flex: 1,
-                        child: Center(
-                            child: _buildEstadoCell(empleado['estado']))),
-                    Expanded(flex: 1, child: _buildOpcionesCell(empleado)),
+                        child: Center(child: _buildHeaderCell('Estado'))),
+                    Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
                   ],
                 ),
               ),
-            );
-          }).toList(),
-        ],
-      ),
+              ...paginatedEmpleados.asMap().entries.map((entry) {
+                final index = entry.key;
+                final empleado = entry.value;
+                return Container(
+                  decoration: BoxDecoration(
+                    color: index.isEven ? Colors.grey[50] : Colors.white,
+                    border: Border(
+                        bottom:
+                            BorderSide(color: Colors.grey[100]!, width: 0.5)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    child: Row(
+                      children: [
+                        Expanded(flex: 1, child: _buildCell(empleado['id'])),
+                        Expanded(flex: 3, child: _buildEmpleadoCell(empleado)),
+                        Expanded(flex: 2, child: _buildCell(empleado['cargo'])),
+                        Expanded(
+                            flex: 2,
+                            child: _buildCell(empleado['departamento'])),
+                        Expanded(
+                            flex: 1,
+                            child: _buildCell(empleado['fechaIngreso'])),
+                        Expanded(
+                            flex: 1,
+                            child: _buildMoneyCell(empleado['salario'])),
+                        Expanded(
+                            flex: 1,
+                            child: Center(
+                                child: _buildEstadoCell(empleado['estado']))),
+                        Expanded(flex: 1, child: _buildOpcionesCell(empleado)),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Paginación
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Mostrando ${startIndex + 1}-${endIndex} de ${filtered.length} empleados',
+              style: const TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left_rounded),
+                  onPressed: currentPageEmpleados > 1
+                      ? () => setState(() => currentPageEmpleados--)
+                      : null,
+                ),
+                ...List.generate(
+                  totalPages,
+                  (index) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: TextButton(
+                      onPressed: () =>
+                          setState(() => currentPageEmpleados = index + 1),
+                      style: TextButton.styleFrom(
+                        backgroundColor: currentPageEmpleados == index + 1
+                            ? CeasColors.primaryBlue
+                            : Colors.transparent,
+                        foregroundColor: currentPageEmpleados == index + 1
+                            ? Colors.white
+                            : CeasColors.primaryBlue,
+                      ),
+                      child: Text('${index + 1}'),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right_rounded),
+                  onPressed: currentPageEmpleados < totalPages
+                      ? () => setState(() => currentPageEmpleados++)
+                      : null,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -471,69 +716,136 @@ class _StaffListScreenState extends State<StaffListScreen> {
   }
 
   Widget _buildAsistenciaTable() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.05),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(flex: 3, child: _buildHeaderCell('Empleado')),
-                Expanded(flex: 1, child: _buildHeaderCell('Fecha')),
-                Expanded(flex: 1, child: _buildHeaderCell('Entrada')),
-                Expanded(flex: 1, child: _buildHeaderCell('Salida')),
-                Expanded(flex: 1, child: _buildHeaderCell('Horas')),
-                Expanded(
-                    flex: 1, child: Center(child: _buildHeaderCell('Estado'))),
-                Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
-              ],
-            ),
+    final startIndex = (currentPageAsistencia - 1) * itemsPerPageAsistencia;
+    final endIndex =
+        (startIndex + itemsPerPageAsistencia).clamp(0, asistencia.length);
+    final paginatedAsistencia = asistencia.sublist(startIndex, endIndex);
+    final totalPages = (asistencia.length / itemsPerPageAsistencia).ceil();
+
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
           ),
-          ...asistencia.asMap().entries.map((entry) {
-            final index = entry.key;
-            final registro = entry.value;
-            return Container(
-              decoration: BoxDecoration(
-                color: index.isEven ? Colors.grey[50] : Colors.white,
-                border: Border(
-                    bottom: BorderSide(color: Colors.grey[100]!, width: 0.5)),
-              ),
-              child: Padding(
+          child: Column(
+            children: [
+              Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.05),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                ),
                 child: Row(
                   children: [
-                    Expanded(flex: 3, child: _buildCell(registro['empleado'])),
-                    Expanded(flex: 1, child: _buildCell(registro['fecha'])),
-                    Expanded(flex: 1, child: _buildCell(registro['entrada'])),
-                    Expanded(flex: 1, child: _buildCell(registro['salida'])),
-                    Expanded(
-                        flex: 1, child: _buildCell('${registro['horas']}h')),
+                    Expanded(flex: 3, child: _buildHeaderCell('Empleado')),
+                    Expanded(flex: 1, child: _buildHeaderCell('Fecha')),
+                    Expanded(flex: 1, child: _buildHeaderCell('Entrada')),
+                    Expanded(flex: 1, child: _buildHeaderCell('Salida')),
+                    Expanded(flex: 1, child: _buildHeaderCell('Horas')),
                     Expanded(
                         flex: 1,
-                        child: Center(
-                            child: _buildAsistenciaEstadoCell(
-                                registro['estado']))),
-                    Expanded(
-                        flex: 1, child: _buildAsistenciaOpcionesCell(registro)),
+                        child: Center(child: _buildHeaderCell('Estado'))),
+                    Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
                   ],
                 ),
               ),
-            );
-          }).toList(),
-        ],
-      ),
+              ...paginatedAsistencia.asMap().entries.map((entry) {
+                final index = entry.key;
+                final registro = entry.value;
+                return Container(
+                  decoration: BoxDecoration(
+                    color: index.isEven ? Colors.grey[50] : Colors.white,
+                    border: Border(
+                        bottom:
+                            BorderSide(color: Colors.grey[100]!, width: 0.5)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                            flex: 3, child: _buildCell(registro['empleado'])),
+                        Expanded(flex: 1, child: _buildCell(registro['fecha'])),
+                        Expanded(
+                            flex: 1, child: _buildCell(registro['entrada'])),
+                        Expanded(
+                            flex: 1, child: _buildCell(registro['salida'])),
+                        Expanded(
+                            flex: 1,
+                            child: _buildCell('${registro['horas']}h')),
+                        Expanded(
+                            flex: 1,
+                            child: Center(
+                                child: _buildAsistenciaEstadoCell(
+                                    registro['estado']))),
+                        Expanded(
+                            flex: 1,
+                            child: _buildAsistenciaOpcionesCell(registro)),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Paginación
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Mostrando ${startIndex + 1}-${endIndex} de ${asistencia.length} registros',
+              style: const TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left_rounded),
+                  onPressed: currentPageAsistencia > 1
+                      ? () => setState(() => currentPageAsistencia--)
+                      : null,
+                ),
+                ...List.generate(
+                  totalPages,
+                  (index) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: TextButton(
+                      onPressed: () =>
+                          setState(() => currentPageAsistencia = index + 1),
+                      style: TextButton.styleFrom(
+                        backgroundColor: currentPageAsistencia == index + 1
+                            ? Colors.orange
+                            : Colors.transparent,
+                        foregroundColor: currentPageAsistencia == index + 1
+                            ? Colors.white
+                            : Colors.orange,
+                      ),
+                      child: Text('${index + 1}'),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right_rounded),
+                  onPressed: currentPageAsistencia < totalPages
+                      ? () => setState(() => currentPageAsistencia++)
+                      : null,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -729,8 +1041,8 @@ class _StaffListScreenState extends State<StaffListScreen> {
 
   Widget _buildFilterDropdown(String label, String value, List<String> items,
       Function(String?) onChanged) {
-    return Container(
-      width: 200,
+    return Flexible(
+      flex: 1,
       child: DropdownButtonFormField<String>(
         value: value,
         decoration: InputDecoration(

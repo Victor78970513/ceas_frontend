@@ -59,6 +59,8 @@ class CeasSidebar extends StatelessWidget {
                         Icons.assignment_turned_in, '/acciones'),
                     _sidebarItem(context, 'Finanzas', Icons.account_balance,
                         '/finanzas_reportes'),
+                    _sidebarItem(context, 'Compras y Proveedores',
+                        Icons.shopping_cart, '/compras_proveedores'),
                     _sidebarItem(
                         context, 'Recursos humanos', Icons.people, '/personal'),
                     const SizedBox(height: 12),
