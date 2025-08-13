@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/ceas_colors.dart';
+import '../providers/members_provider.dart';
+import '../models/socio.dart';
 import 'member_detail_screen.dart';
 import 'member_form_screen.dart';
 
@@ -11,142 +14,20 @@ class MembersListScreen extends StatefulWidget {
 }
 
 class _MembersListScreenState extends State<MembersListScreen> {
-  String search = '';
-  String estado = 'Todos';
-  String tipoMembresia = 'Todos';
-  final estados = ['Todos', 'Activo', 'Inactivo', 'Moroso'];
-  final tiposMembresia = ['Todos', 'Básica', 'Premium', 'VIP', 'Familiar'];
   int currentPage = 1;
   int itemsPerPage = 10;
 
-  final socios = [
-    {
-      'club': 'CEAS Principal',
-      'nombres': 'Juan Carlos',
-      'apellidos': 'Pérez López',
-      'ci': '1234567',
-      'telefono': '76543210',
-      'correo': 'juan.perez@email.com',
-      'direccion': 'Av. Principal #123, La Paz',
-      'estado': 'Activo',
-      'fechaRegistro': '15/01/2024',
-      'fechaNacimiento': '25/03/1985',
-      'tipoMembresia': 'Premium'
-    },
-    {
-      'club': 'CEAS Principal',
-      'nombres': 'María Elena',
-      'apellidos': 'López Torres',
-      'ci': '2345678',
-      'telefono': '76543211',
-      'correo': 'maria.lopez@email.com',
-      'direccion': 'Calle Comercio #456, La Paz',
-      'estado': 'Moroso',
-      'fechaRegistro': '22/03/2024',
-      'fechaNacimiento': '12/07/1990',
-      'tipoMembresia': 'Básica'
-    },
-    {
-      'club': 'CEAS Principal',
-      'nombres': 'Carlos Alberto',
-      'apellidos': 'Gómez Silva',
-      'ci': '3456789',
-      'telefono': '76543212',
-      'correo': 'carlos.gomez@email.com',
-      'direccion': 'Zona Sur #789, La Paz',
-      'estado': 'Inactivo',
-      'fechaRegistro': '08/02/2024',
-      'fechaNacimiento': '03/11/1982',
-      'tipoMembresia': 'VIP'
-    },
-    {
-      'club': 'CEAS Principal',
-      'nombres': 'Ana Patricia',
-      'apellidos': 'Torres Vargas',
-      'ci': '4567890',
-      'telefono': '76543213',
-      'correo': 'ana.torres@email.com',
-      'direccion': 'Miraflores #321, La Paz',
-      'estado': 'Activo',
-      'fechaRegistro': '12/04/2024',
-      'fechaNacimiento': '18/09/1988',
-      'tipoMembresia': 'Familiar'
-    },
-    {
-      'club': 'CEAS Principal',
-      'nombres': 'Luis Fernando',
-      'apellidos': 'Fernández Ruiz',
-      'ci': '5678901',
-      'telefono': '76543214',
-      'correo': 'luis.fernandez@email.com',
-      'direccion': 'San Miguel #654, La Paz',
-      'estado': 'Activo',
-      'fechaRegistro': '05/05/2024',
-      'fechaNacimiento': '30/12/1992',
-      'tipoMembresia': 'Premium'
-    },
-    {
-      'club': 'CEAS Principal',
-      'nombres': 'Carmen Rosa',
-      'apellidos': 'Silva Mendoza',
-      'ci': '6789012',
-      'telefono': '76543215',
-      'correo': 'carmen.silva@email.com',
-      'direccion': 'Obrajes #987, La Paz',
-      'estado': 'Activo',
-      'fechaRegistro': '18/06/2024',
-      'fechaNacimiento': '14/05/1987',
-      'tipoMembresia': 'Básica'
-    },
-    {
-      'club': 'CEAS Principal',
-      'nombres': 'Roberto José',
-      'apellidos': 'Vargas Herrera',
-      'ci': '7890123',
-      'telefono': '76543216',
-      'correo': 'roberto.vargas@email.com',
-      'direccion': 'Calacoto #147, La Paz',
-      'estado': 'Moroso',
-      'fechaRegistro': '25/07/2024',
-      'fechaNacimiento': '22/08/1980',
-      'tipoMembresia': 'Premium'
-    },
-    {
-      'club': 'CEAS Principal',
-      'nombres': 'Patricia Alejandra',
-      'apellidos': 'Ruiz Morales',
-      'ci': '8901234',
-      'telefono': '76543217',
-      'correo': 'patricia.ruiz@email.com',
-      'direccion': 'Achumani #258, La Paz',
-      'estado': 'Activo',
-      'fechaRegistro': '30/08/2024',
-      'fechaNacimiento': '09/01/1995',
-      'tipoMembresia': 'VIP'
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Cargar socios al inicializar la pantalla
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MembersProvider>(context, listen: false).loadSocios();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filtered = socios.where((s) {
-      final matchesEstado = estado == 'Todos' || s['estado'] == estado;
-      final matchesMembresia =
-          tipoMembresia == 'Todos' || s['tipoMembresia'] == tipoMembresia;
-      final matchesSearch = search.isEmpty ||
-          (s['nombres'] as String)
-              .toLowerCase()
-              .contains(search.toLowerCase()) ||
-          (s['ci'] as String).contains(search) ||
-          (s['correo'] as String).toLowerCase().contains(search.toLowerCase());
-      return matchesEstado && matchesMembresia && matchesSearch;
-    }).toList();
-
-    final totalSocios = socios.length;
-    final sociosActivos = socios.where((s) => s['estado'] == 'Activo').length;
-    final sociosMorosos = socios.where((s) => s['estado'] == 'Moroso').length;
-    final sociosInactivos =
-        socios.where((s) => s['estado'] == 'Inactivo').length;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: SingleChildScrollView(
@@ -184,7 +65,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
-                      Icons.people_alt_rounded,
+                      Icons.groups_rounded,
                       color: Colors.white,
                       size: 28,
                     ),
@@ -204,7 +85,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Administra y controla todos los socios del CEAS',
+                          'Administración y control de miembros del club',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.white.withOpacity(0.9),
@@ -214,22 +95,9 @@ class _MembersListScreenState extends State<MembersListScreen> {
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () async {
-                      final result = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const MemberFormScreen(),
-                        ),
-                      );
-                      if (result == true) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text(
-                                  'Socio registrado/actualizado (ficticio)')),
-                        );
-                      }
-                    },
-                    icon: const Icon(Icons.person_add_rounded),
-                    label: const Text('Nuevo Socio'),
+                    onPressed: () => _showCreateMemberDialog(context),
+                    icon: const Icon(Icons.person_add),
+                    label: const Text('Crear Socio'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: CeasColors.primaryBlue,
@@ -245,158 +113,42 @@ class _MembersListScreenState extends State<MembersListScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Estadísticas mejoradas
-            Row(
-              children: [
-                _buildStatCard(
-                    'Total Socios',
-                    totalSocios.toString(),
-                    Icons.people_rounded,
-                    CeasColors.kpiBlue,
-                    'Socios registrados'),
-                const SizedBox(width: 16),
-                _buildStatCard(
-                    'Activos',
-                    sociosActivos.toString(),
-                    Icons.check_circle_rounded,
-                    CeasColors.kpiGreen,
-                    'En buen estado'),
-                const SizedBox(width: 16),
-                _buildStatCard(
-                    'Morosos',
-                    sociosMorosos.toString(),
-                    Icons.warning_rounded,
-                    CeasColors.kpiOrange,
-                    'Pagos pendientes'),
-                const SizedBox(width: 16),
-                _buildStatCard(
-                    'Inactivos',
-                    sociosInactivos.toString(),
-                    Icons.block_rounded,
-                    CeasColors.kpiPurple,
-                    'Suspensión temporal'),
-              ],
-            ),
-            const SizedBox(height: 24),
+            // Estadísticas
+            Consumer<MembersProvider>(
+              builder: (context, membersProvider, child) {
+                final totalSocios = membersProvider.socios.length;
+                final sociosActivos =
+                    membersProvider.socios.where((s) => s.estaActivo).length;
+                final sociosInactivos = totalSocios - sociosActivos;
 
-            // Filtros y búsqueda mejorados
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: Colors.grey[200]!, width: 1),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                return Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: CeasColors.primaryBlue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.filter_alt_rounded,
-                            color: CeasColors.primaryBlue,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Filtros y Búsqueda',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: CeasColors.primaryBlue,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey[200]!),
-                            ),
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Buscar por nombre, CI o correo...',
-                                hintStyle: TextStyle(color: Colors.grey[500]),
-                                prefixIcon: const Icon(Icons.search_rounded,
-                                    color: Colors.grey),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 16),
-                              ),
-                              onChanged: (v) => setState(() => search = v),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[50],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey[200]!),
-                          ),
-                          child: DropdownButton<String>(
-                            value: estado,
-                            items: estados
-                                .map((e) =>
-                                    DropdownMenuItem(value: e, child: Text(e)))
-                                .toList(),
-                            onChanged: (v) =>
-                                setState(() => estado = v ?? 'Todos'),
-                            underline: Container(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: CeasColors.primaryBlue),
-                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[50],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey[200]!),
-                          ),
-                          child: DropdownButton<String>(
-                            value: tipoMembresia,
-                            items: tiposMembresia
-                                .map((e) =>
-                                    DropdownMenuItem(value: e, child: Text(e)))
-                                .toList(),
-                            onChanged: (v) =>
-                                setState(() => tipoMembresia = v ?? 'Todos'),
-                            underline: Container(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: CeasColors.primaryBlue),
-                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                          ),
-                        ),
-                      ],
-                    ),
+                    _buildStatCard('Total Socios', totalSocios.toString(),
+                        Icons.groups, CeasColors.kpiBlue, 'Socios registrados'),
+                    const SizedBox(width: 16),
+                    _buildStatCard(
+                        'Socios Activos',
+                        sociosActivos.toString(),
+                        Icons.check_circle,
+                        CeasColors.kpiGreen,
+                        'En buen estado'),
+                    const SizedBox(width: 16),
+                    _buildStatCard(
+                        'Socios Inactivos',
+                        sociosInactivos.toString(),
+                        Icons.cancel,
+                        Colors.red,
+                        'Pendientes'),
+                    const SizedBox(width: 16),
+                    _buildStatCard('Nuevos este mes', '0', Icons.person_add,
+                        CeasColors.kpiOrange, 'Registros recientes'),
                   ],
-                ),
-              ),
+                );
+              },
             ),
             const SizedBox(height: 24),
 
-            // Acciones rápidas mejoradas
+            // Acciones rápidas
             Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -455,203 +207,32 @@ class _MembersListScreenState extends State<MembersListScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Tabla profesional ERP
+            // Contenido principal
             Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
                 side: BorderSide(color: Colors.grey[200]!, width: 1),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: CeasColors.primaryBlue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.table_chart_rounded,
-                            color: CeasColors.primaryBlue,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Lista de Socios',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: CeasColors.primaryBlue,
-                          ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: CeasColors.primaryBlue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            '${filtered.length} socios encontrados',
-                            style: const TextStyle(
-                              color: CeasColors.primaryBlue,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Lista de Socios',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: CeasColors.primaryBlue,
+                      ),
                     ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        // Header de la tabla
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 16),
-                          decoration: BoxDecoration(
-                            color: CeasColors.primaryBlue.withOpacity(0.05),
-                            border: Border(
-                              bottom: BorderSide(
-                                  color: Colors.grey[200]!, width: 1),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  flex: 3, child: _buildHeaderCell('Socio')),
-                              Expanded(flex: 1, child: _buildHeaderCell('CI')),
-                              Expanded(
-                                  flex: 1, child: _buildHeaderCell('Teléfono')),
-                              Expanded(
-                                  flex: 2, child: _buildHeaderCell('Correo')),
-                              Flexible(
-                                  flex: 1,
-                                  child: Center(
-                                      child: _buildHeaderCell('Estado'))),
-                              Flexible(
-                                  flex: 1,
-                                  child: Center(
-                                      child: _buildHeaderCell('Membresía'))),
-                              Expanded(
-                                  flex: 1,
-                                  child: _buildHeaderCell('Fecha Registro')),
-                              Expanded(
-                                  flex: 1, child: _buildHeaderCell('Acciones')),
-                            ],
-                          ),
-                        ),
-                        // Filas de la tabla
-                        ...filtered.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final s = entry.value;
-                          return Container(
-                            decoration: BoxDecoration(
-                              color:
-                                  index.isEven ? Colors.grey[50] : Colors.white,
-                              border: Border(
-                                bottom: BorderSide(
-                                    color: Colors.grey[100]!, width: 0.5),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 12),
-                              child: Row(
-                                children: [
-                                  Expanded(flex: 3, child: _buildSocioCell(s)),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildCell(s['ci'] as String)),
-                                  Expanded(
-                                      flex: 1,
-                                      child:
-                                          _buildCell(s['telefono'] as String)),
-                                  Expanded(
-                                      flex: 2,
-                                      child: _buildCorreoCell(
-                                          s['correo'] as String)),
-                                  Flexible(
-                                      flex: 1,
-                                      child: Center(
-                                          child: _buildEstadoCell(
-                                              s['estado'] as String))),
-                                  Flexible(
-                                      flex: 1,
-                                      child: Center(
-                                          child: _buildMembresiaCell(
-                                              s['tipoMembresia'] as String))),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildCell(
-                                          s['fechaRegistro'] as String)),
-                                  Expanded(
-                                      flex: 1, child: _buildOpcionesCell(s)),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Paginación mejorada
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Página $currentPage de ${(filtered.length / itemsPerPage).ceil()}',
-                          style: const TextStyle(
-                              color: Colors.grey, fontWeight: FontWeight.w500),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.chevron_left_rounded),
-                              onPressed: currentPage > 1
-                                  ? () => setState(() => currentPage--)
-                                  : null,
-                            ),
-                            ...List.generate(
-                              (filtered.length / itemsPerPage).ceil(),
-                              (index) => Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                child: TextButton(
-                                  onPressed: () =>
-                                      setState(() => currentPage = index + 1),
-                                  child: Text('${index + 1}'),
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.chevron_right_rounded),
-                              onPressed: currentPage <
-                                      (filtered.length / itemsPerPage).ceil()
-                                  ? () => setState(() => currentPage++)
-                                  : null,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    _buildFilters(),
+                    const SizedBox(height: 20),
+                    _buildMembersTable(),
+                  ],
+                ),
               ),
             ),
           ],
@@ -664,34 +245,59 @@ class _MembersListScreenState extends State<MembersListScreen> {
       String title, String value, IconData icon, Color color, String subtitle) {
     return Expanded(
       child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey[200]!, width: 1),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 24),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Text(title,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  Text(value,
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: color)),
-                  Text(subtitle,
-                      style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, color: color, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          value,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
               ),
             ],
           ),
@@ -743,102 +349,300 @@ class _MembersListScreenState extends State<MembersListScreen> {
     );
   }
 
-  Widget _estadoBadge(String estado) {
-    Color color;
-    switch (estado) {
-      case 'Activo':
-        color = Colors.green;
-        break;
-      case 'Inactivo':
-        color = Colors.grey;
-        break;
-      case 'Moroso':
-        color = Colors.red;
-        break;
-      default:
-        color = Colors.blueGrey;
-    }
-    return IntrinsicWidth(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(4),
+  Widget _buildFilters() {
+    return Consumer<MembersProvider>(
+      builder: (context, membersProvider, child) {
+        return Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: TextField(
+                onChanged: membersProvider.updateSearchQuery,
+                decoration: InputDecoration(
+                  hintText: 'Buscar por nombre, CI o email...',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            _buildFilterDropdown(
+              'Estado',
+              membersProvider.filterEstado,
+              ['Todos', 'Activo', 'Inactivo'],
+              membersProvider.updateFilterEstado,
+            ),
+            const SizedBox(width: 16),
+            _buildFilterDropdown(
+              'Tipo Membresía',
+              membersProvider.filterTipoMembresia,
+              ['Todos', 'Accionista', 'Básica', 'Premium', 'VIP'],
+              membersProvider.updateFilterTipoMembresia,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterDropdown(String label, String value, List<String> items,
+      Function(String) onChanged) {
+    return Container(
+      width: 200,
+      child: DropdownButtonFormField<String>(
+        value: value,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
-        child: Text(estado,
-            style: TextStyle(
-                color: color, fontWeight: FontWeight.bold, fontSize: 11)),
+        items: items
+            .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+            .toList(),
+        onChanged: (value) => onChanged(value!),
       ),
     );
   }
 
-  Widget _membresiaBadge(String membresia) {
-    Color color;
-    switch (membresia) {
-      case 'VIP':
-        color = Colors.purple;
-        break;
-      case 'Premium':
-        color = Colors.blue;
-        break;
-      case 'Familiar':
-        color = Colors.orange;
-        break;
-      case 'Básica':
-        color = Colors.grey;
-        break;
-      default:
-        color = Colors.blueGrey;
+  Widget _buildMembersTable() {
+    return Consumer<MembersProvider>(
+      builder: (context, membersProvider, child) {
+        if (membersProvider.isLoading) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(40),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (membersProvider.error != null) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Column(
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error al cargar socios',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red[400]),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    membersProvider.error!,
+                    style: const TextStyle(color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => membersProvider.loadSocios(),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final filteredSocios = membersProvider.filteredSocios;
+        final startIndex = (currentPage - 1) * itemsPerPage;
+        final endIndex =
+            (startIndex + itemsPerPage).clamp(0, filteredSocios.length);
+        final paginatedSocios = filteredSocios.sublist(startIndex, endIndex);
+        final totalPages = (filteredSocios.length / itemsPerPage).ceil();
+
+        return Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: CeasColors.primaryBlue.withOpacity(0.05),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                            flex: 2,
+                            child: _buildHeaderCell('Socio', TextAlign.center)),
+                        Expanded(
+                            flex: 1,
+                            child:
+                                _buildHeaderCell('CI/NIT', TextAlign.center)),
+                        Expanded(
+                            flex: 1,
+                            child:
+                                _buildHeaderCell('Teléfono', TextAlign.center)),
+                        Expanded(
+                            flex: 2,
+                            child: _buildHeaderCell('Email', TextAlign.start)),
+                        Expanded(
+                            flex: 1,
+                            child:
+                                _buildHeaderCell('Estado', TextAlign.center)),
+                        Expanded(
+                            flex: 1,
+                            child: _buildHeaderCell(
+                                'Membresía', TextAlign.center)),
+                        Expanded(
+                            flex: 1,
+                            child: _buildHeaderCell(
+                                'Fecha Registro', TextAlign.center)),
+                        Expanded(
+                            flex: 1,
+                            child:
+                                _buildHeaderCell('Acciones', TextAlign.center)),
+                      ],
+                    ),
+                  ),
+                  ...paginatedSocios.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final socio = entry.value;
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: index.isEven ? Colors.grey[50] : Colors.white,
+                        border: Border(
+                            bottom: BorderSide(
+                                color: Colors.grey[100]!, width: 0.5)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        child: Row(
+                          children: [
+                            Expanded(flex: 2, child: _buildSocioCell(socio)),
+                            Expanded(
+                                flex: 1,
+                                child:
+                                    _buildCell(socio.ciNit, TextAlign.center)),
+                            Expanded(
+                                flex: 1,
+                                child: _buildCell(
+                                    socio.telefono, TextAlign.center)),
+                            Expanded(
+                                flex: 2,
+                                child: _buildCell(socio.correoElectronico)),
+                            Expanded(
+                                flex: 1,
+                                child: _buildEstadoCell(socio.estadoTexto)),
+                            Expanded(
+                                flex: 1,
+                                child:
+                                    _buildMembresiaCell(socio.tipoMembresia)),
+                            Expanded(
+                                flex: 1,
+                                child: _buildCell(
+                                    _formatDate(socio.fechaDeRegistro),
+                                    TextAlign.center)),
+                            Expanded(
+                                flex: 1, child: _buildActionButtons(socio)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildPagination(
+                currentPage,
+                totalPages,
+                (page) => setState(() => currentPage = page),
+                filteredSocios.length,
+                startIndex,
+                endIndex),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      // Parsear la fecha del backend y formatearla
+      final date = DateTime.parse(dateString);
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    } catch (e) {
+      return dateString;
     }
-    return IntrinsicWidth(
+  }
+
+  Widget _buildHeaderCell(String text,
+      [TextAlign textAlign = TextAlign.center]) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(4),
+        // color: Colors.red,
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: CeasColors.primaryBlue,
+            fontSize: 14,
+          ),
+          textAlign: textAlign,
         ),
-        child: Text(membresia,
-            style: TextStyle(
-                color: color, fontWeight: FontWeight.bold, fontSize: 11)),
       ),
     );
   }
 
-  Widget _buildHeaderCell(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 13,
-        color: CeasColors.primaryBlue,
+  Widget _buildCell(String text, [TextAlign textAlign = TextAlign.start]) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Container(
+        // color: Colors.red,
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 14),
+          textAlign: textAlign,
+        ),
       ),
-      overflow: TextOverflow.ellipsis,
     );
   }
 
-  Widget _buildSocioCell(Map<String, dynamic> socio) {
-    final nombreCompleto = '${socio['nombres']} ${socio['apellidos']}';
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 18,
-          backgroundColor: CeasColors.primaryBlue.withOpacity(0.1),
-          child: Text(
-            (socio['nombres'] as String).substring(0, 1).toUpperCase(),
-            style: const TextStyle(
-              color: CeasColors.primaryBlue,
-              fontWeight: FontWeight.bold,
-              fontSize: 11,
+  Widget _buildSocioCell(Socio socio) {
+    return Container(
+      // color: Colors.red,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: CeasColors.primaryBlue.withOpacity(0.1),
+            child: Text(
+              socio.nombres.substring(0, 1).toUpperCase(),
+              style: const TextStyle(
+                color: CeasColors.primaryBlue,
+                fontWeight: FontWeight.bold,
+                fontSize: 11,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
+          const SizedBox(width: 10),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                nombreCompleto,
+                socio.nombreCompleto,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
@@ -847,7 +651,7 @@ class _MembersListScreenState extends State<MembersListScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                socio['club'] as String,
+                'CEAS Principal',
                 style: const TextStyle(
                   fontSize: 11,
                   color: Colors.grey,
@@ -856,123 +660,252 @@ class _MembersListScreenState extends State<MembersListScreen> {
               ),
             ],
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCorreoCell(String correo) {
-    return Text(
-      correo,
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: CeasColors.primaryBlue,
+        ],
       ),
-      overflow: TextOverflow.ellipsis,
     );
-  }
-
-  Widget _buildCell(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-      ),
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildMembresiaCell(String membresia) {
-    return _membresiaBadge(membresia);
   }
 
   Widget _buildEstadoCell(String estado) {
-    return _estadoBadge(estado);
+    Color color = estado == 'Activo' ? Colors.green : Colors.grey;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        estado,
+        style:
+            TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 
-  Widget _buildOpcionesCell(Map<String, dynamic> socio) {
+  Widget _buildMembresiaCell(String tipoMembresia) {
+    Color backgroundColor;
+    Color borderColor;
+    Color textColor;
+
+    switch (tipoMembresia.toLowerCase()) {
+      case 'accionista':
+        backgroundColor = Colors.purple[100]!;
+        borderColor = Colors.purple[600]!;
+        textColor = Colors.purple[700]!;
+        break;
+      case 'básica':
+        backgroundColor = Colors.blue[100]!;
+        borderColor = Colors.blue[600]!;
+        textColor = Colors.blue[700]!;
+        break;
+      case 'premium':
+        backgroundColor = Colors.orange[100]!;
+        borderColor = Colors.orange[600]!;
+        textColor = Colors.orange[700]!;
+        break;
+      case 'vip':
+        backgroundColor = Colors.amber[100]!;
+        borderColor = Colors.amber[600]!;
+        textColor = Colors.amber[700]!;
+        break;
+      default:
+        backgroundColor = Colors.grey[100]!;
+        borderColor = Colors.grey[600]!;
+        textColor = Colors.grey[700]!;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: borderColor,
+          width: 1,
+        ),
+      ),
+      child: Text(
+        tipoMembresia,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(Socio socio) {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert, color: Colors.grey),
       onSelected: (value) {
         switch (value) {
-          case 'ver':
-            Navigator.of(context).push(
+          case 'view':
+            Navigator.push(
+              context,
               MaterialPageRoute(
                 builder: (_) => const MemberDetailScreen(),
               ),
             );
             break;
-          case 'editar':
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const MemberFormScreen(),
-              ),
-            );
-            break;
-          case 'desactivar':
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Desactivar socio'),
-                content: const Text(
-                    '¿Estás seguro de que deseas desactivar este socio?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancelar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Socio desactivado (ficticio)')),
-                      );
-                    },
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: const Text('Desactivar'),
-                  ),
-                ],
-              ),
-            );
+          case 'edit':
+            _showEditMemberDialog(context, socio);
             break;
         }
       },
       itemBuilder: (context) => [
         const PopupMenuItem(
-          value: 'ver',
+          value: 'view',
           child: Row(
             children: [
-              Icon(Icons.visibility, color: CeasColors.primaryBlue),
+              Icon(Icons.visibility, color: CeasColors.primaryBlue, size: 18),
               SizedBox(width: 8),
               Text('Ver detalle'),
             ],
           ),
         ),
         const PopupMenuItem(
-          value: 'editar',
+          value: 'edit',
           child: Row(
             children: [
-              Icon(Icons.edit, color: Colors.orange),
+              Icon(Icons.edit, color: Colors.orange, size: 18),
               SizedBox(width: 8),
               Text('Editar'),
             ],
           ),
         ),
-        const PopupMenuItem(
-          value: 'desactivar',
-          child: Row(
-            children: [
-              Icon(Icons.block, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Desactivar'),
-            ],
+      ],
+    );
+  }
+
+  Widget _buildPagination(
+      int currentPage,
+      int totalPages,
+      Function(int) onPageChange,
+      int totalItems,
+      int startIndex,
+      int endIndex) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Mostrando ${startIndex + 1}-$endIndex de $totalItems registros',
+          style: const TextStyle(
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
           ),
         ),
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left_rounded),
+              onPressed:
+                  currentPage > 1 ? () => onPageChange(currentPage - 1) : null,
+            ),
+            ...List.generate(
+              totalPages,
+              (index) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: TextButton(
+                  onPressed: () => onPageChange(index + 1),
+                  style: TextButton.styleFrom(
+                    backgroundColor: currentPage == index + 1
+                        ? CeasColors.primaryBlue
+                        : Colors.transparent,
+                    foregroundColor: currentPage == index + 1
+                        ? Colors.white
+                        : CeasColors.primaryBlue,
+                  ),
+                  child: Text('${index + 1}'),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right_rounded),
+              onPressed: currentPage < totalPages
+                  ? () => onPageChange(currentPage + 1)
+                  : null,
+            ),
+          ],
+        ),
       ],
+    );
+  }
+
+  void _showCreateMemberDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Crear Nuevo Socio'),
+        content: const Text('Funcionalidad de crear socio (ficticia)'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Socio creado exitosamente')),
+              );
+            },
+            child: const Text('Crear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditMemberDialog(BuildContext context, Socio socio) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Editar Socio - ${socio.nombreCompleto}'),
+        content: const Text('Funcionalidad de editar socio (ficticia)'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Socio actualizado exitosamente')),
+              );
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteMemberDialog(BuildContext context, Socio socio) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Eliminar Socio - ${socio.nombreCompleto}'),
+        content: const Text('¿Está seguro de que desea eliminar este socio?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Socio eliminado exitosamente')),
+              );
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
     );
   }
 }

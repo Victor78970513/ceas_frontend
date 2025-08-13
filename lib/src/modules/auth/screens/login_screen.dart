@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/ceas_colors.dart';
 import '../../../core/widgets/ceas_main_layout.dart';
+import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -15,7 +17,34 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    final success = await authProvider.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
+    if (success && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const CeasMainLayout(initialRoute: '/dashboard'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,13 +101,47 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 28),
-                  if (_errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(_errorMessage!,
-                          style: const TextStyle(
-                              color: Colors.red, fontWeight: FontWeight.bold)),
-                    ),
+                  Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      if (authProvider.error != null) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.red[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.red[200]!),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.error_outline,
+                                    color: Colors.red[600], size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    authProvider.error!,
+                                    style: TextStyle(
+                                      color: Colors.red[700],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.close,
+                                      color: Colors.red[600], size: 18),
+                                  onPressed: () => authProvider.clearError(),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -162,41 +225,37 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: CeasColors.primaryBlue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        textStyle: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (_) => const CeasMainLayout(
-                                initialRoute: '/dashboard'),
+                  Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: CeasColors.primaryBlue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            textStyle: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
                           ),
-                        );
-                        // if (_formKey.currentState!.validate()) {
-                        //   setState(() => _errorMessage = null);
-                        //   Navigator.of(context).pushReplacement(
-                        //     MaterialPageRoute(
-                        //       builder: (_) => const CeasMainLayout(
-                        //           initialRoute: '/dashboard'),
-                        //     ),
-                        //   );
-                        // } else {
-                        //   setState(() => _errorMessage =
-                        //       'Por favor, corrija los errores.');
-                        // }
-                      },
-                      child: const Text('Iniciar Sesión'),
-                    ),
+                          onPressed:
+                              authProvider.isLoading ? null : _handleLogin,
+                          child: authProvider.isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : const Text('Iniciar Sesión'),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 10),
                   Center(

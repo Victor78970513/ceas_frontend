@@ -399,7 +399,7 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
                     ),
                   ),
                   Container(
-                    height: 600,
+                    height: MediaQuery.of(context).size.height * 0.7,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: const BorderRadius.only(
@@ -572,7 +572,9 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
           const SizedBox(height: 20),
           _buildProveedoresFilters(),
           const SizedBox(height: 20),
-          _buildProveedoresTable(),
+          Expanded(
+            child: _buildProveedoresTable(),
+          ),
         ],
       ),
     );
@@ -631,7 +633,9 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
           const SizedBox(height: 20),
           _buildComprasFilters(),
           const SizedBox(height: 20),
-          _buildComprasTable(),
+          Expanded(
+            child: _buildComprasTable(),
+          ),
         ],
       ),
     );
@@ -722,82 +726,103 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
 
     return Column(
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: CeasColors.primaryBlue.withOpacity(0.05),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(flex: 1, child: _buildHeaderCell('ID')),
-                    Expanded(flex: 2, child: _buildHeaderCell('Proveedor')),
-                    Expanded(flex: 2, child: _buildHeaderCell('Contacto')),
-                    Expanded(flex: 2, child: _buildHeaderCell('Email')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Categoría')),
-                    Expanded(
-                        flex: 1,
-                        child: Center(child: _buildHeaderCell('Estado'))),
-                    Expanded(flex: 1, child: _buildHeaderCell('Última Compra')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Total')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
-                  ],
-                ),
-              ),
-              ...paginatedProveedores.asMap().entries.map((entry) {
-                final index = entry.key;
-                final proveedor = entry.value;
-                return Container(
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
-                    color: index.isEven ? Colors.grey[50] : Colors.white,
-                    border: Border(
-                        bottom:
-                            BorderSide(color: Colors.grey[100]!, width: 0.5)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
-                    child: Row(
-                      children: [
-                        Expanded(flex: 1, child: _buildCell(proveedor['id'])),
-                        Expanded(
-                            flex: 2, child: _buildCell(proveedor['nombre'])),
-                        Expanded(
-                            flex: 2, child: _buildCell(proveedor['contacto'])),
-                        Expanded(
-                            flex: 2, child: _buildCell(proveedor['email'])),
-                        Expanded(
-                            flex: 1, child: _buildCell(proveedor['categoria'])),
-                        Expanded(
-                            flex: 1,
-                            child: Center(
-                                child: _buildEstadoCell(proveedor['estado']))),
-                        Expanded(
-                            flex: 1,
-                            child: _buildCell(proveedor['ultimaCompra'])),
-                        Expanded(
-                            flex: 1,
-                            child: _buildMoneyCell(proveedor['totalCompras'])),
-                        Expanded(
-                            flex: 1,
-                            child: _buildProveedorOpcionesCell(proveedor)),
-                      ],
+                    color: CeasColors.primaryBlue.withOpacity(0.05),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
                     ),
                   ),
-                );
-              }).toList(),
-            ],
+                  child: Row(
+                    children: [
+                      Expanded(flex: 1, child: _buildHeaderCell('ID')),
+                      Expanded(flex: 2, child: _buildHeaderCell('Proveedor')),
+                      Expanded(flex: 2, child: _buildHeaderCell('Contacto')),
+                      Expanded(flex: 2, child: _buildHeaderCell('Email')),
+                      Expanded(flex: 1, child: _buildHeaderCell('Categoría')),
+                      Expanded(
+                          flex: 1,
+                          child: Center(child: _buildHeaderCell('Estado'))),
+                      Expanded(
+                          flex: 1, child: _buildHeaderCell('Última Compra')),
+                      Expanded(flex: 1, child: _buildHeaderCell('Total')),
+                      Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children:
+                          paginatedProveedores.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final proveedor = entry.value;
+                        return Container(
+                          decoration: BoxDecoration(
+                            color:
+                                index.isEven ? Colors.grey[50] : Colors.white,
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: Colors.grey[100]!, width: 0.5)),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                    flex: 1,
+                                    child: _buildCell(proveedor['id'])),
+                                Expanded(
+                                    flex: 2,
+                                    child: _buildCell(proveedor['nombre'])),
+                                Expanded(
+                                    flex: 2,
+                                    child: _buildCell(proveedor['contacto'])),
+                                Expanded(
+                                    flex: 2,
+                                    child: _buildCell(proveedor['email'])),
+                                Expanded(
+                                    flex: 1,
+                                    child: _buildCell(proveedor['categoria'])),
+                                Expanded(
+                                    flex: 1,
+                                    child: Center(
+                                        child: _buildEstadoCell(
+                                            proveedor['estado']))),
+                                Expanded(
+                                    flex: 1,
+                                    child:
+                                        _buildCell(proveedor['ultimaCompra'])),
+                                Expanded(
+                                    flex: 1,
+                                    child: _buildMoneyCell(
+                                        proveedor['totalCompras'])),
+                                Expanded(
+                                    flex: 1,
+                                    child:
+                                        _buildProveedorOpcionesCell(proveedor)),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -821,80 +846,98 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
 
     return Column(
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.05),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(flex: 1, child: _buildHeaderCell('ID')),
-                    Expanded(flex: 2, child: _buildHeaderCell('Proveedor')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Fecha')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Monto Total')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Categoría')),
-                    Expanded(
-                        flex: 1,
-                        child: Center(child: _buildHeaderCell('Estado'))),
-                    Expanded(flex: 1, child: _buildHeaderCell('Items')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Entrega')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
-                  ],
-                ),
-              ),
-              ...paginatedCompras.asMap().entries.map((entry) {
-                final index = entry.key;
-                final compra = entry.value;
-                return Container(
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
-                    color: index.isEven ? Colors.grey[50] : Colors.white,
-                    border: Border(
-                        bottom:
-                            BorderSide(color: Colors.grey[100]!, width: 0.5)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
-                    child: Row(
-                      children: [
-                        Expanded(flex: 1, child: _buildCell(compra['id'])),
-                        Expanded(
-                            flex: 2, child: _buildCell(compra['proveedor'])),
-                        Expanded(flex: 1, child: _buildCell(compra['fecha'])),
-                        Expanded(
-                            flex: 1,
-                            child: _buildMoneyCell(compra['montoTotal'])),
-                        Expanded(
-                            flex: 1, child: _buildCell(compra['categoria'])),
-                        Expanded(
-                            flex: 1,
-                            child: Center(
-                                child:
-                                    _buildCompraEstadoCell(compra['estado']))),
-                        Expanded(
-                            flex: 1, child: _buildCell('${compra['items']}')),
-                        Expanded(
-                            flex: 1, child: _buildCell(compra['fechaEntrega'])),
-                        Expanded(
-                            flex: 1, child: _buildCompraOpcionesCell(compra)),
-                      ],
+                    color: Colors.orange.withOpacity(0.05),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
                     ),
                   ),
-                );
-              }).toList(),
-            ],
+                  child: Row(
+                    children: [
+                      Expanded(flex: 1, child: _buildHeaderCell('ID')),
+                      Expanded(flex: 2, child: _buildHeaderCell('Proveedor')),
+                      Expanded(flex: 1, child: _buildHeaderCell('Fecha')),
+                      Expanded(flex: 1, child: _buildHeaderCell('Monto Total')),
+                      Expanded(flex: 1, child: _buildHeaderCell('Categoría')),
+                      Expanded(
+                          flex: 1,
+                          child: Center(child: _buildHeaderCell('Estado'))),
+                      Expanded(flex: 1, child: _buildHeaderCell('Items')),
+                      Expanded(flex: 1, child: _buildHeaderCell('Entrega')),
+                      Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: paginatedCompras.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final compra = entry.value;
+                        return Container(
+                          decoration: BoxDecoration(
+                            color:
+                                index.isEven ? Colors.grey[50] : Colors.white,
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: Colors.grey[100]!, width: 0.5)),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                    flex: 1, child: _buildCell(compra['id'])),
+                                Expanded(
+                                    flex: 2,
+                                    child: _buildCell(compra['proveedor'])),
+                                Expanded(
+                                    flex: 1,
+                                    child: _buildCell(compra['fecha'])),
+                                Expanded(
+                                    flex: 1,
+                                    child:
+                                        _buildMoneyCell(compra['montoTotal'])),
+                                Expanded(
+                                    flex: 1,
+                                    child: _buildCell(compra['categoria'])),
+                                Expanded(
+                                    flex: 1,
+                                    child: Center(
+                                        child: _buildCompraEstadoCell(
+                                            compra['estado']))),
+                                Expanded(
+                                    flex: 1,
+                                    child: _buildCell('${compra['items']}')),
+                                Expanded(
+                                    flex: 1,
+                                    child: _buildCell(compra['fechaEntrega'])),
+                                Expanded(
+                                    flex: 1,
+                                    child: _buildCompraOpcionesCell(compra)),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 16),
