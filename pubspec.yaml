@@ -37,6 +37,11 @@ dependencies:
   http: ^1.1.0
   provider: ^6.1.1
   shared_preferences: ^2.2.2
+  pdf: ^3.10.7
+  path_provider: ^2.1.2
+  open_file: ^3.3.2
+  permission_handler: ^11.3.1
+  fl_chart: ^0.66.2
 
 dev_dependencies:
   flutter_test:

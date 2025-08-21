@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/ceas_colors.dart';
+import '../providers/proveedor_provider.dart';
+import '../providers/compra_provider.dart';
+import '../models/proveedor.dart';
+import '../models/compra.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class PurchasesSuppliersScreen extends StatefulWidget {
   const PurchasesSuppliersScreen({Key? key}) : super(key: key);
@@ -13,237 +19,33 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Variables de paginación
-  int currentPageProveedores = 1;
-  int currentPageCompras = 1;
-  int itemsPerPage = 5;
-
-  // Filtros para proveedores
-  String searchProveedores = '';
-  String filtroEstadoProveedor = 'Todos';
-
-  // Filtros para compras
-  String searchCompras = '';
-  String filtroEstadoCompra = 'Todos';
-
-  // Datos de Proveedores
-  final List<Map<String, dynamic>> proveedores = [
-    {
-      'id': 'PROV001',
-      'nombre': 'Equipos Ecuestres S.A.',
-      'contacto': 'Juan Pérez',
-      'telefono': '76543210',
-      'email': 'juan@equiposecuestres.com',
-      'direccion': 'Av. Comercio #123, La Paz',
-      'estado': 'Activo',
-      'categoria': 'Equipos',
-      'ultimaCompra': '15/12/2024',
-      'totalCompras': 45000.0,
-    },
-    {
-      'id': 'PROV002',
-      'nombre': 'Alimentos para Caballos Ltda.',
-      'contacto': 'María González',
-      'telefono': '76543211',
-      'email': 'maria@alimentoscaballos.com',
-      'direccion': 'Calle Industrial #456, Santa Cruz',
-      'estado': 'Activo',
-      'categoria': 'Alimentos',
-      'ultimaCompra': '12/12/2024',
-      'totalCompras': 28000.0,
-    },
-    {
-      'id': 'PROV003',
-      'nombre': 'Veterinaria Equina Central',
-      'contacto': 'Dr. Carlos Rodríguez',
-      'telefono': '76543212',
-      'email': 'carlos@vetequina.com',
-      'direccion': 'Plaza Mayor #789, Cochabamba',
-      'estado': 'Activo',
-      'categoria': 'Veterinaria',
-      'ultimaCompra': '10/12/2024',
-      'totalCompras': 15000.0,
-    },
-    {
-      'id': 'PROV004',
-      'nombre': 'Herramientas y Mantenimiento',
-      'contacto': 'Roberto Silva',
-      'telefono': '76543213',
-      'email': 'roberto@herramientas.com',
-      'direccion': 'Zona Industrial #321, La Paz',
-      'estado': 'Activo',
-      'categoria': 'Herramientas',
-      'ultimaCompra': '08/12/2024',
-      'totalCompras': 12000.0,
-    },
-    {
-      'id': 'PROV005',
-      'nombre': 'Transporte Ecuestre Express',
-      'contacto': 'Ana Torres',
-      'telefono': '76543214',
-      'email': 'ana@transporteecuestre.com',
-      'direccion': 'Terminal #654, El Alto',
-      'estado': 'Inactivo',
-      'categoria': 'Transporte',
-      'ultimaCompra': '05/12/2024',
-      'totalCompras': 8000.0,
-    },
-    {
-      'id': 'PROV006',
-      'nombre': 'Seguros para Equinos',
-      'contacto': 'Luis Mendoza',
-      'telefono': '76543215',
-      'email': 'luis@segurosequinos.com',
-      'direccion': 'Centro Comercial #987, La Paz',
-      'estado': 'Activo',
-      'categoria': 'Seguros',
-      'ultimaCompra': '03/12/2024',
-      'totalCompras': 5000.0,
-    },
-    {
-      'id': 'PROV007',
-      'nombre': 'Ropa y Accesorios Ecuestres',
-      'contacto': 'Carmen Vega',
-      'telefono': '76543216',
-      'email': 'carmen@ropaecuestre.com',
-      'direccion': 'Mall Center #147, Santa Cruz',
-      'estado': 'Activo',
-      'categoria': 'Ropa',
-      'ultimaCompra': '01/12/2024',
-      'totalCompras': 18000.0,
-    },
-    {
-      'id': 'PROV008',
-      'nombre': 'Construcción de Instalaciones',
-      'contacto': 'Diego Morales',
-      'telefono': '76543217',
-      'email': 'diego@construccion.com',
-      'direccion': 'Zona Norte #258, La Paz',
-      'estado': 'Activo',
-      'categoria': 'Construcción',
-      'ultimaCompra': '28/11/2024',
-      'totalCompras': 75000.0,
-    },
-  ];
-
-  // Datos de Compras
-  final List<Map<String, dynamic>> compras = [
-    {
-      'id': 'COMP001',
-      'proveedor': 'Equipos Ecuestres S.A.',
-      'fecha': '15/12/2024',
-      'montoTotal': 8500.0,
-      'estado': 'Confirmada',
-      'categoria': 'Equipos',
-      'items': 12,
-      'metodoPago': 'Transferencia',
-      'fechaEntrega': '20/12/2024',
-    },
-    {
-      'id': 'COMP002',
-      'proveedor': 'Alimentos para Caballos Ltda.',
-      'fecha': '12/12/2024',
-      'montoTotal': 3200.0,
-      'estado': 'Entregada',
-      'categoria': 'Alimentos',
-      'items': 8,
-      'metodoPago': 'Efectivo',
-      'fechaEntrega': '15/12/2024',
-    },
-    {
-      'id': 'COMP003',
-      'proveedor': 'Veterinaria Equina Central',
-      'fecha': '10/12/2024',
-      'montoTotal': 1800.0,
-      'estado': 'Entregada',
-      'categoria': 'Veterinaria',
-      'items': 5,
-      'metodoPago': 'Tarjeta',
-      'fechaEntrega': '12/12/2024',
-    },
-    {
-      'id': 'COMP004',
-      'proveedor': 'Herramientas y Mantenimiento',
-      'fecha': '08/12/2024',
-      'montoTotal': 4500.0,
-      'estado': 'En Proceso',
-      'categoria': 'Herramientas',
-      'items': 15,
-      'metodoPago': 'Transferencia',
-      'fechaEntrega': '18/12/2024',
-    },
-    {
-      'id': 'COMP005',
-      'proveedor': 'Transporte Ecuestre Express',
-      'fecha': '05/12/2024',
-      'montoTotal': 1200.0,
-      'estado': 'Cancelada',
-      'categoria': 'Transporte',
-      'items': 1,
-      'metodoPago': 'Efectivo',
-      'fechaEntrega': '10/12/2024',
-    },
-    {
-      'id': 'COMP006',
-      'proveedor': 'Seguros para Equinos',
-      'fecha': '03/12/2024',
-      'montoTotal': 2500.0,
-      'estado': 'Confirmada',
-      'categoria': 'Seguros',
-      'items': 3,
-      'metodoPago': 'Transferencia',
-      'fechaEntrega': '05/12/2024',
-    },
-    {
-      'id': 'COMP007',
-      'proveedor': 'Ropa y Accesorios Ecuestres',
-      'fecha': '01/12/2024',
-      'montoTotal': 2800.0,
-      'estado': 'Entregada',
-      'categoria': 'Ropa',
-      'items': 10,
-      'metodoPago': 'Tarjeta',
-      'fechaEntrega': '05/12/2024',
-    },
-    {
-      'id': 'COMP008',
-      'proveedor': 'Construcción de Instalaciones',
-      'fecha': '28/11/2024',
-      'montoTotal': 25000.0,
-      'estado': 'En Proceso',
-      'categoria': 'Construcción',
-      'items': 1,
-      'metodoPago': 'Transferencia',
-      'fechaEntrega': '15/01/2025',
-    },
-    {
-      'id': 'COMP009',
-      'proveedor': 'Equipos Ecuestres S.A.',
-      'fecha': '25/11/2024',
-      'montoTotal': 12000.0,
-      'estado': 'Entregada',
-      'categoria': 'Equipos',
-      'items': 20,
-      'metodoPago': 'Transferencia',
-      'fechaEntrega': '30/11/2024',
-    },
-    {
-      'id': 'COMP010',
-      'proveedor': 'Alimentos para Caballos Ltda.',
-      'fecha': '20/11/2024',
-      'montoTotal': 4500.0,
-      'estado': 'Entregada',
-      'categoria': 'Alimentos',
-      'items': 12,
-      'metodoPago': 'Efectivo',
-      'fechaEntrega': '25/11/2024',
-    },
-  ];
+  // Variables de paginación (ahora manejadas por los providers)
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    // Cargar datos al inicializar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      print(
+          'InitState - AuthProvider isAuthenticated: ${authProvider.isAuthenticated}');
+      if (authProvider.isAuthenticated) {
+        print(
+            'InitState - Token disponible: ${authProvider.user!.accessToken.substring(0, 20)}...');
+        print('InitState - Cargando proveedores...');
+        Provider.of<ProveedorProvider>(context, listen: false).loadProveedores(
+          authProvider.user!.accessToken,
+        );
+        print('InitState - Cargando compras...');
+        Provider.of<CompraProvider>(context, listen: false).loadCompras(
+          authProvider.user!.accessToken,
+        );
+      } else {
+        print('InitState - NO autenticado!');
+      }
+    });
   }
 
   @override
@@ -252,404 +54,376 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     super.dispose();
   }
 
-  List<Map<String, dynamic>> get filteredProveedores {
-    return proveedores.where((proveedor) {
-      final matchesSearch = searchProveedores.isEmpty ||
-          proveedor['nombre']
-              .toLowerCase()
-              .contains(searchProveedores.toLowerCase()) ||
-          proveedor['contacto']
-              .toLowerCase()
-              .contains(searchProveedores.toLowerCase()) ||
-          proveedor['email']
-              .toLowerCase()
-              .contains(searchProveedores.toLowerCase());
-      final matchesEstado = filtroEstadoProveedor == 'Todos' ||
-          proveedor['estado'] == filtroEstadoProveedor;
-      return matchesSearch && matchesEstado;
-    }).toList();
-  }
-
-  List<Map<String, dynamic>> get filteredCompras {
-    return compras.where((compra) {
-      final matchesSearch = searchCompras.isEmpty ||
-          compra['proveedor']
-              .toLowerCase()
-              .contains(searchCompras.toLowerCase()) ||
-          compra['categoria']
-              .toLowerCase()
-              .contains(searchCompras.toLowerCase());
-      final matchesEstado = filtroEstadoCompra == 'Todos' ||
-          compra['estado'] == filtroEstadoCompra;
-      return matchesSearch && matchesEstado;
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header principal
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    CeasColors.primaryBlue,
-                    CeasColors.primaryBlue.withOpacity(0.8),
-                  ],
+    return Consumer2<ProveedorProvider, CompraProvider>(
+      builder: (context, proveedorProvider, compraProvider, child) {
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFC),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header principal
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        CeasColors.primaryBlue,
+                        CeasColors.primaryBlue.withOpacity(0.8),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: CeasColors.primaryBlue.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.shopping_cart_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Compras y Proveedores',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Gestión de proveedores y control de compras',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          final authProvider =
+                              Provider.of<AuthProvider>(context, listen: false);
+                          if (authProvider.isAuthenticated) {
+                            proveedorProvider
+                                .refresh(authProvider.user!.accessToken);
+                            compraProvider
+                                .refresh(authProvider.user!.accessToken);
+                          }
+                        },
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Actualizar'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: CeasColors.primaryBlue.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
+                const SizedBox(height: 24),
+
+                // Estadísticas
+                _buildStatsRow(proveedorProvider, compraProvider),
+                const SizedBox(height: 24),
+
+                // Mensajes de error
+                if (proveedorProvider.error != null)
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.red.shade50,
+                      border: Border.all(color: Colors.red.shade200),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
-                      Icons.shopping_cart_rounded,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        const Text(
-                          'Compras y Proveedores',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Gestión de proveedores y control de compras',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white.withOpacity(0.9),
+                        Icon(Icons.error_outline, color: Colors.red.shade600),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Error en Proveedores: ${proveedorProvider.error}',
+                            style: TextStyle(color: Colors.red.shade700),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Estadísticas
-            _buildStatsRow(),
-            const SizedBox(height: 24),
-
-            // Tabs
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: Colors.grey[200]!, width: 1),
-              ),
-              child: Column(
-                children: [
+                if (compraProvider.error != null)
                   Container(
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
+                      color: Colors.red.shade50,
+                      border: Border.all(color: Colors.red.shade200),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: TabBar(
-                      controller: _tabController,
-                      labelColor: CeasColors.primaryBlue,
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: CeasColors.primaryBlue,
-                      indicatorWeight: 3,
-                      physics: const NeverScrollableScrollPhysics(),
-                      tabs: const [
-                        Tab(
-                          icon: Icon(Icons.business),
-                          text: 'Proveedores',
-                        ),
-                        Tab(
-                          icon: Icon(Icons.shopping_bag),
-                          text: 'Compras',
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: MediaQuery.of(context).size.height * 0.7,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(16),
-                        bottomRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: TabBarView(
-                      controller: _tabController,
-                      physics: const NeverScrollableScrollPhysics(),
+                    child: Row(
                       children: [
-                        _buildProveedoresTab(),
-                        _buildComprasTab(),
+                        Icon(Icons.error_outline, color: Colors.red.shade600),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Error en Compras: ${compraProvider.error}',
+                            style: TextStyle(color: Colors.red.shade700),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
+
+                // Tabs
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                        ),
+                        child: TabBar(
+                          controller: _tabController,
+                          labelColor: CeasColors.primaryBlue,
+                          unselectedLabelColor: Colors.grey,
+                          indicatorColor: CeasColors.primaryBlue,
+                          tabs: const [
+                            Tab(
+                              icon: Icon(Icons.store_mall_directory),
+                              text: 'Proveedores',
+                            ),
+                            Tab(
+                              icon: Icon(Icons.shopping_bag),
+                              text: 'Compras',
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        constraints: const BoxConstraints(
+                          minHeight: 400,
+                          maxHeight: 800,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(16),
+                            bottomRight: Radius.circular(16),
+                          ),
+                        ),
+                        child: TabBarView(
+                          controller: _tabController,
+                          physics: const ClampingScrollPhysics(),
+                          children: [
+                            _buildProveedoresTab(proveedorProvider),
+                            _buildComprasTab(compraProvider),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildStatsRow() {
-    final totalProveedores = proveedores.length;
-    final proveedoresActivos =
-        proveedores.where((p) => p['estado'] == 'Activo').length;
-    final totalCompras = compras.length;
-    final montoTotalCompras =
-        compras.fold(0.0, (sum, c) => sum + (c['montoTotal'] as double));
+  Widget _buildStatsRow(
+      ProveedorProvider proveedorProvider, CompraProvider compraProvider) {
+    final estadisticasProveedores = proveedorProvider.getEstadisticas();
+    final estadisticasCompras = compraProvider.getEstadisticas();
+    final totalProveedores = estadisticasProveedores['total'] ?? 0;
+    final proveedoresActivos = estadisticasProveedores['activos'] ?? 0;
+    final totalCompras = estadisticasCompras['total'] ?? 0;
+    final montoTotalCompras = estadisticasCompras['montoTotal'] ?? 0.0;
+
+    // Debug info
+    print('Stats - Proveedores totales: $totalProveedores');
+    print('Stats - Compras totales: $totalCompras');
+    print('Stats - Proveedores activos: $proveedoresActivos');
+    print('Stats - Monto total compras: $montoTotalCompras');
 
     return Row(
       children: [
-        _buildStatCard('Total Proveedores', totalProveedores.toString(),
-            Icons.business, CeasColors.kpiBlue, 'Proveedores registrados'),
-        const SizedBox(width: 16),
-        _buildStatCard('Proveedores Activos', proveedoresActivos.toString(),
-            Icons.check_circle, CeasColors.kpiGreen, 'En buen estado'),
-        const SizedBox(width: 16),
-        _buildStatCard('Total Compras', totalCompras.toString(),
-            Icons.shopping_bag, CeasColors.kpiOrange, 'Compras realizadas'),
-        const SizedBox(width: 16),
-        _buildStatCard(
-            'Monto Total',
-            'Bs. ${montoTotalCompras.toStringAsFixed(0)}',
-            Icons.attach_money,
-            CeasColors.kpiPurple,
-            'Valor total compras'),
+        Expanded(
+          child: _buildStatCard(
+            title: 'Proveedores Totales',
+            value: totalProveedores.toString(),
+            icon: Icons.store_mall_directory_rounded,
+            color: Colors.indigo,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            title: 'Proveedores Activos',
+            value: proveedoresActivos.toString(),
+            icon: Icons.verified_rounded,
+            color: Colors.green,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            title: 'Compras Totales',
+            value: totalCompras.toString(),
+            icon: Icons.shopping_bag_rounded,
+            color: Colors.orange,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            title: 'Monto Total (Bs.)',
+            value: montoTotalCompras.toStringAsFixed(0),
+            icon: Icons.payments_rounded,
+            color: Colors.teal,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildStatCard(
-      String title, String value, IconData icon, Color color, String subtitle) {
-    return Expanded(
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey[200]!, width: 1),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, color: color, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Text(
-                          value,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-          ),
-        ),
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
-    );
-  }
-
-  Widget _buildProveedoresTab() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Gestión de Proveedores',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: CeasColors.primaryBlue,
-                ),
-              ),
-              Row(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => _showCreateProviderDialog(),
-                    icon: const Icon(Icons.business),
-                    label: const Text('Nuevo Proveedor'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CeasColors.primaryBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton.icon(
-                    onPressed: () => _showRelateProviderDialog(),
-                    icon: const Icon(Icons.link),
-                    label: const Text('Relacionar'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color),
           ),
-          const SizedBox(height: 20),
-          _buildProveedoresFilters(),
-          const SizedBox(height: 20),
+          const SizedBox(width: 12),
           Expanded(
-            child: _buildProveedoresTable(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style:
+                        const TextStyle(fontSize: 13, color: Colors.black54)),
+                const SizedBox(height: 4),
+                Text(value,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildComprasTab() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
+  Widget _buildProveedoresTab(ProveedorProvider proveedorProvider) {
+    final proveedores = proveedorProvider.filteredProveedores;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Control de Compras',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: CeasColors.primaryBlue,
-                ),
-              ),
-              Row(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => _showCreatePurchaseDialog(),
-                    icon: const Icon(Icons.add_shopping_cart),
-                    label: const Text('Nueva Compra'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CeasColors.primaryBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton.icon(
-                    onPressed: () => _showPurchaseHistoryDialog(),
-                    icon: const Icon(Icons.history),
-                    label: const Text('Ver Historial'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          _buildComprasFilters(),
-          const SizedBox(height: 20),
-          Expanded(
-            child: _buildComprasTable(),
-          ),
+          _buildProveedoresFilters(proveedorProvider),
+          const SizedBox(height: 16),
+          if (proveedorProvider.isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            )
+          else
+            _buildProveedoresTable(proveedores, proveedorProvider),
         ],
       ),
     );
   }
 
-  Widget _buildProveedoresFilters() {
+  Widget _buildComprasTab(CompraProvider compraProvider) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildComprasFilters(compraProvider),
+          const SizedBox(height: 16),
+          if (compraProvider.isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            )
+          else
+            _buildComprasTable(compraProvider),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProveedoresFilters(ProveedorProvider proveedorProvider) {
     return Row(
       children: [
         Expanded(
           flex: 2,
           child: TextField(
-            onChanged: (value) => setState(() => searchProveedores = value),
+            onChanged: (value) => proveedorProvider.updateSearchQuery(value),
             decoration: InputDecoration(
-              hintText: 'Buscar por nombre, contacto o email...',
+              hintText: 'Buscar por nombre, email o categoría...',
               prefixIcon: const Icon(Icons.search),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -661,21 +435,21 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
         const SizedBox(width: 16),
         _buildFilterDropdown(
           'Estado',
-          filtroEstadoProveedor,
-          ['Todos', 'Activo', 'Inactivo'],
-          (value) => setState(() => filtroEstadoProveedor = value!),
+          proveedorProvider.filterEstado,
+          proveedorProvider.estados,
+          (value) => proveedorProvider.updateFilterEstado(value),
         ),
       ],
     );
   }
 
-  Widget _buildComprasFilters() {
+  Widget _buildComprasFilters(CompraProvider compraProvider) {
     return Row(
       children: [
         Expanded(
           flex: 2,
           child: TextField(
-            onChanged: (value) => setState(() => searchCompras = value),
+            onChanged: (value) => compraProvider.updateSearchQuery(value),
             decoration: InputDecoration(
               hintText: 'Buscar por proveedor o categoría...',
               prefixIcon: const Icon(Icons.search),
@@ -689,56 +463,72 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
         const SizedBox(width: 16),
         _buildFilterDropdown(
           'Estado',
-          filtroEstadoCompra,
-          ['Todos', 'Confirmada', 'En Proceso', 'Entregada', 'Cancelada'],
-          (value) => setState(() => filtroEstadoCompra = value!),
+          compraProvider.filterEstado,
+          compraProvider.estados,
+          (value) => compraProvider.updateFilterEstado(value),
         ),
       ],
     );
   }
 
-  Widget _buildFilterDropdown(String label, String value, List<String> items,
-      Function(String?) onChanged) {
-    return Container(
-      width: 200,
-      child: DropdownButtonFormField<String>(
-        value: value,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-        items: items
-            .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-            .toList(),
-        onChanged: onChanged,
+  Widget _buildFilterDropdown(
+    String label,
+    String currentValue,
+    List<String> options,
+    void Function(String?) onChanged,
+  ) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value: currentValue,
+            items: options
+                .map((e) => DropdownMenuItem<String>(value: e, child: Text(e)))
+                .toList(),
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildProveedoresTable() {
-    final filtered = filteredProveedores;
-    final startIndex = (currentPageProveedores - 1) * itemsPerPage;
-    final endIndex = (startIndex + itemsPerPage).clamp(0, filtered.length);
-    final paginatedProveedores = filtered.sublist(startIndex, endIndex);
-    final totalPages = (filtered.length / itemsPerPage).ceil();
+  Widget _buildProveedoresTable(
+      List<Proveedor> proveedores, ProveedorProvider proveedorProvider) {
+    final paginated = proveedorProvider.paginatedProveedores;
 
-    return Column(
-      children: [
-        Expanded(
-          child: Container(
+    // Debug logs
+    print('Proveedores totales: ${proveedorProvider.totalItems}');
+    print('Página actual: ${proveedorProvider.currentPage}');
+    print('Elementos por página: ${proveedorProvider.itemsPerPage}');
+    print('Elementos paginados: ${paginated.length}');
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
             ),
             child: Column(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12), // Reducido de 16 a 12
                   decoration: BoxDecoration(
-                    color: CeasColors.primaryBlue.withOpacity(0.05),
+                    color: Colors.blue.withOpacity(0.05),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
@@ -747,116 +537,251 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
                   child: Row(
                     children: [
                       Expanded(flex: 1, child: _buildHeaderCell('ID')),
-                      Expanded(flex: 2, child: _buildHeaderCell('Proveedor')),
-                      Expanded(flex: 2, child: _buildHeaderCell('Contacto')),
+                      Expanded(flex: 2, child: _buildHeaderCell('Nombre')),
                       Expanded(flex: 2, child: _buildHeaderCell('Email')),
-                      Expanded(flex: 1, child: _buildHeaderCell('Categoría')),
+                      Expanded(flex: 2, child: _buildHeaderCell('Categoría')),
                       Expanded(
                           flex: 1,
                           child: Center(child: _buildHeaderCell('Estado'))),
-                      Expanded(
-                          flex: 1, child: _buildHeaderCell('Última Compra')),
-                      Expanded(flex: 1, child: _buildHeaderCell('Total')),
+                      Expanded(flex: 2, child: _buildHeaderCell('Teléfono')),
+                      Expanded(flex: 2, child: _buildHeaderCell('Dirección')),
                       Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children:
-                          paginatedProveedores.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final proveedor = entry.value;
-                        return Container(
-                          decoration: BoxDecoration(
-                            color:
-                                index.isEven ? Colors.grey[50] : Colors.white,
-                            border: Border(
-                                bottom: BorderSide(
-                                    color: Colors.grey[100]!, width: 0.5)),
+                if (paginated.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(24), // Reducido de 40 a 24
+                    child: const Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.inbox_outlined,
+                            size: 32, // Reducido de 48 a 32
+                            color: Colors.grey,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                    flex: 1,
-                                    child: _buildCell(proveedor['id'])),
-                                Expanded(
-                                    flex: 2,
-                                    child: _buildCell(proveedor['nombre'])),
-                                Expanded(
-                                    flex: 2,
-                                    child: _buildCell(proveedor['contacto'])),
-                                Expanded(
-                                    flex: 2,
-                                    child: _buildCell(proveedor['email'])),
-                                Expanded(
-                                    flex: 1,
-                                    child: _buildCell(proveedor['categoria'])),
-                                Expanded(
-                                    flex: 1,
-                                    child: Center(
-                                        child: _buildEstadoCell(
-                                            proveedor['estado']))),
-                                Expanded(
-                                    flex: 1,
-                                    child:
-                                        _buildCell(proveedor['ultimaCompra'])),
-                                Expanded(
-                                    flex: 1,
-                                    child: _buildMoneyCell(
-                                        proveedor['totalCompras'])),
-                                Expanded(
-                                    flex: 1,
-                                    child:
-                                        _buildProveedorOpcionesCell(proveedor)),
-                              ],
+                          SizedBox(height: 12), // Reducido de 16 a 12
+                          Text(
+                            'No hay proveedores para mostrar',
+                            style: TextStyle(
+                              fontSize: 14, // Reducido de 16 a 14
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        );
-                      }).toList(),
+                        ],
+                      ),
                     ),
+                  )
+                else
+                  Column(
+                    children: paginated.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final proveedor = entry.value;
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: index.isEven ? Colors.grey[50] : Colors.white,
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: Colors.grey[100]!, width: 0.5)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8), // Reducido de 12 a 8
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  flex: 1, child: _buildCell(proveedor.id)),
+                              Expanded(
+                                  flex: 2, child: _buildCell(proveedor.nombre)),
+                              Expanded(
+                                  flex: 2, child: _buildCell(proveedor.email)),
+                              Expanded(
+                                  flex: 2,
+                                  child: _buildCell(proveedor.categoria)),
+                              Expanded(
+                                  flex: 1,
+                                  child: Center(
+                                      child: _buildEstadoCell(
+                                          proveedor.estadoDisplay))),
+                              Expanded(
+                                  flex: 2,
+                                  child: _buildCell(proveedor.telefono)),
+                              Expanded(
+                                  flex: 2,
+                                  child: _buildCell(proveedor.direccion)),
+                              Expanded(
+                                  flex: 1,
+                                  child:
+                                      _buildProveedorOpcionesCell(proveedor)),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildPagination(
-            currentPageProveedores,
-            totalPages,
-            (page) => setState(() => currentPageProveedores = page),
-            filtered.length,
-            startIndex,
-            endIndex),
-      ],
+          const SizedBox(height: 12), // Reducido de 16 a 12
+          // Controles de paginación usando el provider
+          if (proveedorProvider.totalPages > 1) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey.shade200,
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Información de la página
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Mostrando ${proveedorProvider.paginatedProveedores.length} de ${proveedorProvider.totalItems} proveedores',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Controles de navegación
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Botón anterior
+                      IconButton(
+                        onPressed: proveedorProvider.currentPage > 1
+                            ? () => proveedorProvider.previousPage()
+                            : null,
+                        icon: const Icon(Icons.chevron_left),
+                        color: proveedorProvider.currentPage > 1
+                            ? CeasColors.primaryBlue
+                            : Colors.grey.shade400,
+                      ),
+
+                      // Número de página actual
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: CeasColors.primaryBlue,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${proveedorProvider.currentPage}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+
+                      // Separador
+                      Text(
+                        ' de ${proveedorProvider.totalPages}',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+
+                      // Botón siguiente
+                      IconButton(
+                        onPressed: proveedorProvider.hasMorePages
+                            ? () => proveedorProvider.nextPage()
+                            : null,
+                        icon: const Icon(Icons.chevron_right),
+                        color: proveedorProvider.hasMorePages
+                            ? CeasColors.primaryBlue
+                            : Colors.grey.shade400,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Selector de elementos por página
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Mostrar: ',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      DropdownButton<int>(
+                        value: proveedorProvider.itemsPerPage,
+                        onChanged: (int? newValue) {
+                          if (newValue != null) {
+                            proveedorProvider.setItemsPerPage(newValue);
+                          }
+                        },
+                        items: [10, 20, 50, 100].map((int value) {
+                          return DropdownMenuItem<int>(
+                            value: value,
+                            child: Text('$value'),
+                          );
+                        }).toList(),
+                        underline: Container(),
+                        style: TextStyle(
+                          color: CeasColors.primaryBlue,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
-  Widget _buildComprasTable() {
-    final filtered = filteredCompras;
-    final startIndex = (currentPageCompras - 1) * itemsPerPage;
-    final endIndex = (startIndex + itemsPerPage).clamp(0, filtered.length);
-    final paginatedCompras = filtered.sublist(startIndex, endIndex);
-    final totalPages = (filtered.length / itemsPerPage).ceil();
+  Widget _buildComprasTable(CompraProvider compraProvider) {
+    final paginatedCompras = compraProvider.paginatedCompras;
 
-    return Column(
-      children: [
-        Expanded(
-          child: Container(
+    // Debug logs
+    print('Compras totales: ${compraProvider.totalItems}');
+    print('Página actual: ${compraProvider.currentPage}');
+    print('Elementos por página: ${compraProvider.itemsPerPage}');
+    print('Elementos paginados: ${paginatedCompras.length}');
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
             ),
             child: Column(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12), // Reducido de 16 a 12
                   decoration: BoxDecoration(
                     color: Colors.orange.withOpacity(0.05),
                     borderRadius: const BorderRadius.only(
@@ -880,129 +805,213 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
                     ],
                   ),
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: paginatedCompras.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final compra = entry.value;
-                        return Container(
-                          decoration: BoxDecoration(
-                            color:
-                                index.isEven ? Colors.grey[50] : Colors.white,
-                            border: Border(
-                                bottom: BorderSide(
-                                    color: Colors.grey[100]!, width: 0.5)),
+                if (paginatedCompras.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(24), // Reducido de 40 a 24
+                    child: const Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 32, // Reducido de 48 a 32
+                            color: Colors.grey,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                    flex: 1, child: _buildCell(compra['id'])),
-                                Expanded(
-                                    flex: 2,
-                                    child: _buildCell(compra['proveedor'])),
-                                Expanded(
-                                    flex: 1,
-                                    child: _buildCell(compra['fecha'])),
-                                Expanded(
-                                    flex: 1,
-                                    child:
-                                        _buildMoneyCell(compra['montoTotal'])),
-                                Expanded(
-                                    flex: 1,
-                                    child: _buildCell(compra['categoria'])),
-                                Expanded(
-                                    flex: 1,
-                                    child: Center(
-                                        child: _buildCompraEstadoCell(
-                                            compra['estado']))),
-                                Expanded(
-                                    flex: 1,
-                                    child: _buildCell('${compra['items']}')),
-                                Expanded(
-                                    flex: 1,
-                                    child: _buildCell(compra['fechaEntrega'])),
-                                Expanded(
-                                    flex: 1,
-                                    child: _buildCompraOpcionesCell(compra)),
-                              ],
+                          SizedBox(height: 12), // Reducido de 16 a 12
+                          Text(
+                            'No hay compras para mostrar',
+                            style: TextStyle(
+                              fontSize: 14, // Reducido de 16 a 14
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        );
-                      }).toList(),
+                        ],
+                      ),
                     ),
+                  )
+                else
+                  Column(
+                    children: paginatedCompras.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final compra = entry.value;
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: index.isEven ? Colors.grey[50] : Colors.white,
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: Colors.grey[100]!, width: 0.5)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8), // Reducido de 12 a 8
+                          child: Row(
+                            children: [
+                              Expanded(flex: 1, child: _buildCell(compra.id)),
+                              Expanded(
+                                  flex: 2, child: _buildCell(compra.proveedor)),
+                              Expanded(
+                                  flex: 1, child: _buildCell(compra.fecha)),
+                              Expanded(
+                                  flex: 1,
+                                  child: _buildMoneyCell(compra.montoTotal)),
+                              Expanded(
+                                  flex: 1, child: _buildCell(compra.categoria)),
+                              Expanded(
+                                flex: 1,
+                                child: Center(
+                                    child:
+                                        _buildCompraEstadoCell(compra.estado)),
+                              ),
+                              Expanded(
+                                  flex: 1, child: _buildCell(compra.items)),
+                              Expanded(
+                                  flex: 1,
+                                  child: _buildCell(compra.fechaEntrega)),
+                              Expanded(
+                                  flex: 1,
+                                  child: _buildCompraOpcionesCell(compra)),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _buildPagination(
-            currentPageCompras,
-            totalPages,
-            (page) => setState(() => currentPageCompras = page),
-            filtered.length,
-            startIndex,
-            endIndex),
-      ],
-    );
-  }
-
-  Widget _buildPagination(
-      int currentPage,
-      int totalPages,
-      Function(int) onPageChange,
-      int totalItems,
-      int startIndex,
-      int endIndex) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Mostrando ${startIndex + 1}-${endIndex} de $totalItems registros',
-          style: const TextStyle(
-            color: Colors.grey,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.chevron_left_rounded),
-              onPressed:
-                  currentPage > 1 ? () => onPageChange(currentPage - 1) : null,
-            ),
-            ...List.generate(
-              totalPages,
-              (index) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: TextButton(
-                  onPressed: () => onPageChange(index + 1),
-                  style: TextButton.styleFrom(
-                    backgroundColor: currentPage == index + 1
-                        ? CeasColors.primaryBlue
-                        : Colors.transparent,
-                    foregroundColor: currentPage == index + 1
-                        ? Colors.white
-                        : CeasColors.primaryBlue,
+          const SizedBox(height: 12), // Reducido de 16 a 12
+          // Controles de paginación usando el provider
+          if (compraProvider.totalPages > 1) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey.shade200,
+                    width: 1,
                   ),
-                  child: Text('${index + 1}'),
                 ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.chevron_right_rounded),
-              onPressed: currentPage < totalPages
-                  ? () => onPageChange(currentPage + 1)
-                  : null,
+              child: Column(
+                children: [
+                  // Información de la página
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Mostrando ${compraProvider.paginatedCompras.length} de ${compraProvider.totalItems} compras',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Controles de navegación
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Botón anterior
+                      IconButton(
+                        onPressed: compraProvider.currentPage > 1
+                            ? () => compraProvider.previousPage()
+                            : null,
+                        icon: const Icon(Icons.chevron_left),
+                        color: compraProvider.currentPage > 1
+                            ? CeasColors.primaryBlue
+                            : Colors.grey.shade400,
+                      ),
+
+                      // Número de página actual
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: CeasColors.primaryBlue,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${compraProvider.currentPage}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+
+                      // Separador
+                      Text(
+                        ' de ${compraProvider.totalPages}',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+
+                      // Botón siguiente
+                      IconButton(
+                        onPressed: compraProvider.hasMorePages
+                            ? () => compraProvider.nextPage()
+                            : null,
+                        icon: const Icon(Icons.chevron_right),
+                        color: compraProvider.hasMorePages
+                            ? CeasColors.primaryBlue
+                            : Colors.grey.shade400,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Selector de elementos por página
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Mostrar: ',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      DropdownButton<int>(
+                        value: compraProvider.itemsPerPage,
+                        onChanged: (int? newValue) {
+                          if (newValue != null) {
+                            compraProvider.setItemsPerPage(newValue);
+                          }
+                        },
+                        items: [10, 20, 50, 100].map((int value) {
+                          return DropdownMenuItem<int>(
+                            value: value,
+                            child: Text('$value'),
+                          );
+                        }).toList(),
+                        underline: Container(),
+                        style: TextStyle(
+                          color: CeasColors.primaryBlue,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1066,6 +1075,12 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
       case 'Cancelada':
         color = Colors.red;
         break;
+      case 'Pendiente':
+        color = Colors.amber;
+        break;
+      case 'Completada':
+        color = Colors.green;
+        break;
       default:
         color = Colors.grey;
     }
@@ -1083,7 +1098,7 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     );
   }
 
-  Widget _buildProveedorOpcionesCell(Map<String, dynamic> proveedor) {
+  Widget _buildProveedorOpcionesCell(Proveedor proveedor) {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert),
       onSelected: (value) {
@@ -1107,7 +1122,7 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     );
   }
 
-  Widget _buildCompraOpcionesCell(Map<String, dynamic> compra) {
+  Widget _buildCompraOpcionesCell(Compra compra) {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert),
       onSelected: (value) {
@@ -1123,10 +1138,10 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
             break;
         }
       },
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: 'view', child: Text('Ver Detalle')),
-        const PopupMenuItem(value: 'edit', child: Text('Editar')),
-        const PopupMenuItem(value: 'delete', child: Text('Eliminar')),
+      itemBuilder: (context) => const [
+        PopupMenuItem(value: 'view', child: Text('Ver Detalle')),
+        PopupMenuItem(value: 'edit', child: Text('Editar')),
+        PopupMenuItem(value: 'delete', child: Text('Eliminar')),
       ],
     );
   }
@@ -1157,11 +1172,11 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     );
   }
 
-  void _showEditProviderDialog(Map<String, dynamic> proveedor) {
+  void _showEditProviderDialog(Proveedor proveedor) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Editar Proveedor - ${proveedor['nombre']}'),
+        title: Text('Editar Proveedor - ${proveedor.nombre}'),
         content: const Text('Funcionalidad de editar proveedor (ficticia)'),
         actions: [
           TextButton(
@@ -1183,11 +1198,11 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     );
   }
 
-  void _showProviderHistoryDialog(Map<String, dynamic> proveedor) {
+  void _showProviderHistoryDialog(Proveedor proveedor) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Historial - ${proveedor['nombre']}'),
+        title: Text('Historial - ${proveedor.nombre}'),
         content:
             const Text('Funcionalidad de historial de proveedor (ficticia)'),
         actions: [
@@ -1200,11 +1215,11 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     );
   }
 
-  void _showDeleteProviderDialog(Map<String, dynamic> proveedor) {
+  void _showDeleteProviderDialog(Proveedor proveedor) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Eliminar Proveedor - ${proveedor['nombre']}'),
+        title: Text('Eliminar Proveedor - ${proveedor.nombre}'),
         content:
             const Text('¿Está seguro de que desea eliminar este proveedor?'),
         actions: [
@@ -1281,11 +1296,11 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     );
   }
 
-  void _showViewPurchaseDialog(Map<String, dynamic> compra) {
+  void _showViewPurchaseDialog(Compra compra) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Detalle de Compra - ${compra['id']}'),
+        title: Text('Detalle de Compra - ${compra.id}'),
         content:
             const Text('Funcionalidad de ver detalle de compra (ficticia)'),
         actions: [
@@ -1298,11 +1313,11 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     );
   }
 
-  void _showEditPurchaseDialog(Map<String, dynamic> compra) {
+  void _showEditPurchaseDialog(Compra compra) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Editar Compra - ${compra['id']}'),
+        title: Text('Editar Compra - ${compra.id}'),
         content: const Text('Funcionalidad de editar compra (ficticia)'),
         actions: [
           TextButton(
@@ -1324,11 +1339,11 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     );
   }
 
-  void _showDeletePurchaseDialog(Map<String, dynamic> compra) {
+  void _showDeletePurchaseDialog(Compra compra) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Eliminar Compra - ${compra['id']}'),
+        title: Text('Eliminar Compra - ${compra.id}'),
         content: const Text('¿Está seguro de que desea eliminar esta compra?'),
         actions: [
           TextButton(

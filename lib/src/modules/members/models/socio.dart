@@ -61,6 +61,22 @@ class Socio {
     };
   }
 
+  // Método específico para crear socios (formato del backend)
+  Map<String, dynamic> toCreateJson() {
+    return {
+      'id_club': idClub,
+      'nombres': nombres,
+      'apellidos': apellidos,
+      'ci_nit': ciNit,
+      'telefono': telefono,
+      'correo_electronico': correoElectronico,
+      'direccion': direccion,
+      'estado': estado,
+      'fecha_nacimiento': fechaNacimiento ?? '',
+      'tipo_membresia': tipoMembresia,
+    };
+  }
+
   // Getters útiles
   String get nombreCompleto => '$nombres $apellidos';
   bool get estaActivo => estado == 1;

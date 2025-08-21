@@ -7,10 +7,12 @@ import '../../modules/dashboard/screens/dashboard_screen.dart';
 import '../../modules/members/screens/members_list_screen.dart';
 import '../../modules/members/screens/member_detail_screen.dart';
 import '../../modules/members/screens/member_form_screen.dart';
+import '../../modules/members/models/socio.dart';
 // Acciones
 import '../../modules/shares/screens/shares_list_screen.dart';
 import '../../modules/shares/screens/share_sale_form_screen.dart';
 import '../../modules/shares/screens/share_certificate_screen.dart';
+import '../../modules/shares/screens/share_emission_screen.dart';
 // Pagos
 import '../../modules/payments/screens/payments_list_screen.dart';
 import '../../modules/payments/screens/payment_form_screen.dart';
@@ -42,7 +44,15 @@ class AppRouter {
       case '/socio_detalle':
         return MaterialPageRoute(builder: (_) => const MemberDetailScreen());
       case '/socio_form':
-        return MaterialPageRoute(builder: (_) => const MemberFormScreen());
+        return MaterialPageRoute(
+            builder: (_) => const MemberFormScreen(socio: null));
+      case '/socio_editar':
+        final socio = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => MemberFormScreen(
+            socio: socio != null ? Socio.fromJson(socio) : null,
+          ),
+        );
       case '/acciones':
         return MaterialPageRoute(builder: (_) => const SharesListScreen());
       case '/accion_venta':
@@ -50,6 +60,8 @@ class AppRouter {
       case '/accion_certificado':
         return MaterialPageRoute(
             builder: (_) => const ShareCertificateScreen());
+      case '/accion_emision':
+        return MaterialPageRoute(builder: (_) => const ShareEmissionScreen());
       case '/pagos':
         return MaterialPageRoute(builder: (_) => const PaymentsListScreen());
       case '/pago_form':

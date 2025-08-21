@@ -47,4 +47,33 @@ class AuthService {
       return false;
     }
   }
+
+  Future<LoginResponse?> verifyToken(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/verify'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return LoginResponse.fromJson(responseData);
+      } else if (response.statusCode == 401) {
+        // Token no válido
+        return null;
+      } else {
+        final Map<String, dynamic> errorData = jsonDecode(response.body);
+        throw Exception(
+            errorData['detail'] ?? 'Error en la verificación del token');
+      }
+    } catch (e) {
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Error de conexión: $e');
+    }
+  }
 }
