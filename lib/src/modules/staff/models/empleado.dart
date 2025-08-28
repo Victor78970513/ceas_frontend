@@ -139,3 +139,6 @@ class Empleado {
     return 'Empleado(idEmpleado: $idEmpleado, nombreCompleto: $nombreCompleto, cargo: $cargo, departamento: $departamento, estado: $estado)';
   }
 }
+
+
+

@@ -82,3 +82,6 @@ class Asistencia {
     }
   }
 }
+
+
+

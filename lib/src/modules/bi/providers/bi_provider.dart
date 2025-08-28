@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/bi_metricas_financieras.dart';
 import '../models/bi_metricas_administrativas.dart';
 import '../models/bi_top_club.dart';
+// Modelos eliminados - comentados temporalmente
 import '../models/bi_top_socio.dart';
 import '../models/bi_distribucion_financiera.dart';
 import '../models/bi_kpi.dart';

@@ -83,3 +83,6 @@ class BiPersonalAsistenciaDepartamento {
   String get porcentajeAusenciasFormatted =>
       '${porcentajeAusencias.toStringAsFixed(1)}%';
 }
+
+
+

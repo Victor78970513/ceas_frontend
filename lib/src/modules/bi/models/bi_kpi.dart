@@ -2,68 +2,84 @@ import 'package:flutter/material.dart';
 
 class BiKpi {
   final String nombre;
-  final double valorActual;
+  final double valor;
+  final String unidad;
+  final DateTime fecha;
+  final String tipo; // 'ingreso', 'egreso', 'balance', 'socios', etc.
   final double valorAnterior;
-  final double cambioPorcentual;
-  final double meta;
-  final String estado;
+  final double variacion;
+  final String tendencia; // 'creciente', 'decreciente', 'estable'
 
   BiKpi({
     required this.nombre,
-    required this.valorActual,
+    required this.valor,
+    required this.unidad,
+    required this.fecha,
+    required this.tipo,
     required this.valorAnterior,
-    required this.cambioPorcentual,
-    required this.meta,
-    required this.estado,
+    required this.variacion,
+    required this.tendencia,
   });
 
   factory BiKpi.fromJson(Map<String, dynamic> json) {
     return BiKpi(
-      nombre: json['nombre'] as String,
-      valorActual: (json['valor_actual'] as num).toDouble(),
-      valorAnterior: (json['valor_anterior'] as num).toDouble(),
-      cambioPorcentual: (json['cambio_porcentual'] as num).toDouble(),
-      meta: (json['meta'] as num).toDouble(),
-      estado: json['estado'] as String,
+      nombre: json['nombre'] ?? '',
+      valor: (json['valor'] ?? 0.0).toDouble(),
+      unidad: json['unidad'] ?? '',
+      fecha: DateTime.tryParse(json['fecha'] ?? '') ?? DateTime.now(),
+      tipo: json['tipo'] ?? '',
+      valorAnterior: (json['valor_anterior'] ?? 0.0).toDouble(),
+      variacion: (json['variacion'] ?? 0.0).toDouble(),
+      tendencia: json['tendencia'] ?? 'estable',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'nombre': nombre,
-      'valor_actual': valorActual,
+      'valor': valor,
+      'unidad': unidad,
+      'fecha': fecha.toIso8601String(),
+      'tipo': tipo,
       'valor_anterior': valorAnterior,
-      'cambio_porcentual': cambioPorcentual,
-      'meta': meta,
-      'estado': estado,
+      'variacion': variacion,
+      'tendencia': tendencia,
     };
   }
 
   // Getters para UI
-  String get valorActualFormatted => valorActual.toStringAsFixed(1);
-  String get valorAnteriorFormatted => valorAnterior.toStringAsFixed(1);
-  String get cambioPorcentualFormatted =>
-      '${cambioPorcentual >= 0 ? '+' : ''}${cambioPorcentual.toStringAsFixed(1)}%';
-  String get metaFormatted => meta.toStringAsFixed(1);
-  String get estadoDisplay => estado.toUpperCase();
-
-  Color get estadoColor {
-    switch (estado.toLowerCase()) {
-      case 'excelente':
-        return Colors.green;
-      case 'bueno':
-        return Colors.blue;
-      case 'regular':
-        return Colors.orange;
-      case 'malo':
-        return Colors.red;
-      default:
-        return Colors.grey;
+  String get valorFormatted {
+    if (unidad.toLowerCase() == 'bs' || unidad.toLowerCase() == 'bs.') {
+      return 'Bs. ${valor.toStringAsFixed(0)}';
+    } else if (unidad.toLowerCase() == '%') {
+      return '${valor.toStringAsFixed(1)}%';
+    } else {
+      return '${valor.toStringAsFixed(0)} $unidad';
     }
   }
 
-  Color get cambioColor => cambioPorcentual >= 0 ? Colors.green : Colors.red;
-  IconData get cambioIcon =>
-      cambioPorcentual >= 0 ? Icons.trending_up : Icons.trending_down;
-}
+  String get variacionFormatted {
+    final signo = variacion >= 0 ? '+' : '';
+    return '$signo${variacion.toStringAsFixed(1)}%';
+  }
 
+  String get fechaFormatted {
+    return '${fecha.day}/${fecha.month}/${fecha.year}';
+  }
+
+  bool get esCreciente => tendencia.toLowerCase() == 'creciente';
+  bool get esDecreciente => tendencia.toLowerCase() == 'decreciente';
+  bool get esEstable => tendencia.toLowerCase() == 'estable';
+
+  Color get colorTendencia {
+    if (esCreciente) return Colors.green;
+    if (esDecreciente) return Colors.red;
+    return Colors.orange;
+  }
+
+  IconData get iconoTendencia {
+    if (esCreciente) return Icons.trending_up;
+    if (esDecreciente) return Icons.trending_down;
+    return Icons.trending_flat;
+  }
+}

@@ -171,6 +171,10 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
 
                         // Top clubes y socios con gráficos
                         _buildTopRankings(biProvider),
+                        const SizedBox(height: 24),
+
+                        // Top Socios
+                        _buildTopSocios(biProvider),
                       ],
                     ],
                   ),
@@ -516,225 +520,225 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
     );
   }
 
-  Widget _buildKpisPrincipales(BiProvider provider) {
-    final kpis = provider.kpis;
+  // Widget _buildKpisPrincipales(BiProvider provider) {
+  //   final kpis = provider.kpis;
 
-    if (kpis.isEmpty) return const SizedBox.shrink();
+  //   if (kpis.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'KPIs Principales',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 20),
-        ...kpis.map((kpi) => _buildKpiCard(kpi)).toList(),
-      ],
-    );
-  }
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       const Text(
+  //         'KPIs Principales',
+  //         style: TextStyle(
+  //           fontSize: 24,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.black87,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 20),
+  //       ...kpis.map((kpi) => _buildKpiCard(kpi)).toList(),
+  //     ],
+  //   );
+  // }
 
-  Widget _buildKpiCard(BiKpi kpi) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: kpi.estadoColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              kpi.cambioIcon,
-              color: kpi.estadoColor,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  kpi.nombre,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      'Actual: ${kpi.valorActualFormatted}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      'Meta: ${kpi.metaFormatted}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: kpi.estadoColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  kpi.estadoDisplay,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: kpi.estadoColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    kpi.cambioIcon,
-                    color: kpi.cambioColor,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    kpi.cambioPorcentualFormatted,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: kpi.cambioColor,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildKpiCard(BiKpi kpi) {
+  //   return Container(
+  //     margin: const EdgeInsets.only(bottom: 16),
+  //     padding: const EdgeInsets.all(20),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(16),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.grey.withOpacity(0.1),
+  //           blurRadius: 10,
+  //           offset: const Offset(0, 2),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Container(
+  //           padding: const EdgeInsets.all(12),
+  //           decoration: BoxDecoration(
+  //             color: kpi.estadoColor.withOpacity(0.1),
+  //             borderRadius: BorderRadius.circular(12),
+  //           ),
+  //           child: Icon(
+  //             kpi.cambioIcon,
+  //             color: kpi.estadoColor,
+  //             size: 24,
+  //           ),
+  //       ),
+  //       const SizedBox(width: 16),
+  //       Expanded(
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(
+  //               kpi.nombre,
+  //               style: const TextStyle(
+  //                 fontSize: 16,
+  //                   fontWeight: FontWeight.bold,
+  //                   color: Colors.black87,
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 8),
+  //               Row(
+  //                 children: [
+  //                   Text(
+  //                     'Actual: ${kpi.valorActualFormatted}',
+  //                     style: const TextStyle(
+  //                       fontSize: 14,
+  //                       color: Colors.grey,
+  //                     ),
+  //                   ),
+  //                   const SizedBox(width: 16),
+  //                   Text(
+  //                     'Meta: ${kpi.metaFormatted}',
+  //                     style: const TextStyle(
+  //                         fontSize: 14,
+  //                         color: Colors.grey,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //           Column(
+  //             crossAxisAlignment: CrossAxisAlignment.end,
+  //             children: [
+  //               Container(
+  //                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+  //                 decoration: BoxDecoration(
+  //                   color: kpi.estadoColor.withOpacity(0.1),
+  //                   borderRadius: BorderRadius.circular(12),
+  //                 ),
+  //                 child: Text(
+  //                   kpi.estadoDisplay,
+  //                   style: TextStyle(
+  //                     fontSize: 12,
+  //                     fontWeight: FontWeight.bold,
+  //                     color: kpi.estadoColor,
+  //                   ),
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 8),
+  //               Row(
+  //                 children: [
+  //                   Icon(
+  //                     kpi.cambioIcon,
+  //                     color: kpi.cambioColor,
+  //                     size: 16,
+  //                   ),
+  //                   const SizedBox(width: 4),
+  //                   Text(
+  //                     kpi.cambioPorcentualFormatted,
+  //                     style: TextStyle(
+  //                       fontSize: 14,
+  //                       fontWeight: FontWeight.bold,
+  //                       color: kpi.cambioColor,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ],
+  //           ),
+  //         ],
+  //       ),
+  //     );
+  //   }
 
-  Widget _buildGraficosDistribucion(BiProvider provider) {
-    final distribucion = provider.distribucionFinanciera;
-    if (distribucion == null) return const SizedBox.shrink();
+  // Widget _buildGraficosDistribucion(BiProvider provider) {
+  //   final distribucion = provider.distribucionFinanciera;
+  //   if (distribucion == null) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Distribución Financiera',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            Expanded(
-              child: BiPieChart(
-                title: 'Distribución de Ingresos',
-                data: distribucion.ingresos,
-                colors: [
-                  Colors.green,
-                  Colors.blue,
-                  Colors.orange,
-                  Colors.purple
-                ],
-              ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: BiPieChart(
-                title: 'Distribución de Egresos',
-                data: distribucion.egresos,
-                colors: [Colors.red, Colors.pink, Colors.deepOrange],
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       const Text(
+  //         'Distribución Financiera',
+  //         style: TextStyle(
+  //           fontSize: 24,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.black87,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 20),
+  //       Row(
+  //         children: [
+  //           Expanded(
+  //             child: BiPieChart(
+  //               title: 'Distribución de Ingresos',
+  //               data: distribucion.ingresos,
+  //               colors: [
+  //                 Colors.green,
+  //                 Colors.blue,
+  //                 Colors.orange,
+  //                 Colors.purple
+  //               ],
+  //             ),
+  //           ),
+  //           const SizedBox(width: 24),
+  //           Expanded(
+  //             child: BiPieChart(
+  //               title: 'Distribución de Egresos',
+  //               data: distribucion.egresos,
+  //               colors: [Colors.red, Colors.pink, Colors.deepOrange],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  Widget _buildTopRankings(BiProvider provider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Rankings y Top Performers',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 20),
+  // Widget _buildTopRankings(BiProvider provider) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       const Text(
+  //         'Rankings y Top Performers',
+  //         style: TextStyle(
+  //           fontSize: 24,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.black87,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 20),
 
-        // Gráficos de rankings
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: BiHorizontalBarChart(
-                title: 'Balance por Club',
-                data: provider.topClubes,
-              ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: _buildTopSociosChart(provider),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
+  //       // Gráficos de rankings
+  //       Row(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //         Expanded(
+  //           child: BiHorizontalBarChart(
+  //             title: 'Balance por Club',
+  //             data: provider.topClubes,
+  //           ),
+  //         ),
+  //         const SizedBox(width: 24),
+  //         Expanded(
+  //           child: _buildTopSociosChart(provider),
+  //         ),
+  //       ],
+  //       ),
+  //       const SizedBox(height: 24),
 
-        // Datos detallados de rankings
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: _buildTopClubes(provider)),
-            const SizedBox(width: 24),
-            Expanded(child: _buildTopSocios(provider)),
-          ],
-        ),
-      ],
-    );
-  }
+  //       // Datos detallados de rankings
+  //       Row(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Expanded(child: _buildTopClubes(provider)),
+  //           const SizedBox(width: 24),
+  //           Expanded(child: _buildTopSocios(provider)),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildTopClubes(BiProvider provider) {
     final clubes = provider.topClubes;
@@ -870,145 +874,145 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
     );
   }
 
-  Widget _buildTopSocios(BiProvider provider) {
-    final socios = provider.topSocios;
+  // Widget _buildTopSocios(BiProvider provider) {
+  //   final socios = provider.topSocios;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.person, color: Colors.orange, size: 20),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Top Socios',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-          // const SizedBox(height: 20),
-          ...socios.map((socio) => _buildSocioItem(socio)).toList(),
-        ],
-      ),
-    );
-  }
+  //   return Container(
+  //     padding: const EdgeInsets.all(20),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(16),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.grey.withOpacity(0.1),
+  //           blurRadius: 10,
+  //           offset: const Offset(0, 2),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           children: [
+  //         Container(
+  //           padding: const EdgeInsets.all(8),
+  //           decoration: BoxDecoration(
+  //             color: Colors.orange.withOpacity(0.1),
+  //             borderRadius: BorderRadius.circular(8),
+  //           ),
+  //           child: const Icon(Icons.person, color: Colors.orange, size: 20),
+  //         ),
+  //         const SizedBox(width: 12),
+  //         const Text(
+  //           'Top Socios',
+  //           style: TextStyle(
+  //             fontSize: 18,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.black87,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //     // const SizedBox(height: 20),
+  //     ...socios.map((socio) => _buildSocioItem(socio)).toList(),
+  //   ],
+  // ),
+  // );
+  // }
 
-  Widget _buildSocioItem(BiTopSocio socio) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  socio.nombreCompleto,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: socio.estadoPagosColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  socio.estadoPagosDisplay,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: socio.estadoPagosColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Club: ${socio.clubPrincipal}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    Text(
-                      'Acciones: ${socio.accionesCompradas}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Invertido: ${socio.totalInvertidoFormatted}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    Text(
-                      'Antigüedad: ${socio.antiguedadFormatted}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildSocioItem(BiTopSocio socio) {
+  //   return Container(
+  //     margin: const EdgeInsets.only(bottom: 12),
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: Colors.grey[50],
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(color: Colors.grey[200]!),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: [
+  //           Expanded(
+  //             child: Text(
+  //               socio.nombreCompleto,
+  //               style: const TextStyle(
+  //                 fontSize: 16,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: Colors.black87,
+  //               ),
+  //             ),
+  //           ),
+  //           Container(
+  //             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+  //             decoration: BoxDecoration(
+  //               color: socio.estadoPagosColor.withOpacity(0.1),
+  //               borderRadius: BorderRadius.circular(12),
+  //             ),
+  //             child: Text(
+  //               socio.estadoPagosDisplay,
+  //               style: TextStyle(
+  //                 fontSize: 12,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: socio.estadoPagosColor,
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 12),
+  //       Row(
+  //         children: [
+  //           Expanded(
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Text(
+  //                   'Club: ${socio.clubPrincipal}',
+  //                   style: const TextStyle(fontSize: 14, color: Colors.grey),
+  //                 ),
+  //                 Text(
+  //                   'Acciones: ${socio.accionesCompradas}',
+  //                   style: const TextStyle(fintSize: 14, color: Colors.grey),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //           Expanded(
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.end,
+  //               children: [
+  //                 Text(
+  //                   'Invertido: ${socio.totalInvertidoFormatted}',
+  //                   style: const TextStyle(fontSize: 14, color: Colors.grey),
+  //                 ),
+  //                 Text(
+  //                   'Antigüedad: ${socio.antiguedadFormatted}',
+  //                   style: const TextStyle(fontSize: 14, color: Colors.grey),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ],
+  //   ),
+  // );
+  // }
 
-  Widget _buildGraficoLineas(BiProvider provider) {
-    final kpis = provider.kpis;
+  // Widget _buildGraficoLineas(BiProvider provider) {
+  //   final kpis = provider.kpis;
 
-    if (kpis.isEmpty) return const SizedBox.shrink();
+  //   if (kpis.isEmpty) return const SizedBox.shrink();
 
-    return BiLineChart(
-      title: 'Tendencia de KPIs',
-      data: kpis,
-    );
-  }
+  //   return BiLineChart(
+  //     title: 'Tendencia de KPIs',
+  //     data: kpis,
+  //   );
+  // }
 
   Widget _buildAlertasCriticas(BiProvider provider) {
     final alertas = provider.alertas;
@@ -1141,109 +1145,109 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildTopSociosChart(BiProvider provider) {
-    final socios = provider.topSocios;
-    if (socios.isEmpty) return const SizedBox.shrink();
+  // Widget _buildTopSociosChart(BiProvider provider) {
+  //   final socios = provider.topSocios;
+  //   if (socios.isEmpty) return const SizedBox.shrink();
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Acciones por Socio',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            // height: 200,
-            child: ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: socios.length,
-              itemBuilder: (context, index) {
-                final socio = socios[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      Flexible(
-                        flex: 2,
-                        child: Text(
-                          socio.nombreCompleto.split(' ').take(2).join(' '),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Expanded(flex: 1, child: SizedBox()),
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: socio.accionesCompradas /
-                                _getMaxAcciones(provider.topSocios),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.orange,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 35,
-                        child: Text(
-                          '${socio.accionesCompradas}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.right,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  //   return Container(
+  //     padding: const EdgeInsets.all(20),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(16),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.grey.withOpacity(0.1),
+  //           blurRadius: 10,
+  //           offset: const Offset(0, 2),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'Acciones por Socio',
+  //           style: const TextStyle(
+  //             fontSize: 18,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.black87,
+  //           ),
+  //         ),
+  //       const SizedBox(height: 20),
+  //       SizedBox(
+  //         // height: 200,
+  //         child: ListView.builder(
+  //           shrinkWrap: true,
+  //           physics: const NeverScrollableScrollPhysics(),
+  //           itemCount: socios.length,
+  //           itemBuilder: (context, index) {
+  //             final socio = socios[index];
+  //             return Padding(
+  //               padding: const EdgeInsets.only(bottom: 12),
+  //               child: Row(
+  //                 children: [
+  //                   Flexible(
+  //                   flex: 2,
+  //                   child: Text(
+  //                     socio.nombreCompleto.split(' ').take(2).join(' '),
+  //                     style: const TextStyle(
+  //                       fontSize: 12,
+  //                       fontWeight: FontWeight.w600,
+  //                     ),
+  //                       overflow: TextOverflow.ellipsis,
+  //                     ),
+  //                   ),
+  //                   Expanded(flex: 1, child: SizedBox()),
+  //                   Expanded(
+  //                     flex: 3,
+  //                     child: Container(
+  //                       height: 20,
+  //                       decoration: BoxDecoration(
+  //                         color: Colors.grey[200],
+  //                         borderRadius: BorderRadius.circular(10),
+  //                       ),
+  //                       child: FractionallySizedBox(
+  //                         alignment: Alignment.centerLeft,
+  //                         widthFactor: socio.accionesCompradas /
+  //                             _getMaxAcciones(provider.topSocios),
+  //                         child: Container(
+  //                           decoration: BoxDecoration(
+  //                             color: Colors.orange,
+  //                             borderRadius: BorderRadius.circular(10),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   const SizedBox(width: 8),
+  //                   SizedBox(
+  //                     width: 35,
+  //                     child: Text(
+  //                       '${socio.accionesCompradas}',
+  //                       style: const TextStyle(
+  //                         fontSize: 12,
+  //                         fontWeight: FontWeight.bold,
+  //                       ),
+  //                       textAlign: TextAlign.right,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       ),
+  //     ],
+  //   ),
+  // );
+  // }
 
-  double _getMaxAcciones(List<BiTopSocio> socios) {
-    if (socios.isEmpty) return 5;
-    final maxAcciones =
-        socios.map((e) => e.accionesCompradas).reduce((a, b) => a > b ? a : b);
-    return maxAcciones.toDouble() * 1.2;
-  }
+  // double _getMaxAcciones(List<BiTopSocio> socios) {
+  //   if (socios.isEmpty) return 5;
+  //   final maxAcciones =
+  //       socios.map((e) => e.accionesCompradas).reduce((a, b) => a > b ? a : b);
+  //   return maxAcciones.toDouble() * 1.2;
+  // }
 
   Widget _buildGraficoMovimientosFinancieros(BiProvider provider) {
     final movimientos = provider.movimientosFinancieros;
@@ -1367,6 +1371,924 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
           ),
         ],
       ],
+    );
+  }
+
+  // KPIs Principales usando métricas disponibles
+  Widget _buildKpisPrincipales(BiProvider provider) {
+    final metricasFin = provider.metricasFinancieras;
+    final metricasAdmin = provider.metricasAdministrativas;
+
+    if (metricasFin == null && metricasAdmin == null)
+      return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'KPIs Principales',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 20),
+        if (metricasFin != null)
+          _buildKpiCard(
+            'Balance Neto',
+            'Bs. ${metricasFin.balanceNeto.toStringAsFixed(0)}',
+            Icons.account_balance_wallet,
+            metricasFin.balanceNeto >= 0 ? Colors.green : Colors.red,
+          ),
+        if (metricasAdmin != null)
+          _buildKpiCard(
+            'Total Socios',
+            metricasAdmin.totalSocios.toString(),
+            Icons.people,
+            Colors.blue,
+          ),
+        if (metricasAdmin != null)
+          _buildKpiCard(
+            'Socios Activos',
+            metricasAdmin.sociosActivos.toString(),
+            Icons.check_circle,
+            Colors.green,
+          ),
+        if (metricasFin != null)
+          _buildKpiCard(
+            'Total Ingresos',
+            'Bs. ${metricasFin.ingresosTotales.toStringAsFixed(0)}',
+            Icons.trending_up,
+            Colors.green,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildKpiCard(String title, String value, IconData icon, Color color) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Gráfico de líneas para KPIs usando métricas financieras
+  Widget _buildGraficoLineas(BiProvider provider) {
+    final metricasFin = provider.metricasFinancieras;
+    if (metricasFin == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade100, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.orange.shade600,
+                      Colors.orange.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.trending_up_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Análisis de KPIs Financieros',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Evolución de métricas clave del sistema',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: _buildKpiMetric(
+                  'Ingresos',
+                  'Bs. ${metricasFin.ingresosTotales.toStringAsFixed(0)}',
+                  Icons.trending_up,
+                  Colors.green,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildKpiMetric(
+                  'Egresos',
+                  'Bs. ${metricasFin.egresosTotales.toStringAsFixed(0)}',
+                  Icons.trending_down,
+                  Colors.red,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildKpiMetric(
+                  'Balance',
+                  'Bs. ${metricasFin.balanceNeto.toStringAsFixed(0)}',
+                  Icons.account_balance,
+                  metricasFin.balanceNeto >= 0 ? Colors.blue : Colors.orange,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKpiMetric(
+      String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Gráficos de distribución usando top clubes
+  Widget _buildGraficosDistribucion(BiProvider provider) {
+    final topClubes = provider.topClubes;
+    if (topClubes.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade100, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purple.shade600,
+                      Colors.purple.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.pie_chart_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Distribución por Clubes',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Análisis de balance por club',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 200,
+            child: Row(
+              children: topClubes.take(3).map((club) {
+                final balance = club.balance;
+                final color = balance >= 0 ? Colors.green : Colors.red;
+                final percentage = (balance.abs() /
+                        topClubes
+                            .map((c) => c.balance.abs())
+                            .reduce((a, b) => a > b ? a : b)) *
+                    100;
+
+                return Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Stack(
+                              children: [
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    height: percentage * 2,
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(8),
+                                        topRight: Radius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          club.nombreClub,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          'Bs. ${balance.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Top rankings usando top clubes
+  Widget _buildTopRankings(BiProvider provider) {
+    final topClubes = provider.topClubes;
+    if (topClubes.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade100, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.amber.shade600,
+                      Colors.amber.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.emoji_events_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Top Rankings',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Clubes con mejor rendimiento financiero',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          ...topClubes.take(5).toList().asMap().entries.map((entry) {
+            final index = entry.key;
+            final club = entry.value;
+            final balance = club.balance;
+            final color = balance >= 0 ? Colors.green : Colors.red;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: color.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${index + 1}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          club.nombreClub,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          'Balance: Bs. ${balance.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: color,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    balance >= 0 ? Icons.trending_up : Icons.trending_down,
+                    color: color,
+                    size: 24,
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  // Top Socios usando métricas administrativas
+  Widget _buildTopSocios(BiProvider provider) {
+    final metricasAdmin = provider.metricasAdministrativas;
+    if (metricasAdmin == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade100, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.orange.shade600,
+                      Colors.orange.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.people_alt_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Top Socios del CEAS',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Análisis de socios por actividad y participación',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Métricas generales de socios
+          Row(
+            children: [
+              Expanded(
+                child: _buildSocioMetric(
+                  'Total Socios',
+                  metricasAdmin.totalSocios.toString(),
+                  Icons.people,
+                  Colors.blue,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildSocioMetric(
+                  'Socios Activos',
+                  metricasAdmin.sociosActivos.toString(),
+                  Icons.check_circle,
+                  Colors.green,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildSocioMetric(
+                  'Socios Inactivos',
+                  metricasAdmin.sociosInactivos.toString(),
+                  Icons.cancel,
+                  Colors.red,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // Gráfico de distribución de socios
+          Container(
+            height: 200,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  height: 150,
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(8),
+                                      topRight: Radius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Total',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        metricasAdmin.totalSocios.toString(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  height: (metricasAdmin.sociosActivos /
+                                          metricasAdmin.totalSocios) *
+                                      150,
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(8),
+                                      topRight: Radius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Activos',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        metricasAdmin.sociosActivos.toString(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Container(
+                            height: (metricasAdmin.sociosInactivos /
+                                    metricasAdmin.totalSocios) *
+                                150,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Inactivos',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        metricasAdmin.sociosInactivos.toString(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Estadísticas adicionales
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Porcentaje de Actividad',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${((metricasAdmin.sociosActivos / metricasAdmin.totalSocios) * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Tasa de Retención',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${((metricasAdmin.sociosActivos / metricasAdmin.totalSocios) * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSocioMetric(
+      String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

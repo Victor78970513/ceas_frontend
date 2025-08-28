@@ -78,3 +78,6 @@ class BiResumenRapido {
           : Colors.red;
 }
 
+
+
+

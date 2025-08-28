@@ -214,17 +214,4 @@ class BiService {
       throw Exception('Error al obtener movimientos financieros: $e');
     }
   }
-
-  // Método para probar conectividad
-  static Future<bool> probarConectividad() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/bi/administrativo/resumen-rapido'),
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 5));
-      return response.statusCode == 200 || response.statusCode == 401;
-    } catch (e) {
-      return false;
-    }
-  }
 }

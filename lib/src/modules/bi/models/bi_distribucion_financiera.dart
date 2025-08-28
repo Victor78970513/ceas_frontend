@@ -1,112 +1,81 @@
-import 'package:flutter/material.dart';
-
 class BiDistribucionFinanciera {
-  final List<BiCategoriaFinanciera> ingresos;
-  final List<BiCategoriaFinanciera> egresos;
-  final BiResumenFinanciero resumen;
+  final String periodo;
+  final List<BiCategoriaFinanciera> categorias;
+  final double totalIngresos;
+  final double totalEgresos;
+  final double balanceTotal;
 
   BiDistribucionFinanciera({
-    required this.ingresos,
-    required this.egresos,
-    required this.resumen,
+    required this.periodo,
+    required this.categorias,
+    required this.totalIngresos,
+    required this.totalEgresos,
+    required this.balanceTotal,
   });
 
   factory BiDistribucionFinanciera.fromJson(Map<String, dynamic> json) {
     return BiDistribucionFinanciera(
-      ingresos: (json['ingresos'] as List)
-          .map((e) => BiCategoriaFinanciera.fromJson(e))
-          .toList(),
-      egresos: (json['egresos'] as List)
-          .map((e) => BiCategoriaFinanciera.fromJson(e))
-          .toList(),
-      resumen: BiResumenFinanciero.fromJson(json['resumen']),
+      periodo: json['periodo'] ?? '',
+      categorias: (json['categorias'] as List<dynamic>?)
+              ?.map((item) => BiCategoriaFinanciera.fromJson(item))
+              .toList() ??
+          [],
+      totalIngresos: (json['total_ingresos'] ?? 0.0).toDouble(),
+      totalEgresos: (json['total_egresos'] ?? 0.0).toDouble(),
+      balanceTotal: (json['balance_total'] ?? 0.0).toDouble(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'ingresos': ingresos.map((e) => e.toJson()).toList(),
-      'egresos': egresos.map((e) => e.toJson()).toList(),
-      'resumen': resumen.toJson(),
+      'periodo': periodo,
+      'categorias': categorias.map((c) => c.toJson()).toList(),
+      'total_ingresos': totalIngresos,
+      'total_egresos': totalEgresos,
+      'balance_total': balanceTotal,
     };
   }
 }
 
 class BiCategoriaFinanciera {
-  final String categoria;
+  final String nombre;
   final double monto;
+  final String tipo; // 'ingreso' o 'egreso'
   final double porcentaje;
-  final String tendencia;
+  final String color;
 
   BiCategoriaFinanciera({
-    required this.categoria,
+    required this.nombre,
     required this.monto,
+    required this.tipo,
     required this.porcentaje,
-    required this.tendencia,
+    required this.color,
   });
 
   factory BiCategoriaFinanciera.fromJson(Map<String, dynamic> json) {
     return BiCategoriaFinanciera(
-      categoria: json['categoria'] as String,
-      monto: (json['monto'] as num).toDouble(),
-      porcentaje: (json['porcentaje'] as num).toDouble(),
-      tendencia: json['tendencia'] as String,
+      nombre: json['nombre'] ?? '',
+      monto: (json['monto'] ?? 0.0).toDouble(),
+      tipo: json['tipo'] ?? 'ingreso',
+      porcentaje: (json['porcentaje'] ?? 0.0).toDouble(),
+      color: json['color'] ?? '#2196F3',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'categoria': categoria,
+      'nombre': nombre,
       'monto': monto,
+      'tipo': tipo,
       'porcentaje': porcentaje,
-      'tendencia': tendencia,
+      'color': color,
     };
   }
 
   // Getters para UI
   String get montoFormatted => 'Bs. ${monto.toStringAsFixed(0)}';
   String get porcentajeFormatted => '${porcentaje.toStringAsFixed(1)}%';
-  String get tendenciaDisplay => tendencia.toUpperCase();
 
-  Color get tendenciaColor =>
-      tendencia.toLowerCase() == 'creciente' ? Colors.green : Colors.red;
-  IconData get tendenciaIcon => tendencia.toLowerCase() == 'creciente'
-      ? Icons.trending_up
-      : Icons.trending_down;
+  bool get esIngreso => tipo.toLowerCase() == 'ingreso';
+  bool get esEgreso => tipo.toLowerCase() == 'egreso';
 }
-
-class BiResumenFinanciero {
-  final double totalIngresos;
-  final double totalEgresos;
-  final double balance;
-
-  BiResumenFinanciero({
-    required this.totalIngresos,
-    required this.totalEgresos,
-    required this.balance,
-  });
-
-  factory BiResumenFinanciero.fromJson(Map<String, dynamic> json) {
-    return BiResumenFinanciero(
-      totalIngresos: (json['total_ingresos'] as num).toDouble(),
-      totalEgresos: (json['total_egresos'] as num).toDouble(),
-      balance: (json['balance'] as num).toDouble(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'total_ingresos': totalIngresos,
-      'total_egresos': totalEgresos,
-      'balance': balance,
-    };
-  }
-
-  // Getters para UI
-  String get totalIngresosFormatted =>
-      'Bs. ${totalIngresos.toStringAsFixed(0)}';
-  String get totalEgresosFormatted => 'Bs. ${totalEgresos.toStringAsFixed(0)}';
-  String get balanceFormatted => 'Bs. ${balance.toStringAsFixed(0)}';
-  Color get balanceColor => balance >= 0 ? Colors.green : Colors.red;
-}
-

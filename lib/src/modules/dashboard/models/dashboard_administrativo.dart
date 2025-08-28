@@ -559,3 +559,4 @@ class TendenciaMensual {
       variacionPorcentual >= 0 ? Colors.green : Colors.red;
 }
 
+
