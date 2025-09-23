@@ -32,21 +32,8 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
   final _fechaNacimientoController = TextEditingController();
 
   // Variables de estado
-  String _estado = 'Activo';
-  String _tipoMembresia = 'Individual';
   DateTime? _fechaNacimiento;
   bool _isLoading = false;
-
-  // Opciones para dropdowns
-  final List<String> _estados = ['Activo', 'Inactivo', 'Moroso'];
-  List<String> _tiposMembresia = [
-    'Individual',
-    'Familiar',
-    'Corporativa',
-    'VIP',
-    'Estudiante',
-    'Accionista'
-  ];
 
   @override
   void initState() {
@@ -64,26 +51,6 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
       _correoController.text = widget.socio!.correoElectronico;
       _direccionController.text = widget.socio!.direccion;
 
-      // Manejar estado de manera robusta
-      if (_estados.contains(widget.socio!.estadoTexto)) {
-        _estado = widget.socio!.estadoTexto;
-      } else {
-        // Si el estado no está en la lista, usar el primero disponible
-        _estado = _estados.first;
-      }
-
-      // Manejar tipo de membresía de manera robusta
-      if (_tiposMembresia.contains(widget.socio!.tipoMembresia)) {
-        _tipoMembresia = widget.socio!.tipoMembresia;
-      } else {
-        // Si el tipo no está en la lista, agregarlo temporalmente
-        if (widget.socio!.tipoMembresia.isNotEmpty) {
-          _tiposMembresia.add(widget.socio!.tipoMembresia);
-          _tipoMembresia = widget.socio!.tipoMembresia;
-        } else {
-          _tipoMembresia = _tiposMembresia.first;
-        }
-      }
 
       if (widget.socio!.fechaNacimiento != null) {
         try {
@@ -192,11 +159,11 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
           telefono: _telefonoController.text.trim(),
           correoElectronico: _correoController.text.trim(),
           direccion: _direccionController.text.trim(),
-          estado: _getEstadoValue(_estado),
+          estado: 1, // Activo por defecto
           fechaNacimiento: _fechaNacimiento != null
               ? _formatDateForBackend(_fechaNacimiento!)
               : '',
-          tipoMembresia: _tipoMembresia,
+          tipoMembresia: 'Individual', // Tipo por defecto
         );
 
         if (success && mounted) {
@@ -223,11 +190,11 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
           telefono: _telefonoController.text.trim(),
           correoElectronico: _correoController.text.trim(),
           direccion: _direccionController.text.trim(),
-          estado: _getEstadoValue(_estado),
+          estado: 1, // Activo por defecto
           fechaNacimiento: _fechaNacimiento != null
               ? _formatDateForBackend(_fechaNacimiento!)
               : '',
-          tipoMembresia: _tipoMembresia,
+          tipoMembresia: 'Individual', // Tipo por defecto
         );
 
         if (success && mounted) {
@@ -317,7 +284,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
 
   Widget _buildFormContent(bool isEditing) {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(widget.isBottomSheet ? 16.0 : 24.0),
+      padding: EdgeInsets.all(widget.isBottomSheet ? 12.0 : 24.0),
       child: Form(
         key: _formKey,
         child: Column(
@@ -331,7 +298,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
 
             // Datos personales
             _buildSectionHeader('Datos Personales', Icons.person),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             Row(
               children: [
@@ -394,11 +361,11 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Información de contacto
             _buildSectionHeader('Información de Contacto', Icons.contact_phone),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             _buildTextField(
               controller: _correoController,
@@ -450,45 +417,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
-
-            // Información de membresía
-            _buildSectionHeader(
-                'Información de Membresía', Icons.card_membership),
-            const SizedBox(height: 16),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDropdown(
-                    value: _estado,
-                    items: _estados,
-                    label: 'Estado',
-                    icon: Icons.check_circle_outline,
-                    onChanged: (value) {
-                      setState(() {
-                        _estado = value ?? 'Activo';
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildDropdown(
-                    value: _tipoMembresia,
-                    items: _tiposMembresia,
-                    label: 'Tipo de Membresía',
-                    icon: Icons.category_outlined,
-                    onChanged: (value) {
-                      setState(() {
-                        _tipoMembresia = value ?? 'Individual';
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 24),
 
             // Botones de acción
             _buildActionButtons(isEditing),
@@ -638,44 +567,6 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
     );
   }
 
-  Widget _buildDropdown({
-    required String value,
-    required List<String> items,
-    required String label,
-    required IconData icon,
-    required Function(String?) onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      value: value,
-      items: items
-          .map((item) => DropdownMenuItem(
-                value: item,
-                child: Text(item),
-              ))
-          .toList(),
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: CeasColors.primaryBlue),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: CeasColors.primaryBlue, width: 2),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      ),
-    );
-  }
 
   Widget _buildActionButtons(bool isEditing) {
     return Row(
@@ -763,19 +654,6 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
     );
   }
 
-  // Método auxiliar para convertir estado de texto a valor numérico
-  int _getEstadoValue(String estadoTexto) {
-    switch (estadoTexto) {
-      case 'Activo':
-        return 1;
-      case 'Inactivo':
-        return 0;
-      case 'Moroso':
-        return 2;
-      default:
-        return 1; // Por defecto activo
-    }
-  }
 
   // Método auxiliar para formatear fecha para el backend (YYYY-MM-DD)
   String _formatDateForBackend(DateTime date) {
