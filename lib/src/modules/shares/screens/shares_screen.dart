@@ -1027,6 +1027,7 @@ class _SharesScreenState extends State<SharesScreen> {
                           icon: const Icon(Icons.close),
                           style: IconButton.styleFrom(
                             backgroundColor: Colors.grey.shade100,
+                            foregroundColor: Colors.grey.shade600,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -1180,6 +1181,7 @@ class _SharesScreenState extends State<SharesScreen> {
       }
     }
   }
+
 
   void _showCertificadoDialog(BuildContext context, Accion accion) {
     showDialog(

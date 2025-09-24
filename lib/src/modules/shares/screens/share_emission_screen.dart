@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/ceas_colors.dart';
+import '../services/qr_payment_service.dart';
+import '../widgets/qr_payment_dialog.dart';
 
 class ShareEmissionScreen extends StatefulWidget {
   final bool isBottomSheet;
@@ -270,18 +272,41 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
     });
 
     try {
-      // Simular guardado
-      await Future.delayed(const Duration(seconds: 2));
+      // Obtener datos del formulario
+      final idSocio = int.tryParse(_idSocioController.text) ?? 123;
+      final totalPago = 5000.0; // Valor fijo por ahora
+      final metodoPago = _metodoPago == 'Efectivo' ? 'efectivo' : 'transferencia_bancaria';
+
+      print('🚀 Generando QR de pago...');
+      print('📋 Datos: ID Socio: $idSocio, Total: $totalPago, Método: $metodoPago');
+
+      // Llamar al servicio para generar QR
+      final qrResponse = await QrPaymentService.generarQrPago(
+        idClub: 1,
+        idSocio: idSocio,
+        modalidadPago: 1,
+        estadoAccion: 1,
+        tipoAccion: 'compra',
+        totalPago: totalPago,
+        metodoPago: metodoPago,
+      );
 
       if (mounted) {
-        // Mostrar QR para pago
-        _mostrarQRPago();
+        // Cerrar el bottom sheet primero
+        Navigator.of(context).pop();
+        
+        // Mostrar el diálogo con el QR
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => QrPaymentDialog(qrResponse: qrResponse),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al emitir acción: $e'),
+            content: Text('Error al generar QR de pago: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -566,70 +591,6 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
     );
   }
 
-  Widget _buildFormHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            CeasColors.primaryBlue,
-            CeasColors.primaryBlue.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: CeasColors.primaryBlue.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.add_business,
-              color: Colors.white,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Emitir Nueva Acción',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Complete todos los campos para emitir una nueva acción del club',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
@@ -820,9 +781,6 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header con información
-          _buildFormHeader(),
-          const SizedBox(height: 32),
 
           // Información del socio
           _buildSectionHeader('Información del Socio', Icons.person),
@@ -883,123 +841,11 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
           ),
           const SizedBox(height: 32),
 
-          // Información de la acción
-          _buildSectionHeader('Información de la Acción', Icons.assignment),
-          const SizedBox(height: 16),
-
-          Row(
-            children: [
-              Expanded(
-                child: _buildDropdown(
-                  value: _tipoAccion,
-                  items: _tiposAccion,
-                  label: 'Tipo de Acción',
-                  icon: Icons.category_outlined,
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _tipoAccion = value;
-                      });
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildDropdown(
-                  value: _estado,
-                  items: _estados,
-                  label: 'Estado',
-                  icon: Icons.info_outline,
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _estado = value;
-                      });
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _numeroCertificadoController,
-                  label: 'Número de Certificado',
-                  icon: Icons.receipt_long_outlined,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Ingrese el número de certificado';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildTextField(
-                  controller: _observacionesController,
-                  label: 'Observaciones',
-                  icon: Icons.note_outlined,
-                  maxLines: 1,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
 
           // Modos de emisión
           _buildModosEmision(),
           const SizedBox(height: 32),
 
-          // Información financiera
-          _buildSectionHeader('Información Financiera', Icons.attach_money),
-          const SizedBox(height: 16),
-
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _valorNominalController,
-                  label: 'Valor Nominal (Bs.)',
-                  icon: Icons.account_balance_wallet_outlined,
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Ingrese el valor nominal';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Ingrese un valor válido';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildTextField(
-                  controller: _valorComercialController,
-                  label: 'Valor Comercial (Bs.)',
-                  icon: Icons.payments_outlined,
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Ingrese el valor comercial';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Ingrese un valor válido';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
 
           // Información de pagos
           _buildSectionHeader('Información de Pagos', Icons.payment),
@@ -1010,7 +856,7 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
               Expanded(
                 child: _buildDropdown(
                   value: _metodoPago,
-                  items: _metodosPago,
+                  items: const ['Efectivo', 'Otro método'],
                   label: 'Método de Pago',
                   icon: Icons.payment_outlined,
                   onChanged: (value) {
@@ -1024,112 +870,10 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildDropdown(
-                  value: _modalidadPago,
-                  items: _modalidadesPago,
-                  label: 'Modalidad de Pago',
-                  icon: Icons.schedule_outlined,
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _modalidadPago = value;
-                        _actualizarCamposCuotas();
-                      });
-                    }
-                  },
-                ),
+                child: Container(), // Espaciador para mantener el layout
               ),
             ],
           ),
-          const SizedBox(height: 16),
-
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _cuotaInicialController,
-                  label: 'Cuota Inicial (Bs.)',
-                  icon: Icons.account_balance_outlined,
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Ingrese la cuota inicial';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Ingrese un valor válido';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildTextField(
-                  controller: _numeroCuotasController,
-                  label: 'Número de Cuotas',
-                  icon: Icons.format_list_numbered_outlined,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    if (value != null) {
-                      _calcularCuotas();
-                    }
-                  },
-                  validator: (value) {
-                    if (_mostrarCamposCuotas &&
-                        (value == null || value.trim().isEmpty)) {
-                      return 'Ingrese el número de cuotas';
-                    }
-                    if (_mostrarCamposCuotas &&
-                        (int.tryParse(value ?? '') ?? 0) <= 0) {
-                      return 'Ingrese un número válido';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-            ],
-          ),
-
-          if (_mostrarCamposCuotas) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    controller: _valorCuotaController,
-                    label: 'Valor de Cuota (Bs.)',
-                    icon: Icons.calculate_outlined,
-                    keyboardType: TextInputType.number,
-                    readOnly: true,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTextField(
-                    controller: TextEditingController(
-                      text: _fechaPrimerPago?.toString().split(' ')[0] ?? '',
-                    ),
-                    label: 'Fecha Primer Pago',
-                    icon: Icons.calendar_today_outlined,
-                    readOnly: true,
-                    onTap: () async {
-                      final fecha = await showDatePicker(
-                        context: context,
-                        initialDate: _fechaPrimerPago ?? DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                      );
-                      if (fecha != null) {
-                        setState(() {
-                          _fechaPrimerPago = fecha;
-                        });
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
 
           const SizedBox(height: 32),
 

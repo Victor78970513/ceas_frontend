@@ -43,6 +43,7 @@ dependencies:
   open_file: ^3.3.2
   permission_handler: ^11.3.1
   fl_chart: ^0.66.2
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:
