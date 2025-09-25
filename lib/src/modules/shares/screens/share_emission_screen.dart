@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/ceas_colors.dart';
 import '../services/qr_payment_service.dart';
 import '../widgets/qr_payment_dialog.dart';
+import '../../members/services/members_service.dart';
+import '../../members/models/socio.dart';
 
 class ShareEmissionScreen extends StatefulWidget {
   final bool isBottomSheet;
@@ -15,6 +17,7 @@ class ShareEmissionScreen extends StatefulWidget {
 
 class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _membersService = MembersService();
 
   // Controllers para los campos
   final _idSocioController = TextEditingController();
@@ -36,6 +39,11 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
   DateTime? _fechaPrimerPago;
   bool _isLoading = false;
   bool _mostrarCamposCuotas = false;
+
+  // Variables para manejo de socios
+  List<Socio> _socios = [];
+  Socio? _socioSeleccionado;
+  bool _cargandoSocios = false;
 
   // Modos de emisión predefinidos
   String _modoEmision = 'Contado';
@@ -114,20 +122,32 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
     'Pago Anticipado'
   ];
 
-  // Lista de socios simulada (en producción vendría de un provider)
-  final List<Map<String, dynamic>> _socios = [
-    {'id': 'SOC001', 'nombre': 'Juan Pérez', 'ci': '1234567'},
-    {'id': 'SOC002', 'nombre': 'María López', 'ci': '2345678'},
-    {'id': 'SOC003', 'nombre': 'Carlos Gómez', 'ci': '3456789'},
-    {'id': 'SOC004', 'nombre': 'Ana Torres', 'ci': '4567890'},
-    {'id': 'SOC005', 'nombre': 'Luis Rodríguez', 'ci': '5678901'},
-  ];
 
   @override
   void initState() {
     super.initState();
     _valorNominalController.text = '1000.00';
     _actualizarModoEmision(); // Usar el modo de emisión por defecto
+    _cargarSocios();
+  }
+
+  Future<void> _cargarSocios() async {
+    setState(() {
+      _cargandoSocios = true;
+    });
+
+    try {
+      final socios = await _membersService.getSocios();
+      setState(() {
+        _socios = socios;
+        _cargandoSocios = false;
+      });
+    } catch (e) {
+      setState(() {
+        _cargandoSocios = false;
+      });
+      print('Error cargando socios: $e');
+    }
   }
 
   @override
@@ -193,77 +213,20 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
     }
   }
 
-  void _searchSocio() {
-    showDialog(
-      context: context,
-      builder: (context) => _buildSocioSearchDialog(),
-    );
-  }
 
-  Widget _buildSocioSearchDialog() {
-    return AlertDialog(
-      title: const Text('Buscar Socio'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Buscar por nombre o CI',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                // Aquí iría la lógica de búsqueda en tiempo real
-              },
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _socios.length,
-                itemBuilder: (context, index) {
-                  final socio = _socios[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          CeasColors.primaryBlue.withValues(alpha: 0.1),
-                      child: Text(
-                        socio['nombre'][0],
-                        style: const TextStyle(
-                          color: CeasColors.primaryBlue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    title: Text(socio['nombre']),
-                    subtitle: Text('CI: ${socio['ci']}'),
-                    onTap: () {
-                      _idSocioController.text = socio['id'];
-                      _nombreSocioController.text = socio['nombre'];
-                      Navigator.of(context).pop();
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancelar'),
-        ),
-      ],
-    );
-  }
 
   Future<void> _saveAccion() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (_socioSeleccionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor seleccione un socio'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -273,7 +236,7 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
 
     try {
       // Obtener datos del formulario
-      final idSocio = int.tryParse(_idSocioController.text) ?? 123;
+      final idSocio = _socioSeleccionado!.idSocio;
       final totalPago = 5000.0; // Valor fijo por ahora
       final metodoPago = _metodoPago == 'Efectivo' ? 'efectivo' : 'transferencia_bancaria';
 
@@ -318,6 +281,90 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
         });
       }
     }
+  }
+
+  Widget _buildSocioDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: DropdownButtonFormField<Socio>(
+        value: _socioSeleccionado,
+        decoration: InputDecoration(
+          labelText: 'Seleccionar Socio',
+          labelStyle: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 16,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        hint: _cargandoSocios 
+          ? const Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 12),
+                Text('Cargando socios...'),
+              ],
+            )
+          : const Text('Seleccione un socio'),
+        items: _socios.map((socio) {
+          return DropdownMenuItem<Socio>(
+            value: socio,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  socio.nombreCompleto,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  'CI: ${socio.ciNit} | ID: ${socio.idSocio}',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        onChanged: (Socio? nuevoSocio) {
+          setState(() {
+            _socioSeleccionado = nuevoSocio;
+          });
+        },
+        validator: (value) {
+          if (value == null) {
+            return 'Por favor seleccione un socio';
+          }
+          return null;
+        },
+        isExpanded: true,
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: Colors.grey.shade600,
+        ),
+      ),
+    );
   }
 
   void _mostrarQRPago() {
@@ -786,59 +833,10 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
           _buildSectionHeader('Información del Socio', Icons.person),
           const SizedBox(height: 16),
 
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _idSocioController,
-                  label: 'ID del Socio',
-                  icon: Icons.badge_outlined,
-                  readOnly: true,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Seleccione un socio';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildTextField(
-                  controller: _nombreSocioController,
-                  label: 'Nombre del Socio',
-                  icon: Icons.person_outline,
-                  readOnly: true,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Seleccione un socio';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-            ],
-          ),
+          // Dropdown para seleccionar socio
+          _buildSocioDropdown(),
           const SizedBox(height: 16),
 
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _searchSocio,
-              icon: const Icon(Icons.search),
-              label: const Text('Buscar Socio'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: CeasColors.primaryBlue,
-                side: BorderSide(color: CeasColors.primaryBlue),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                textStyle:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
           const SizedBox(height: 32),
 
 

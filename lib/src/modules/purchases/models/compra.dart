@@ -23,17 +23,19 @@ class Compra {
 
   factory Compra.fromJson(Map<String, dynamic> json) {
     return Compra(
-      idCompra: json['id_compra'],
-      idProveedor: json['id_proveedor'],
-      fechaDeCompra: DateTime.parse(json['fecha_de_compra']),
-      montoTotal: json['monto_total'].toDouble(),
-      estado: json['estado'],
+      idCompra: json['id_compra'] ?? 0,
+      idProveedor: json['id_proveedor'] ?? 0,
+      fechaDeCompra: json['fecha_de_compra'] != null 
+          ? DateTime.parse(json['fecha_de_compra'])
+          : DateTime.now(),
+      montoTotal: (json['monto_total'] as num?)?.toDouble() ?? 0.0,
+      estado: json['estado'] ?? '',
       fechaDeEntrega: json['fecha_de_entrega'] != null
           ? DateTime.parse(json['fecha_de_entrega'])
           : null,
-      cantidadItems: json['cantidad_items'],
-      categoria: json['categoria'],
-      proveedor: json['proveedor'],
+      cantidadItems: json['cantidad_items'] ?? 0,
+      categoria: json['categoria'] ?? '',
+      proveedor: json['proveedor'] ?? '',
     );
   }
 

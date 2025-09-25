@@ -6,6 +6,7 @@ import '../models/accion.dart';
 import '../providers/accion_provider.dart';
 import 'share_emission_screen.dart';
 import 'share_certificate_screen.dart';
+import '../widgets/certificate_download_dialog.dart';
 
 class SharesListScreen extends StatefulWidget {
   const SharesListScreen({Key? key}) : super(key: key);
@@ -482,6 +483,14 @@ class _SharesListScreenState extends State<SharesListScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Botón de descarga de certificado
+                      if (accion.certificadoPdf != null && accion.certificadoPdf!.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.picture_as_pdf, size: 18),
+                          onPressed: () => _showCertificadoDialog(context, accion),
+                          tooltip: 'Descargar Certificado',
+                          color: Colors.red,
+                        ),
                       IconButton(
                         icon: const Icon(Icons.visibility, size: 18),
                         onPressed: () => _viewAccion(accion),
@@ -631,5 +640,34 @@ class _SharesListScreenState extends State<SharesListScreen> {
         backgroundColor: CeasColors.primaryBlue,
       ),
     );
+  }
+
+  void _showCertificadoDialog(BuildContext context, Accion accion) {
+    // Verificar si hay un certificado disponible para descargar
+    if (accion.certificadoPdf != null && accion.certificadoPdf!.isNotEmpty) {
+      // Mostrar diálogo de descarga
+      showDialog(
+        context: context,
+        builder: (context) => CertificateDownloadDialog(
+          fileName: accion.certificadoPdf!,
+          accionId: accion.idAccion.toString(),
+        ),
+      );
+    } else {
+      // Mostrar mensaje de que no hay certificado disponible
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.info, color: Colors.white),
+              const SizedBox(width: 8),
+              Text('No hay certificado disponible para la acción ${accion.idAccion}'),
+            ],
+          ),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 }

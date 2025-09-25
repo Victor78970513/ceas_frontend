@@ -68,8 +68,8 @@ class QrPaymentService {
     }
   }
 
-  /// Verifica el estado de un pago
-  static Future<Map<String, dynamic>> verificarPago(String referenciaTemporal) async {
+  /// Confirma el pago usando la referencia temporal
+  static Future<Map<String, dynamic>> confirmarPago(String referenciaTemporal) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
@@ -78,28 +78,30 @@ class QrPaymentService {
         throw Exception('Token de autenticación no encontrado');
       }
 
-      print('🔍 Verificando pago para referencia: $referenciaTemporal');
+      print('🔍 Confirmando pago para referencia: $referenciaTemporal');
 
-      final response = await http.get(
-        Uri.parse('$_baseUrl/acciones/verificar-pago/$referenciaTemporal'),
+      final response = await http.post(
+        Uri.parse('$_baseUrl/acciones/simular-pago/confirmar-pago?referencia_temporal=$referenciaTemporal'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
 
-      print('📡 Respuesta de verificación: ${response.statusCode}');
+      print('📡 Respuesta de confirmación: ${response.statusCode}');
+      print('📄 Cuerpo de la respuesta: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        print('✅ Estado de pago obtenido');
+        print('✅ Pago confirmado exitosamente');
         return responseData;
       } else {
-        throw Exception('Error verificando pago: ${response.statusCode} - ${response.body}');
+        throw Exception('Error confirmando pago: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('❌ Error verificando pago: $e');
+      print('❌ Error confirmando pago: $e');
       rethrow;
     }
   }
 }
+

@@ -23,14 +23,14 @@ class Proveedor {
 
   factory Proveedor.fromJson(Map<String, dynamic> json) {
     return Proveedor(
-      idProveedor: json['id_proveedor'],
-      nombreProveedor: json['nombre_proveedor'],
-      contacto: json['contacto'],
-      telefono: json['telefono'],
-      correoElectronico: json['correo_electronico'],
-      direccion: json['direccion'],
-      estado: json['estado'],
-      productosServicios: json['productos_servicios'],
+      idProveedor: json['id_proveedor'] ?? 0,
+      nombreProveedor: json['nombre_proveedor'] ?? '',
+      contacto: json['contacto'] ?? '',
+      telefono: json['telefono'] ?? '',
+      correoElectronico: json['correo_electronico'] ?? '',
+      direccion: json['direccion'] ?? '',
+      estado: json['estado'] ?? false,
+      productosServicios: json['productos_servicios'] ?? '',
     );
   }
 

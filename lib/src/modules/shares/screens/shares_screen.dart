@@ -14,6 +14,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../models/accion.dart';
 import '../providers/accion_provider.dart';
 import 'share_emission_screen.dart';
+import '../widgets/certificate_download_dialog.dart';
 
 class SharesScreen extends StatefulWidget {
   const SharesScreen({Key? key}) : super(key: key);
@@ -1184,48 +1185,32 @@ class _SharesScreenState extends State<SharesScreen> {
 
 
   void _showCertificadoDialog(BuildContext context, Accion accion) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Emitir Certificado'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Acción: ${accion.idAccion}'),
-            Text('Socio: ${accion.idSocio}'),
-            const SizedBox(height: 16),
-            const Text('Seleccione el tipo de certificado:'),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: const Icon(Icons.picture_as_pdf, color: Colors.red),
-              title: const Text('Certificado PDF'),
-              subtitle: Text(accion.certificadoPdf ?? 'No disponible'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _generarCertificadoPDF(context, accion);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.security, color: Colors.blue),
-              title: const Text('Certificado Cifrado'),
-              subtitle: Text(
-                  accion.certificadoCifrado ? 'Disponible' : 'No disponible'),
-              onTap: () {
-                Navigator.of(context).pop();
-                _generarCertificadoCifrado(context, accion);
-              },
-            ),
-          ],
+    // Verificar si hay un certificado disponible para descargar
+    if (accion.certificadoPdf != null && accion.certificadoPdf!.isNotEmpty) {
+      // Mostrar diálogo de descarga
+      showDialog(
+        context: context,
+        builder: (context) => CertificateDownloadDialog(
+          fileName: accion.certificadoPdf!,
+          accionId: accion.idAccion.toString(),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
+      );
+    } else {
+      // Mostrar mensaje de que no hay certificado disponible
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.info, color: Colors.white),
+              const SizedBox(width: 8),
+              Text('No hay certificado disponible para la acción ${accion.idAccion}'),
+            ],
           ),
-        ],
-      ),
-    );
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   Future<void> _generarCertificadoPDF(
