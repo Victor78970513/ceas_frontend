@@ -10,30 +10,43 @@ class PersonalService {
   static Future<List<Personal>> getPersonal(String token) async {
     try {
       print('PersonalService - Iniciando llamada HTTP a $baseUrl/personal/');
-      print('PersonalService - Token: ${token.substring(0, 20)}...');
+      print('PersonalService - Token: ${token.isNotEmpty ? token.substring(0, 20) + "..." : "VACÍO"}');
 
       final response = await http.get(
         Uri.parse('$baseUrl/personal/'),
         headers: {
-          'Authorization': 'Bearer $token',
+          if (token.isNotEmpty) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
       ).timeout(const Duration(seconds: 10));
 
       print('PersonalService - Response status: ${response.statusCode}');
-      print(
-          'PersonalService - Response body: ${response.body.substring(0, response.body.length > 100 ? 100 : response.body.length)}...');
+      print('PersonalService - Response body length: ${response.body.length}');
+      if (response.body.isNotEmpty) {
+        print('PersonalService - Response body preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
+      } else {
+        print('PersonalService - Response body is EMPTY');
+      }
 
       if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          print('PersonalService - Response body is empty, returning empty list');
+          return [];
+        }
+        
         final List<dynamic> jsonData = json.decode(response.body);
-        final personal =
-            jsonData.map((json) => Personal.fromJson(json)).toList();
-        print('PersonalService - Personal parseado: ${personal.length}');
+        print('PersonalService - JSON data length: ${jsonData.length}');
+        
+        final personal = jsonData.map((json) {
+          print('PersonalService - Parsing personal item: $json');
+          return Personal.fromJson(json);
+        }).toList();
+        
+        print('PersonalService - Personal parseado exitosamente: ${personal.length}');
         return personal;
       } else {
-        print(
-            'PersonalService - Error HTTP: ${response.statusCode} - ${response.body}');
-        throw Exception('Error HTTP: ${response.statusCode}');
+        print('PersonalService - Error HTTP: ${response.statusCode} - ${response.body}');
+        throw Exception('Error HTTP: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       print('PersonalService - Excepción: $e');
@@ -44,21 +57,45 @@ class PersonalService {
   /// Obtiene la lista de empleados desde el backend
   static Future<List<Empleado>> getEmpleados(String token) async {
     try {
+      print('PersonalService - Iniciando llamada HTTP a $baseUrl/personal/ (empleados)');
+      print('PersonalService - Token: ${token.isNotEmpty ? token.substring(0, 20) + "..." : "VACÍO"}');
+
       final response = await http.get(
-        Uri.parse('$baseUrl/empleados/'),
+        Uri.parse('$baseUrl/personal/'), // El endpoint /personal/ retorna empleados
         headers: {
-          'Authorization': 'Bearer $token',
+          if (token.isNotEmpty) 'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
       ).timeout(const Duration(seconds: 10));
 
+      print('PersonalService - Response status: ${response.statusCode}');
+      print('PersonalService - Response body length: ${response.body.length}');
+      if (response.body.isNotEmpty) {
+        print('PersonalService - Response body preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
+      }
+
       if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          print('PersonalService - Response body is empty, returning empty list');
+          return [];
+        }
+        
         final List<dynamic> jsonData = json.decode(response.body);
-        return jsonData.map((json) => Empleado.fromJson(json)).toList();
+        print('PersonalService - JSON data length: ${jsonData.length}');
+        
+        final empleados = jsonData.map((json) {
+          print('PersonalService - Parsing empleado: ${json['nombre_completo']}');
+          return Empleado.fromJson(json);
+        }).toList();
+        
+        print('PersonalService - Empleados parseados exitosamente: ${empleados.length}');
+        return empleados;
       } else {
-        throw Exception('Error HTTP: ${response.statusCode}');
+        print('PersonalService - Error HTTP: ${response.statusCode} - ${response.body}');
+        throw Exception('Error HTTP: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
+      print('PersonalService - Excepción: $e');
       throw Exception('Error al obtener empleados: $e');
     }
   }

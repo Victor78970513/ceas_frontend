@@ -19,13 +19,13 @@ class BiPersonalMetricasAsistencia {
 
   factory BiPersonalMetricasAsistencia.fromJson(Map<String, dynamic> json) {
     return BiPersonalMetricasAsistencia(
-      totalRegistros: json['total_registros'] as int,
-      asistenciasCompletas: json['asistencias_completas'] as int,
-      tardanzas: json['tardanzas'] as int,
-      ausencias: json['ausencias'] as int,
-      porcentajeAsistencia: (json['porcentaje_asistencia'] as num).toDouble(),
+      totalRegistros: json['total_registros'] ?? 0,
+      asistenciasCompletas: json['asistencias_completas'] ?? 0,
+      tardanzas: json['tardanzas'] ?? 0,
+      ausencias: json['ausencias'] ?? 0,
+      porcentajeAsistencia: (json['porcentaje_asistencia'] as num?)?.toDouble() ?? 0.0,
       promedioHorasTrabajadas:
-          (json['promedio_horas_trabajadas'] as num).toDouble(),
+          (json['promedio_horas_trabajadas'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

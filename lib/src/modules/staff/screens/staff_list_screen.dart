@@ -28,7 +28,9 @@ class _StaffListScreenState extends State<StaffListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       if (authProvider.isAuthenticated) {
-        Provider.of<PersonalProvider>(context, listen: false).loadPersonal();
+        Provider.of<PersonalProvider>(context, listen: false).loadPersonal(
+          authProvider.user!.accessToken,
+        );
         Provider.of<AsistenciaProvider>(context, listen: false).loadAsistencia(
           authProvider.user!.accessToken,
         );
@@ -319,8 +321,7 @@ class _StaffListScreenState extends State<StaffListScreen> {
                 ),
                 child: Row(
                   children: [
-                    Expanded(flex: 2, child: _buildHeaderCell('ID')),
-                    Expanded(flex: 4, child: _buildHeaderCell('Empleado')),
+                    Expanded(flex: 5, child: _buildHeaderCell('Empleado')),
                     Expanded(flex: 3, child: _buildHeaderCell('Cargo')),
                     Expanded(flex: 3, child: _buildHeaderCell('Departamento')),
                     Expanded(flex: 2, child: _buildHeaderCell('F. Ingreso')),
@@ -348,10 +349,7 @@ class _StaffListScreenState extends State<StaffListScreen> {
                     child: Row(
                       children: [
                         Expanded(
-                            flex: 2,
-                            child: _buildCell(empleado.idEmpleado.toString())),
-                        Expanded(
-                            flex: 4,
+                            flex: 5,
                             child: _buildEmpleadoCell(empleado.nombreCompleto)),
                         Expanded(flex: 3, child: _buildCell(empleado.cargo)),
                         Expanded(
@@ -632,16 +630,24 @@ class _StaffListScreenState extends State<StaffListScreen> {
   }
 
   Widget _buildEmpleadoCell(String nombreCompleto) {
+    // Obtener las 2 primeras letras del nombre completo
+    String iniciales = '';
+    if (nombreCompleto.isNotEmpty) {
+      String nombreLimpio = nombreCompleto.trim();
+      if (nombreLimpio.length >= 2) {
+        iniciales = nombreLimpio.substring(0, 2).toUpperCase();
+      } else {
+        iniciales = nombreLimpio.toUpperCase();
+      }
+    }
+    
     return Row(
       children: [
         CircleAvatar(
           radius: 16,
           backgroundColor: CeasColors.primaryBlue.withOpacity(0.1),
           child: Text(
-            nombreCompleto
-                .split(' ')
-                .map((n) => n.isNotEmpty ? n[0] : '')
-                .join(''),
+            iniciales,
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,

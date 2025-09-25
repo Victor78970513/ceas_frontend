@@ -17,11 +17,11 @@ class BiPersonalAsistenciaDepartamento {
 
   factory BiPersonalAsistenciaDepartamento.fromJson(Map<String, dynamic> json) {
     return BiPersonalAsistenciaDepartamento(
-      departamento: json['departamento'] as String,
-      totalEmpleados: json['total_empleados'] as int,
-      promedioAsistencia: (json['promedio_asistencia'] as num).toDouble(),
-      totalTardanzas: json['total_tardanzas'] as int,
-      totalAusencias: json['total_ausencias'] as int,
+      departamento: json['departamento'] ?? '',
+      totalEmpleados: json['total_empleados'] ?? 0,
+      promedioAsistencia: (json['promedio_asistencia'] as num?)?.toDouble() ?? 0.0,
+      totalTardanzas: json['total_tardanzas'] ?? 0,
+      totalAusencias: json['total_ausencias'] ?? 0,
     );
   }
 

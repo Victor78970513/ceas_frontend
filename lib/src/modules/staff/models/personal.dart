@@ -29,17 +29,19 @@ class Personal {
 
   factory Personal.fromJson(Map<String, dynamic> json) {
     return Personal(
-      idPersonal: json['id_personal'],
-      idClub: json['id_club'],
-      nombres: json['nombres'],
-      apellidos: json['apellidos'],
-      cargo: json['cargo'],
-      fechaIngreso: DateTime.parse(json['fecha_ingreso']),
-      salario: json['salario'].toDouble(),
-      correo: json['correo'],
-      departamento: json['departamento'],
-      estado: json['estado'],
-      nombreCargo: json['nombre_cargo'],
+      idPersonal: json['id_personal'] ?? 0,
+      idClub: json['id_club'] ?? 0,
+      nombres: json['nombres'] ?? '',
+      apellidos: json['apellidos'] ?? '',
+      cargo: json['cargo'] ?? 0,
+      fechaIngreso: json['fecha_ingreso'] != null 
+          ? DateTime.parse(json['fecha_ingreso'])
+          : DateTime.now(),
+      salario: (json['salario'] as num?)?.toDouble() ?? 0.0,
+      correo: json['correo'] ?? '',
+      departamento: json['departamento'] ?? '',
+      estado: json['estado'] ?? false,
+      nombreCargo: json['nombre_cargo'] ?? '',
     );
   }
 

@@ -86,11 +86,11 @@ class BiPersonalTendenciaMensual {
 
   factory BiPersonalTendenciaMensual.fromJson(Map<String, dynamic> json) {
     return BiPersonalTendenciaMensual(
-      totalRegistros: json['total_registros'] as int,
-      asistencias: json['asistencias'] as int,
-      tardanzas: json['tardanzas'] as int,
-      ausencias: json['ausencias'] as int,
-      porcentajeAsistencia: (json['porcentaje_asistencia'] as num).toDouble(),
+      totalRegistros: json['total_registros'] ?? 0,
+      asistencias: json['asistencias'] ?? 0,
+      tardanzas: json['tardanzas'] ?? 0,
+      ausencias: json['ausencias'] ?? 0,
+      porcentajeAsistencia: (json['porcentaje_asistencia'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

@@ -17,12 +17,12 @@ class BiPersonalMetricasGenerales {
 
   factory BiPersonalMetricasGenerales.fromJson(Map<String, dynamic> json) {
     return BiPersonalMetricasGenerales(
-      totalPersonal: json['total_personal'] as int,
-      personalActivo: json['personal_activo'] as int,
-      personalInactivo: json['personal_inactivo'] as int,
+      totalPersonal: json['total_personal'] ?? 0,
+      personalActivo: json['personal_activo'] ?? 0,
+      personalInactivo: json['personal_inactivo'] ?? 0,
       personalPorDepartamento:
-          Map<String, int>.from(json['personal_por_departamento']),
-      personalPorCargo: Map<String, int>.from(json['personal_por_cargo']),
+          Map<String, int>.from(json['personal_por_departamento'] ?? {}),
+      personalPorCargo: Map<String, int>.from(json['personal_por_cargo'] ?? {}),
     );
   }
 

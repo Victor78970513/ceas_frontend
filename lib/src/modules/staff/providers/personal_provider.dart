@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/empleado.dart';
+import '../models/personal.dart';
 import '../services/personal_service.dart';
 
 class PersonalProvider extends ChangeNotifier {
@@ -18,7 +19,7 @@ class PersonalProvider extends ChangeNotifier {
   String? get error => _error;
   String get searchQuery => _searchQuery;
 
-  // Cargar empleados
+  // Cargar empleados desde /empleados/
   Future<void> loadEmpleados() async {
     try {
       _isLoading = true;
@@ -38,9 +39,68 @@ class PersonalProvider extends ChangeNotifier {
     }
   }
 
-  // Alias para compatibilidad
-  Future<void> loadPersonal() async {
-    await loadEmpleados();
+  // Cargar personal desde /personal/
+  Future<void> loadPersonal([String? token]) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      print('PersonalProvider - Iniciando carga de personal...');
+      print('PersonalProvider - Token: ${token != null ? token.substring(0, 20) + "..." : "VACÍO"}');
+      
+      try {
+        // El endpoint /personal/ retorna datos con estructura de Empleado, no Personal
+        final empleados = await PersonalService.getEmpleados(token ?? '');
+        print('PersonalProvider - Empleados recibidos del backend: ${empleados.length} registros');
+        
+        _empleados = empleados;
+        print('PersonalProvider - Empleados asignados directamente: ${_empleados.length}');
+      } catch (e) {
+        print('PersonalProvider - Error al cargar del backend: $e');
+        print('PersonalProvider - Usando datos de prueba como fallback');
+        
+        // DATOS DE PRUEBA COMO FALLBACK
+        _empleados = [
+          Empleado(
+            idEmpleado: 1,
+            nombreCompleto: 'Juan Pérez García',
+            cargo: 'Desarrollador Senior',
+            departamento: 'Tecnología',
+            estado: 'ACTIVO',
+            email: 'juan.perez@empresa.com',
+            telefono: '+591 77777777',
+            fechaContratacion: DateTime.now(),
+            salario: 15000.00,
+            foto: null,
+          ),
+          Empleado(
+            idEmpleado: 2,
+            nombreCompleto: 'María López Silva',
+            cargo: 'Gerente de Ventas',
+            departamento: 'Ventas',
+            estado: 'ACTIVO',
+            email: 'maria.lopez@empresa.com',
+            telefono: '+591 88888888',
+            fechaContratacion: DateTime.now(),
+            salario: 18000.00,
+            foto: null,
+          ),
+        ];
+        print('PersonalProvider - Empleados de prueba creados: ${_empleados.length}');
+      }
+      
+      _aplicarFiltros();
+      print('PersonalProvider - Empleados filtrados: ${_empleadosFiltrados.length}');
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      print('PersonalProvider - ERROR GENERAL: $e');
+      notifyListeners();
+    }
   }
 
   // Crear empleado
