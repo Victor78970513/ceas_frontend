@@ -9,6 +9,7 @@ import '../../modules/users/screens/users_security_screen.dart';
 import '../../modules/settings/screens/settings_screen.dart';
 import '../../modules/purchases/screens/purchases_suppliers_screen.dart';
 import '../../modules/bi/screens/bi_dashboard_screen.dart';
+import '../../modules/shares/screens/socio_acciones_screen.dart';
 
 class CeasMainLayout extends StatefulWidget {
   final String initialRoute;
@@ -48,6 +49,8 @@ class _CeasMainLayoutState extends State<CeasMainLayout> {
         return const SettingsScreen();
       case '/bi':
         return const BiDashboardScreen();
+      case '/socio-acciones':
+        return const SocioAccionesScreen();
       default:
         return const Center(child: Text('Pantalla no encontrada'));
     }

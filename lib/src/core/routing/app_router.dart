@@ -13,6 +13,7 @@ import '../../modules/shares/screens/shares_list_screen.dart';
 import '../../modules/shares/screens/share_sale_form_screen.dart';
 import '../../modules/shares/screens/share_certificate_screen.dart';
 import '../../modules/shares/screens/share_emission_screen.dart';
+import '../../modules/shares/screens/socio_acciones_screen.dart';
 // Pagos
 import '../../modules/payments/screens/payments_list_screen.dart';
 import '../../modules/payments/screens/payment_form_screen.dart';
@@ -62,6 +63,8 @@ class AppRouter {
             builder: (_) => const ShareCertificateScreen());
       case '/accion_emision':
         return MaterialPageRoute(builder: (_) => const ShareEmissionScreen());
+      case '/socio-acciones':
+        return MaterialPageRoute(builder: (_) => const SocioAccionesScreen());
       case '/pagos':
         return MaterialPageRoute(builder: (_) => const PaymentsListScreen());
       case '/pago_form':

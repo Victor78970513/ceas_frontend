@@ -38,9 +38,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (success && mounted) {
+      final isSocio = authProvider.user?.rol == 4;
+      
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => const CeasMainLayout(initialRoute: '/dashboard'),
+          builder: (_) => CeasMainLayout(
+            initialRoute: isSocio ? '/socio-acciones' : '/dashboard',
+          ),
         ),
       );
     }

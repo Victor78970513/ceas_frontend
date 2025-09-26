@@ -42,8 +42,11 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
 
   // Variables para manejo de socios
   List<Socio> _socios = [];
+  List<Socio> _sociosFiltrados = [];
   Socio? _socioSeleccionado;
   bool _cargandoSocios = false;
+  final _busquedaSocioController = TextEditingController();
+  bool _mostrarSugerencias = false;
 
   // Modos de emisión predefinidos
   String _modoEmision = 'Contado';
@@ -129,6 +132,43 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
     _valorNominalController.text = '1000.00';
     _actualizarModoEmision(); // Usar el modo de emisión por defecto
     _cargarSocios();
+    _busquedaSocioController.addListener(_filtrarSocios);
+  }
+
+  @override
+  void dispose() {
+    _busquedaSocioController.dispose();
+    _idSocioController.dispose();
+    _nombreSocioController.dispose();
+    _valorNominalController.dispose();
+    _valorComercialController.dispose();
+    _numeroCertificadoController.dispose();
+    _observacionesController.dispose();
+    _cuotaInicialController.dispose();
+    _numeroCuotasController.dispose();
+    _valorCuotaController.dispose();
+    super.dispose();
+  }
+
+  void _filtrarSocios() {
+    final query = _busquedaSocioController.text.toLowerCase().trim();
+    
+    if (query.isEmpty) {
+      setState(() {
+        _sociosFiltrados = [];
+        _mostrarSugerencias = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _sociosFiltrados = _socios.where((socio) {
+        final nombre = socio.nombreCompleto.toLowerCase();
+        final ci = socio.ciNit.toLowerCase();
+        return nombre.contains(query) || ci.contains(query);
+      }).toList();
+      _mostrarSugerencias = _sociosFiltrados.isNotEmpty;
+    });
   }
 
   Future<void> _cargarSocios() async {
@@ -150,19 +190,6 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _idSocioController.dispose();
-    _nombreSocioController.dispose();
-    _valorNominalController.dispose();
-    _valorComercialController.dispose();
-    _numeroCertificadoController.dispose();
-    _observacionesController.dispose();
-    _cuotaInicialController.dispose();
-    _numeroCuotasController.dispose();
-    _valorCuotaController.dispose();
-    super.dispose();
-  }
 
   void _actualizarCamposCuotas() {
     setState(() {
@@ -284,86 +311,206 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
   }
 
   Widget _buildSocioDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: DropdownButtonFormField<Socio>(
-        value: _socioSeleccionado,
-        decoration: InputDecoration(
-          labelText: 'Seleccionar Socio',
-          labelStyle: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 16,
+          child: TextFormField(
+            controller: _busquedaSocioController,
+            decoration: InputDecoration(
+              labelText: 'Buscar Socio',
+              hintText: 'Escriba el nombre o CI del socio',
+              prefixIcon: const Icon(Icons.search, color: CeasColors.primaryBlue),
+              suffixIcon: _socioSeleccionado != null
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      onPressed: () {
+                        setState(() {
+                          _socioSeleccionado = null;
+                          _busquedaSocioController.clear();
+                          _mostrarSugerencias = false;
+                        });
+                      },
+                    )
+                  : _cargandoSocios
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: Padding(
+                            padding: EdgeInsets.all(12),
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : null,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
+            onTap: () {
+              if (_busquedaSocioController.text.isNotEmpty) {
+                setState(() {
+                  _mostrarSugerencias = true;
+                });
+              }
+            },
+            onChanged: (value) {
+              _filtrarSocios();
+            },
+            validator: (value) {
+              if (_socioSeleccionado == null) {
+                return 'Por favor seleccione un socio';
+              }
+              return null;
+            },
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
-        hint: _cargandoSocios 
-          ? const Row(
+        
+        // Mostrar socio seleccionado
+        if (_socioSeleccionado != null) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: CeasColors.primaryBlue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: CeasColors.primaryBlue.withOpacity(0.2),
+              ),
+            ),
+            child: Row(
               children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                Icon(
+                  Icons.person,
+                  color: CeasColors.primaryBlue,
+                  size: 20,
                 ),
-                SizedBox(width: 12),
-                Text('Cargando socios...'),
-              ],
-            )
-          : const Text('Seleccione un socio'),
-        items: _socios.map((socio) {
-          return DropdownMenuItem<Socio>(
-            value: socio,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  socio.nombreCompleto,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  'CI: ${socio.ciNit} | ID: ${socio.idSocio}',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 14,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _socioSeleccionado!.nombreCompleto,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        'CI: ${_socioSeleccionado!.ciNit} | ID: ${_socioSeleccionado!.idSocio}',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          );
-        }).toList(),
-        onChanged: (Socio? nuevoSocio) {
-          setState(() {
-            _socioSeleccionado = nuevoSocio;
-          });
-        },
-        validator: (value) {
-          if (value == null) {
-            return 'Por favor seleccione un socio';
-          }
-          return null;
-        },
-        isExpanded: true,
-        icon: Icon(
-          Icons.arrow_drop_down,
-          color: Colors.grey.shade600,
-        ),
-      ),
+          ),
+        ],
+        
+        // Mostrar sugerencias
+        if (_mostrarSugerencias && _sociosFiltrados.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _sociosFiltrados.length,
+              itemBuilder: (context, index) {
+                final socio = _sociosFiltrados[index];
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      _socioSeleccionado = socio;
+                      _busquedaSocioController.text = socio.nombreCompleto;
+                      _mostrarSugerencias = false;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: index < _sociosFiltrados.length - 1
+                          ? Border(
+                              bottom: BorderSide(
+                                color: Colors.grey.shade200,
+                                width: 1,
+                              ),
+                            )
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: CeasColors.primaryBlue.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Icon(
+                            Icons.person_outline,
+                            color: CeasColors.primaryBlue,
+                            size: 16,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                socio.nombreCompleto,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              Text(
+                                'CI: ${socio.ciNit} | ID: ${socio.idSocio}',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ],
     );
   }
 

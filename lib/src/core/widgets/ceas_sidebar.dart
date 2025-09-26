@@ -74,30 +74,31 @@ class CeasSidebar extends StatelessWidget {
               const Divider(color: Colors.white24, thickness: 1, height: 0),
               // Navegación principal
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.only(top: 16, left: 0, right: 0),
-                  children: [
-                    _sidebarItem(context, 'Panel principal', Icons.dashboard,
-                        '/dashboard'),
-                    _sidebarItem(context, 'Socios', Icons.groups, '/socios'),
-                    _sidebarItem(context, 'Acciones',
-                        Icons.assignment_turned_in, '/acciones'),
-                    _sidebarItem(context, 'Finanzas', Icons.account_balance,
-                        '/finanzas_reportes'),
-                    _sidebarItem(context, 'Business Intelligence',
-                        Icons.analytics, '/bi'),
-                    _sidebarItem(context, 'Compras y Proveedores',
-                        Icons.shopping_cart, '/compras_proveedores'),
-                    _sidebarItem(
-                        context, 'Recursos humanos', Icons.people, '/personal'),
-                    const SizedBox(height: 12),
-                    const Divider(
-                        color: Colors.white24, thickness: 1, height: 0),
-                    _sidebarItem(context, 'Usuarios y seguridad',
-                        Icons.security, '/usuarios'),
-                    _sidebarItem(context, 'Configuración', Icons.settings,
-                        '/configuracion'),
-                  ],
+                child: Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) {
+                    final isSocio = authProvider.user?.rol == 4;
+                    
+                    return ListView(
+                      padding: const EdgeInsets.only(top: 16, left: 0, right: 0),
+                      children: isSocio ? [
+                        // Menú para socios
+                        _sidebarItem(context, 'Mis Acciones', Icons.assignment_turned_in, '/socio-acciones'),
+                      ] : [
+                        // Menú para administradores
+                        _sidebarItem(context, 'Panel principal', Icons.dashboard, '/dashboard'),
+                        _sidebarItem(context, 'Socios', Icons.groups, '/socios'),
+                        _sidebarItem(context, 'Acciones', Icons.assignment_turned_in, '/acciones'),
+                        _sidebarItem(context, 'Finanzas', Icons.account_balance, '/finanzas_reportes'),
+                        _sidebarItem(context, 'Business Intelligence', Icons.analytics, '/bi'),
+                        _sidebarItem(context, 'Compras y Proveedores', Icons.shopping_cart, '/compras_proveedores'),
+                        _sidebarItem(context, 'Recursos humanos', Icons.people, '/personal'),
+                        const SizedBox(height: 12),
+                        const Divider(color: Colors.white24, thickness: 1, height: 0),
+                        _sidebarItem(context, 'Usuarios y seguridad', Icons.security, '/usuarios'),
+                        _sidebarItem(context, 'Configuración', Icons.settings, '/configuracion'),
+                      ],
+                    );
+                  },
                 ),
               ),
               // Información del usuario y botón de cerrar sesión
