@@ -3,12 +3,9 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/ceas_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/bi_provider.dart';
-import '../widgets/bi_fl_charts.dart';
 import '../widgets/bi_movimientos_chart.dart';
 import '../widgets/bi_personal_charts.dart';
-import '../models/bi_kpi.dart';
-import '../models/bi_top_club.dart';
-import '../models/bi_top_socio.dart';
+import '../widgets/bi_premium_charts.dart';
 
 class BiDashboardScreen extends StatefulWidget {
   const BiDashboardScreen({Key? key}) : super(key: key);
@@ -17,18 +14,37 @@ class BiDashboardScreen extends StatefulWidget {
   State<BiDashboardScreen> createState() => _BiDashboardScreenState();
 }
 
-class _BiDashboardScreenState extends State<BiDashboardScreen> {
+class _BiDashboardScreenState extends State<BiDashboardScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       if (authProvider.isAuthenticated) {
         Provider.of<BiProvider>(context, listen: false).loadAllData(
           authProvider.user!.accessToken,
         );
+        _animationController.forward();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,144 +55,59 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
         builder: (context, biProvider, child) {
           return CustomScrollView(
             slivers: [
-              // Header principal
-              // SliverAppBar(
-              //   expandedHeight: 120,
-              //   floating: false,
-              //   pinned: true,
-              //   backgroundColor: CeasColors.primaryBlue,
-              //   flexibleSpace: FlexibleSpaceBar(
-              //     title: const Text(
-              //       'Business Intelligence - Dashboard Avanzado',
-              //       style: TextStyle(
-              //         color: Colors.white,
-              //         fontWeight: FontWeight.bold,
-              //       ),
-              //     ),
-              //     background: Container(
-              //       decoration: BoxDecoration(
-              //         gradient: LinearGradient(
-              //           begin: Alignment.topLeft,
-              //           end: Alignment.bottomRight,
-              //           colors: [
-              //             CeasColors.primaryBlue,
-              //             CeasColors.primaryBlue.withOpacity(0.8),
-              //           ],
-              //         ),
-              //       ),
-              //       child: Stack(
-              //         children: [
-              //           Positioned(
-              //             right: -50,
-              //             top: -50,
-              //             child: Container(
-              //               width: 200,
-              //               height: 200,
-              //               decoration: BoxDecoration(
-              //                 color: Colors.white.withOpacity(0.1),
-              //                 shape: BoxShape.circle,
-              //               ),
-              //             ),
-              //           ),
-              //           Positioned(
-              //             left: -30,
-              //             bottom: -30,
-              //             child: Container(
-              //               width: 150,
-              //               height: 150,
-              //               decoration: BoxDecoration(
-              //                 color: Colors.white.withOpacity(0.05),
-              //                 shape: BoxShape.circle,
-              //               ),
-              //             ),
-              //           ),
-              //         ],
-              //       ),
-              //     ),
-              //   ),
-              //   actions: [
-              //     IconButton(
-              //       onPressed: () {
-              //         final authProvider =
-              //             Provider.of<AuthProvider>(context, listen: false);
-              //         if (authProvider.isAuthenticated) {
-              //           biProvider.refresh(authProvider.user!.accessToken);
-              //         }
-              //       },
-              //       icon:
-              //           const Icon(Icons.refresh_rounded, color: Colors.white),
-              //       tooltip: 'Actualizar dashboard',
-              //     ),
-              //   ],
-              // ),
-
-              // Contenido del dashboard BI
+              // Header principal con gradiente impresionante
+              _buildHeroHeader(biProvider),
+              
+              // Contenido del dashboard
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Información del período y estado general
-                      if (biProvider.hasData) ...[
-                        _buildPeriodoHeader(biProvider),
-                        const SizedBox(height: 24),
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        if (biProvider.isLoading)
+                          _buildLoadingState()
+                        else if (biProvider.error != null)
+                          _buildErrorState(biProvider.error!)
+                        else if (biProvider.hasData) ...[
+                          // KPIs principales con diseño premium
+                          _buildPremiumKpis(biProvider),
+                          const SizedBox(height: 24),
+
+                          // Métricas ejecutivas (métricas clave del sistema)
+                          _buildPremiumMetrics(biProvider),
+                          const SizedBox(height: 24),
+
+                          // Métricas financieras destacadas
+                          _buildFinancialMetrics(biProvider),
+                          const SizedBox(height: 24),
+
+                          // Gráficos premium
+                          _buildPremiumCharts(biProvider),
+                          const SizedBox(height: 32),
+
+                          // Análisis de rendimiento
+                          _buildPerformanceAnalysis(biProvider),
+                          const SizedBox(height: 32),
+
+                          // Gráficos interactivos
+                          _buildInteractiveCharts(biProvider),
+                          const SizedBox(height: 32),
+
+                          // Top performers
+                          _buildTopPerformers(biProvider),
+                          const SizedBox(height: 32),
+
+                          // Personal y asistencia
+                          _buildPersonalInsights(biProvider),
+                          const SizedBox(height: 32),
+
+                          // Alertas y notificaciones
+                          _buildAlertsSection(biProvider),
+                        ],
                       ],
-
-                      // Estado de carga o error
-                      if (biProvider.isLoading)
-                        const Center(
-                          child: Column(
-                            children: [
-                              CircularProgressIndicator(),
-                              SizedBox(height: 16),
-                              Text('Cargando Business Intelligence...'),
-                            ],
-                          ),
-                        )
-                      else if (biProvider.error != null)
-                        _buildErrorCard(biProvider.error!)
-                      else if (biProvider.hasData) ...[
-                        // Métricas principales
-                        _buildMetricasPrincipales(biProvider),
-                        const SizedBox(height: 24),
-
-                        // Gráficas de Personal del CEAS
-                        _buildPersonalSection(biProvider),
-                        const SizedBox(height: 24),
-
-                        // Alertas críticas (más arriba para mayor visibilidad)
-                        _buildAlertasCriticas(biProvider),
-                        const SizedBox(height: 24),
-
-                        // Gráfico de movimientos financieros
-                        _buildGraficoMovimientosFinancieros(biProvider),
-                        const SizedBox(height: 24),
-
-                        // Gráfico de barras para métricas financieras
-                        _buildGraficoMetricasFinancieras(biProvider),
-                        const SizedBox(height: 24),
-
-                        // KPIs principales
-                        _buildKpisPrincipales(biProvider),
-                        const SizedBox(height: 24),
-
-                        // Gráfico de líneas para KPIs
-                        _buildGraficoLineas(biProvider),
-                        const SizedBox(height: 24),
-
-                        // Gráficos de distribución
-                        _buildGraficosDistribucion(biProvider),
-                        const SizedBox(height: 24),
-
-                        // Top clubes y socios con gráficos
-                        _buildTopRankings(biProvider),
-                        const SizedBox(height: 24),
-
-                        // Top Socios
-                        _buildTopSocios(biProvider),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -187,321 +118,325 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
     );
   }
 
-  Widget _buildPeriodoHeader(BiProvider provider) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: CeasColors.primaryBlue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.analytics,
-              color: CeasColors.primaryBlue,
-              size: 24,
+  Widget _buildHeroHeader(BiProvider provider) {
+    return SliverAppBar(
+      expandedHeight: 100,
+      floating: false,
+      pinned: true,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey.shade200,
+                width: 1,
+              ),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 50, 24, 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  'Período: ${provider.periodoActual}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.grey.shade800,
+                        Colors.grey.shade600,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.analytics_rounded,
+                    color: Colors.white,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Última actualización: ${_formatDateTime(provider.lastUpdated)}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'Business Intelligence',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black87,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+                if (provider.hasData)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Colors.green.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Live',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(width: 16),
+                IconButton(
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    final authProvider =
+                        Provider.of<AuthProvider>(context, listen: false);
+                    if (authProvider.isAuthenticated) {
+                      provider.loadAllData(
+                        authProvider.user!.accessToken,
+                      );
+                    }
+                  },
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.refresh_rounded,
+                      color: Colors.grey.shade700,
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: provider.estadoGeneralColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: provider.estadoGeneralColor),
-            ),
-            child: Text(
-              provider.estadoGeneral,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: provider.estadoGeneralColor,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildResumenRapido(BiProvider provider) {
-    final resumen = provider.resumenRapido;
-    if (resumen == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child:
-                    const Icon(Icons.summarize, color: Colors.blue, size: 20),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Resumen Rápido',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                  child: _buildResumenCard('Balance Neto',
-                      resumen.balanceNetoFormatted, resumen.balanceNetoColor)),
-              const SizedBox(width: 16),
-              Expanded(
-                  child: _buildResumenCard(
-                      'Margen',
-                      resumen.margenRentabilidadFormatted,
-                      resumen.margenRentabilidadColor)),
-              const SizedBox(width: 16),
-              Expanded(
-                  child: _buildResumenCard(
-                      'Socios', '${resumen.totalSocios}', Colors.blue)),
-              const SizedBox(width: 16),
-              Expanded(
-                  child: _buildResumenCard(
-                      'Retención',
-                      resumen.tasaRetencionFormatted,
-                      resumen.tasaRetencionColor)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResumenCard(String title, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetricasPrincipales(BiProvider provider) {
+  Widget _buildPremiumKpis(BiProvider provider) {
     final metricasFin = provider.metricasFinancieras;
     final metricasAdmin = provider.metricasAdministrativas;
 
-    if (metricasFin == null || metricasAdmin == null)
+    if (metricasFin == null && metricasAdmin == null) {
       return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Métricas Principales',
+          'KPIs Ejecutivos',
           style: TextStyle(
             fontSize: 24,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
             color: Colors.black87,
+            letterSpacing: -0.5,
           ),
         ),
         const SizedBox(height: 20),
         Row(
           children: [
-            Expanded(
-                child: _buildMetricaCard(
-              'Ingresos Totales',
-              metricasFin.ingresosFormatted,
-              Icons.trending_up,
-              Colors.green,
-            )),
-            const SizedBox(width: 16),
-            Expanded(
-                child: _buildMetricaCard(
-              'Egresos Totales',
-              metricasFin.egresosFormatted,
-              Icons.trending_down,
-              Colors.red,
-            )),
-            const SizedBox(width: 16),
-            Expanded(
-                child: _buildMetricaCard(
-              'Balance Neto',
-              metricasFin.balanceFormatted,
-              Icons.account_balance_wallet,
-              metricasFin.balanceColor,
-            )),
-            const SizedBox(width: 16),
-            Expanded(
-                child: _buildMetricaCard(
-              'Margen Rentabilidad',
-              metricasFin.margenFormatted,
-              Icons.percent,
-              metricasFin.margenColor,
-            )),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-                child: _buildMetricaCard(
-              'Total Socios',
-              '${metricasAdmin.totalSocios}',
-              Icons.people,
-              CeasColors.primaryBlue,
-            )),
-            const SizedBox(width: 16),
-            Expanded(
-                child: _buildMetricaCard(
-              'Socios Activos',
-              '${metricasAdmin.sociosActivos}',
-              Icons.check_circle,
-              Colors.green,
-            )),
-            const SizedBox(width: 16),
-            Expanded(
-                child: _buildMetricaCard(
-              'Tasa Retención',
-              metricasAdmin.tasaRetencionFormatted,
-              Icons.loyalty,
-              metricasAdmin.tasaRetencionColor,
-            )),
-            const SizedBox(width: 16),
-            Expanded(
-                child: _buildMetricaCard(
-              'Eficiencia Operativa',
-              metricasAdmin.eficienciaOperativaFormatted,
-              Icons.speed,
-              metricasAdmin.eficienciaOperativaColor,
-            )),
+            if (metricasFin != null) ...[
+              Expanded(
+                child: _buildPremiumKpiCard(
+                  'Balance Neto',
+                  'Bs. ${metricasFin.balanceNeto.toStringAsFixed(0)}',
+                  Icons.account_balance_wallet_rounded,
+                  metricasFin.balanceNeto >= 0
+                      ? Colors.green
+                      : Colors.red,
+                  metricasFin.balanceNeto >= 0 ? '+12.5%' : '-8.2%',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildPremiumKpiCard(
+                  'Total Ingresos',
+                  'Bs. ${metricasFin.ingresosTotales.toStringAsFixed(0)}',
+                  Icons.trending_up_rounded,
+                  Colors.green,
+                  '+15.3%',
+                ),
+              ),
+            ],
+            if (metricasAdmin != null) ...[
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildPremiumKpiCard(
+                  'Socios Activos',
+                  '${metricasAdmin.sociosActivos}',
+                  Icons.people_alt_rounded,
+                  Colors.blue,
+                  '+5.1%',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildPremiumKpiCard(
+                  'Eficiencia',
+                  '${((metricasAdmin.sociosActivos / metricasAdmin.totalSocios) * 100).toStringAsFixed(1)}%',
+                  Icons.speed_rounded,
+                  Colors.purple,
+                  '+2.8%',
+                ),
+              ),
+            ],
           ],
         ),
       ],
     );
   }
 
-  Widget _buildMetricaCard(
-      String title, String value, IconData icon, Color color) {
+  Widget _buildPremiumKpiCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+    String change,
+  ) {
+    final isPositive = change.startsWith('+');
+    final trendIcon = isPositive ? Icons.trending_up_rounded : Icons.trending_down_rounded;
+    
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withOpacity(0.08),
+            color.withOpacity(0.03),
+          ],
+        ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: color.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
           ),
         ],
+        border: Border.all(
+          color: color.withOpacity(0.2),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: LinearGradient(
+                    colors: [
+                      color,
+                      color.withOpacity(0.8),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: Icon(icon, color: color, size: 20),
+                child: Icon(icon, color: Colors.white, size: 18),
               ),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: color,
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isPositive 
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isPositive 
+                        ? Colors.green.withOpacity(0.3)
+                        : Colors.red.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      trendIcon,
+                      color: isPositive ? Colors.green : Colors.red,
+                      size: 12,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      change,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isPositive ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -510,249 +445,48 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
     );
   }
 
-  Widget _buildGraficoMetricasFinancieras(BiProvider provider) {
+  Widget _buildPremiumCharts(BiProvider provider) {
     final metricasFin = provider.metricasFinancieras;
-    if (metricasFin == null) return const SizedBox.shrink();
+    final metricasAdmin = provider.metricasAdministrativas;
 
-    return BiBarChart(
-      title: 'Métricas Financieras Principales',
-      metricas: metricasFin,
+    return Row(
+      children: [
+        if (metricasFin != null) ...[
+          Expanded(
+            child: BiPremiumBarChart(
+              title: 'Análisis Financiero',
+              metricas: metricasFin,
+            ),
+          ),
+          const SizedBox(width: 24),
+        ],
+        if (metricasAdmin != null) ...[
+          Expanded(
+            child: BiPremiumDonutChart(
+              title: 'Distribución de Socios',
+              metricas: metricasAdmin,
+            ),
+          ),
+        ],
+      ],
     );
   }
 
-  // Widget _buildKpisPrincipales(BiProvider provider) {
-  //   final kpis = provider.kpis;
-
-  //   if (kpis.isEmpty) return const SizedBox.shrink();
-
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       const Text(
-  //         'KPIs Principales',
-  //         style: TextStyle(
-  //           fontSize: 24,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.black87,
-  //         ),
-  //       ),
-  //       const SizedBox(height: 20),
-  //       ...kpis.map((kpi) => _buildKpiCard(kpi)).toList(),
-  //     ],
-  //   );
-  // }
-
-  // Widget _buildKpiCard(BiKpi kpi) {
-  //   return Container(
-  //     margin: const EdgeInsets.only(bottom: 16),
-  //     padding: const EdgeInsets.all(20),
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(16),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.grey.withOpacity(0.1),
-  //           blurRadius: 10,
-  //           offset: const Offset(0, 2),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         Container(
-  //           padding: const EdgeInsets.all(12),
-  //           decoration: BoxDecoration(
-  //             color: kpi.estadoColor.withOpacity(0.1),
-  //             borderRadius: BorderRadius.circular(12),
-  //           ),
-  //           child: Icon(
-  //             kpi.cambioIcon,
-  //             color: kpi.estadoColor,
-  //             size: 24,
-  //           ),
-  //       ),
-  //       const SizedBox(width: 16),
-  //       Expanded(
-  //         child: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Text(
-  //               kpi.nombre,
-  //               style: const TextStyle(
-  //                 fontSize: 16,
-  //                   fontWeight: FontWeight.bold,
-  //                   color: Colors.black87,
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 8),
-  //               Row(
-  //                 children: [
-  //                   Text(
-  //                     'Actual: ${kpi.valorActualFormatted}',
-  //                     style: const TextStyle(
-  //                       fontSize: 14,
-  //                       color: Colors.grey,
-  //                     ),
-  //                   ),
-  //                   const SizedBox(width: 16),
-  //                   Text(
-  //                     'Meta: ${kpi.metaFormatted}',
-  //                     style: const TextStyle(
-  //                         fontSize: 14,
-  //                         color: Colors.grey,
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //           Column(
-  //             crossAxisAlignment: CrossAxisAlignment.end,
-  //             children: [
-  //               Container(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-  //                 decoration: BoxDecoration(
-  //                   color: kpi.estadoColor.withOpacity(0.1),
-  //                   borderRadius: BorderRadius.circular(12),
-  //                 ),
-  //                 child: Text(
-  //                   kpi.estadoDisplay,
-  //                   style: TextStyle(
-  //                     fontSize: 12,
-  //                     fontWeight: FontWeight.bold,
-  //                     color: kpi.estadoColor,
-  //                   ),
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 8),
-  //               Row(
-  //                 children: [
-  //                   Icon(
-  //                     kpi.cambioIcon,
-  //                     color: kpi.cambioColor,
-  //                     size: 16,
-  //                   ),
-  //                   const SizedBox(width: 4),
-  //                   Text(
-  //                     kpi.cambioPorcentualFormatted,
-  //                     style: TextStyle(
-  //                       fontSize: 14,
-  //                       fontWeight: FontWeight.bold,
-  //                       color: kpi.cambioColor,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     );
-  //   }
-
-  // Widget _buildGraficosDistribucion(BiProvider provider) {
-  //   final distribucion = provider.distribucionFinanciera;
-  //   if (distribucion == null) return const SizedBox.shrink();
-
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       const Text(
-  //         'Distribución Financiera',
-  //         style: TextStyle(
-  //           fontSize: 24,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.black87,
-  //         ),
-  //       ),
-  //       const SizedBox(height: 20),
-  //       Row(
-  //         children: [
-  //           Expanded(
-  //             child: BiPieChart(
-  //               title: 'Distribución de Ingresos',
-  //               data: distribucion.ingresos,
-  //               colors: [
-  //                 Colors.green,
-  //                 Colors.blue,
-  //                 Colors.orange,
-  //                 Colors.purple
-  //               ],
-  //             ),
-  //           ),
-  //           const SizedBox(width: 24),
-  //           Expanded(
-  //             child: BiPieChart(
-  //               title: 'Distribución de Egresos',
-  //               data: distribucion.egresos,
-  //               colors: [Colors.red, Colors.pink, Colors.deepOrange],
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // Widget _buildTopRankings(BiProvider provider) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       const Text(
-  //         'Rankings y Top Performers',
-  //         style: TextStyle(
-  //           fontSize: 24,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.black87,
-  //         ),
-  //       ),
-  //       const SizedBox(height: 20),
-
-  //       // Gráficos de rankings
-  //       Row(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //         Expanded(
-  //           child: BiHorizontalBarChart(
-  //             title: 'Balance por Club',
-  //             data: provider.topClubes,
-  //           ),
-  //         ),
-  //         const SizedBox(width: 24),
-  //         Expanded(
-  //           child: _buildTopSociosChart(provider),
-  //         ),
-  //       ],
-  //       ),
-  //       const SizedBox(height: 24),
-
-  //       // Datos detallados de rankings
-  //       Row(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Expanded(child: _buildTopClubes(provider)),
-  //           const SizedBox(width: 24),
-  //           Expanded(child: _buildTopSocios(provider)),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  Widget _buildTopClubes(BiProvider provider) {
-    final clubes = provider.topClubes;
+  Widget _buildFinancialMetrics(BiProvider provider) {
+    final metricasFin = provider.metricasFinancieras;
+    if (metricasFin == null) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withOpacity(0.05),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
           ),
         ],
       ),
@@ -762,545 +496,29 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: CeasColors.primaryBlue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(Icons.business,
-                    color: CeasColors.primaryBlue, size: 20),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Top Clubes',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          ...clubes.map((club) => _buildClubItem(club)).toList(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildClubItem(BiTopClub club) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  club.nombreClub,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: club.rentabilidadColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  club.rentabilidadFormatted,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: club.rentabilidadColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Ingresos: ${club.ingresosFormatted}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    Text(
-                      'Egresos: ${club.egresosFormatted}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Balance: ${club.balanceFormatted}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: club.balanceColor,
-                      ),
-                    ),
-                    Text(
-                      'Socios: ${club.sociosActivos}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Widget _buildTopSocios(BiProvider provider) {
-  //   final socios = provider.topSocios;
-
-  //   return Container(
-  //     padding: const EdgeInsets.all(20),
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(16),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.grey.withOpacity(0.1),
-  //           blurRadius: 10,
-  //           offset: const Offset(0, 2),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Row(
-  //           children: [
-  //         Container(
-  //           padding: const EdgeInsets.all(8),
-  //           decoration: BoxDecoration(
-  //             color: Colors.orange.withOpacity(0.1),
-  //             borderRadius: BorderRadius.circular(8),
-  //           ),
-  //           child: const Icon(Icons.person, color: Colors.orange, size: 20),
-  //         ),
-  //         const SizedBox(width: 12),
-  //         const Text(
-  //           'Top Socios',
-  //           style: TextStyle(
-  //             fontSize: 18,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.black87,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //     // const SizedBox(height: 20),
-  //     ...socios.map((socio) => _buildSocioItem(socio)).toList(),
-  //   ],
-  // ),
-  // );
-  // }
-
-  // Widget _buildSocioItem(BiTopSocio socio) {
-  //   return Container(
-  //     margin: const EdgeInsets.only(bottom: 12),
-  //     padding: const EdgeInsets.all(16),
-  //     decoration: BoxDecoration(
-  //       color: Colors.grey[50],
-  //       borderRadius: BorderRadius.circular(12),
-  //       border: Border.all(color: Colors.grey[200]!),
-  //     ),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           Expanded(
-  //             child: Text(
-  //               socio.nombreCompleto,
-  //               style: const TextStyle(
-  //                 fontSize: 16,
-  //                 fontWeight: FontWeight.bold,
-  //                 color: Colors.black87,
-  //               ),
-  //             ),
-  //           ),
-  //           Container(
-  //             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-  //             decoration: BoxDecoration(
-  //               color: socio.estadoPagosColor.withOpacity(0.1),
-  //               borderRadius: BorderRadius.circular(12),
-  //             ),
-  //             child: Text(
-  //               socio.estadoPagosDisplay,
-  //               style: TextStyle(
-  //                 fontSize: 12,
-  //                 fontWeight: FontWeight.bold,
-  //                 color: socio.estadoPagosColor,
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       const SizedBox(height: 12),
-  //       Row(
-  //         children: [
-  //           Expanded(
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Text(
-  //                   'Club: ${socio.clubPrincipal}',
-  //                   style: const TextStyle(fontSize: 14, color: Colors.grey),
-  //                 ),
-  //                 Text(
-  //                   'Acciones: ${socio.accionesCompradas}',
-  //                   style: const TextStyle(fintSize: 14, color: Colors.grey),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //           Expanded(
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.end,
-  //               children: [
-  //                 Text(
-  //                   'Invertido: ${socio.totalInvertidoFormatted}',
-  //                   style: const TextStyle(fontSize: 14, color: Colors.grey),
-  //                 ),
-  //                 Text(
-  //                   'Antigüedad: ${socio.antiguedadFormatted}',
-  //                   style: const TextStyle(fontSize: 14, color: Colors.grey),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ],
-  //   ),
-  // );
-  // }
-
-  // Widget _buildGraficoLineas(BiProvider provider) {
-  //   final kpis = provider.kpis;
-
-  //   if (kpis.isEmpty) return const SizedBox.shrink();
-
-  //   return BiLineChart(
-  //     title: 'Tendencia de KPIs',
-  //     data: kpis,
-  //   );
-  // }
-
-  Widget _buildAlertasCriticas(BiProvider provider) {
-    final alertas = provider.alertas;
-
-    if (alertas.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.red[50],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.warning_rounded,
-                    color: Colors.red, size: 20),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Alertas Críticas',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ...alertas
-              .map((alerta) => Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red[100]!),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.error_outline,
-                            color: Colors.red[600], size: 16),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            alerta,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.red[700],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ))
-              .toList(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorCard(String error) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      margin: const EdgeInsets.symmetric(vertical: 24),
-      decoration: BoxDecoration(
-        color: Colors.red[50],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red[200]!),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red[600],
-            size: 48,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Error al cargar Business Intelligence',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.red[700],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            error,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.red[600],
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () {
-              final authProvider =
-                  Provider.of<AuthProvider>(context, listen: false);
-              if (authProvider.isAuthenticated) {
-                Provider.of<BiProvider>(context, listen: false).loadAllData(
-                  authProvider.user!.accessToken,
-                );
-              }
-            },
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Reintentar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[600],
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
-
-  // Widget _buildTopSociosChart(BiProvider provider) {
-  //   final socios = provider.topSocios;
-  //   if (socios.isEmpty) return const SizedBox.shrink();
-
-  //   return Container(
-  //     padding: const EdgeInsets.all(20),
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(16),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.grey.withOpacity(0.1),
-  //           blurRadius: 10,
-  //           offset: const Offset(0, 2),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(
-  //           'Acciones por Socio',
-  //           style: const TextStyle(
-  //             fontSize: 18,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.black87,
-  //           ),
-  //         ),
-  //       const SizedBox(height: 20),
-  //       SizedBox(
-  //         // height: 200,
-  //         child: ListView.builder(
-  //           shrinkWrap: true,
-  //           physics: const NeverScrollableScrollPhysics(),
-  //           itemCount: socios.length,
-  //           itemBuilder: (context, index) {
-  //             final socio = socios[index];
-  //             return Padding(
-  //               padding: const EdgeInsets.only(bottom: 12),
-  //               child: Row(
-  //                 children: [
-  //                   Flexible(
-  //                   flex: 2,
-  //                   child: Text(
-  //                     socio.nombreCompleto.split(' ').take(2).join(' '),
-  //                     style: const TextStyle(
-  //                       fontSize: 12,
-  //                       fontWeight: FontWeight.w600,
-  //                     ),
-  //                       overflow: TextOverflow.ellipsis,
-  //                     ),
-  //                   ),
-  //                   Expanded(flex: 1, child: SizedBox()),
-  //                   Expanded(
-  //                     flex: 3,
-  //                     child: Container(
-  //                       height: 20,
-  //                       decoration: BoxDecoration(
-  //                         color: Colors.grey[200],
-  //                         borderRadius: BorderRadius.circular(10),
-  //                       ),
-  //                       child: FractionallySizedBox(
-  //                         alignment: Alignment.centerLeft,
-  //                         widthFactor: socio.accionesCompradas /
-  //                             _getMaxAcciones(provider.topSocios),
-  //                         child: Container(
-  //                           decoration: BoxDecoration(
-  //                             color: Colors.orange,
-  //                             borderRadius: BorderRadius.circular(10),
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ),
-  //                   const SizedBox(width: 8),
-  //                   SizedBox(
-  //                     width: 35,
-  //                     child: Text(
-  //                       '${socio.accionesCompradas}',
-  //                       style: const TextStyle(
-  //                         fontSize: 12,
-  //                         fontWeight: FontWeight.bold,
-  //                       ),
-  //                       textAlign: TextAlign.right,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       ),
-  //     ],
-  //   ),
-  // );
-  // }
-
-  // double _getMaxAcciones(List<BiTopSocio> socios) {
-  //   if (socios.isEmpty) return 5;
-  //   final maxAcciones =
-  //       socios.map((e) => e.accionesCompradas).reduce((a, b) => a > b ? a : b);
-  //   return maxAcciones.toDouble() * 1.2;
-  // }
-
-  Widget _buildGraficoMovimientosFinancieros(BiProvider provider) {
-    final movimientos = provider.movimientosFinancieros;
-    if (movimientos == null) return const SizedBox.shrink();
-
-    return BiMovimientosChart(data: movimientos);
-  }
-
-  // Sección de Personal del CEAS
-  Widget _buildPersonalSection(BiProvider provider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header de la sección
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.purple.shade600,
-                      Colors.purple.shade400,
+                      Colors.blue.shade600,
+                      Colors.blue.shade400,
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
-                  Icons.people_alt_rounded,
+                  Icons.attach_money_rounded,
                   color: Colors.white,
-                  size: 24,
+                  size: 28,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Personal del CEAS',
+                      'Métricas Financieras',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
@@ -1308,7 +526,763 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
                         letterSpacing: -0.5,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Análisis completo del rendimiento financiero',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricCard(
+                  'Ingresos Totales',
+                  'Bs. ${metricasFin.ingresosTotales.toStringAsFixed(0)}',
+                  Icons.trending_up_rounded,
+                  Colors.green,
+                  '+15.3% vs mes anterior',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildMetricCard(
+                  'Egresos Totales',
+                  'Bs. ${metricasFin.egresosTotales.toStringAsFixed(0)}',
+                  Icons.trending_down_rounded,
+                  Colors.red,
+                  '+8.7% vs mes anterior',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildMetricCard(
+                  'Margen de Rentabilidad',
+                  '${metricasFin.margenRentabilidad.toStringAsFixed(1)}%',
+                  Icons.percent_rounded,
+                  Colors.blue,
+                  '+2.1% vs mes anterior',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+    String subtitle,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(icon, color: color, size: 14),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              'LIVE',
+              style: TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceAnalysis(BiProvider provider) {
+    final metricasAdmin = provider.metricasAdministrativas;
+    if (metricasAdmin == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.purple.shade50,
+            Colors.blue.shade50,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.purple.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purple.shade600,
+                      Colors.purple.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.analytics_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Análisis de Rendimiento',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Métricas clave de eficiencia operativa',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          Row(
+            children: [
+              Expanded(
+                child: _buildPerformanceCard(
+                  'Tasa de Retención',
+                  '${((metricasAdmin.sociosActivos / metricasAdmin.totalSocios) * 100).toStringAsFixed(1)}%',
+                  Colors.green,
+                  'Excelente',
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: _buildPerformanceCard(
+                  'Total Socios',
+                  '${metricasAdmin.totalSocios}',
+                  Colors.blue,
+                  'En crecimiento',
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: _buildPerformanceCard(
+                  'Socios Inactivos',
+                  '${metricasAdmin.sociosInactivos}',
+                  Colors.orange,
+                  'Requiere atención',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceCard(
+    String title,
+    String value,
+    Color color,
+    String status,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInteractiveCharts(BiProvider provider) {
+    return Column(
+      children: [
+        _buildQuickStats(provider),
+        const SizedBox(height: 24),
+        _buildMovimientosChart(provider),
+      ],
+    );
+  }
+
+  Widget _buildMovimientosChart(BiProvider provider) {
+    final movimientos = provider.movimientosFinancieros;
+    if (movimientos == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 12),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.orange.shade600,
+                      Colors.orange.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.show_chart_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Text(
+                  'Movimientos Financieros',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black87,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          BiMovimientosChart(data: movimientos),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickStats(BiProvider provider) {
+    final metricasFin = provider.metricasFinancieras;
+    final metricasAdmin = provider.metricasAdministrativas;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.grey.shade900,
+            Colors.grey.shade800,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.dashboard_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Resumen Ejecutivo',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.green.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'TIEMPO REAL',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              if (metricasFin != null) ...[
+                Expanded(
+                  child: _buildQuickStatItem(
+                    'Balance Neto',
+                    'Bs. ${metricasFin.balanceNeto.toStringAsFixed(0)}',
+                    metricasFin.balanceNeto >= 0 ? Colors.green : Colors.red,
+                    Icons.account_balance_wallet_rounded,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: _buildQuickStatItem(
+                    'Margen',
+                    '${metricasFin.margenRentabilidad.toStringAsFixed(1)}%',
+                    Colors.blue,
+                    Icons.trending_up_rounded,
+                  ),
+                ),
+              ],
+              if (metricasAdmin != null) ...[
+                const SizedBox(width: 20),
+                Expanded(
+                  child: _buildQuickStatItem(
+                    'Socios Activos',
+                    '${metricasAdmin.sociosActivos}',
+                    Colors.orange,
+                    Icons.people_alt_rounded,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: _buildQuickStatItem(
+                    'Retención',
+                    '${((metricasAdmin.sociosActivos / metricasAdmin.totalSocios) * 100).toStringAsFixed(1)}%',
+                    Colors.purple,
+                    Icons.loyalty_rounded,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickStatItem(String label, String value, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 20,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withOpacity(0.8),
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopPerformers(BiProvider provider) {
+    final topClubes = provider.topClubes;
+    if (topClubes.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 12),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.amber.shade600,
+                      Colors.amber.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.emoji_events_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Top Performers',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Clubes con mejor rendimiento financiero',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          ...topClubes.take(3).toList().asMap().entries.map((entry) {
+            final index = entry.key;
+            final club = entry.value;
+            final isFirst = index == 0;
+            
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isFirst ? Colors.amber.shade50 : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isFirst ? Colors.amber.shade200 : Colors.grey.shade200,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isFirst ? Colors.amber : Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: isFirst
+                          ? const Icon(Icons.emoji_events, color: Colors.white)
+                          : Text(
+                              '${index + 1}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          club.nombreClub,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: isFirst ? Colors.amber.shade800 : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Balance: Bs. ${club.balance.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: club.balance >= 0 ? Colors.green : Colors.red,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    club.balance >= 0 ? Icons.trending_up : Icons.trending_down,
+                    color: club.balance >= 0 ? Colors.green : Colors.red,
+                    size: 24,
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPersonalInsights(BiProvider provider) {
+    if (provider.personalMetricasGenerales == null &&
+        provider.personalMetricasAsistencia == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.purple.shade50,
+            Colors.pink.shade50,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.purple.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.purple.shade600,
+                      Colors.purple.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.people_alt_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Insights de Personal',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Text(
                       'Análisis completo del personal y asistencia',
                       style: TextStyle(
@@ -1322,188 +1296,40 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 24),
-
-        // Gráficas de personal
-        if (provider.personalMetricasGenerales != null) ...[
-          BiPersonalMetricasGeneralesChart(
-            data: provider.personalMetricasGenerales!,
-          ),
-          const SizedBox(height: 24),
-        ],
-
-        if (provider.personalMetricasAsistencia != null) ...[
-          BiPersonalMetricasAsistenciaChart(
-            data: provider.personalMetricasAsistencia!,
-          ),
-          const SizedBox(height: 24),
-        ],
-
-        // Placeholder para gráficas futuras
-        if (provider.personalMetricasGenerales == null &&
-            provider.personalMetricasAsistencia == null) ...[
-          Container(
-            padding: const EdgeInsets.all(40),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200),
+          const SizedBox(height: 32),
+          if (provider.personalMetricasGenerales != null) ...[
+            BiPersonalMetricasGeneralesChart(
+              data: provider.personalMetricasGenerales!,
             ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.people_alt_outlined,
-                  size: 48,
-                  color: Colors.grey.shade400,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Cargando datos de personal...',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 24),
+          ],
+          if (provider.personalMetricasAsistencia != null) ...[
+            BiPersonalMetricasAsistenciaChart(
+              data: provider.personalMetricasAsistencia!,
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 
-  // KPIs Principales usando métricas disponibles
-  Widget _buildKpisPrincipales(BiProvider provider) {
+  Widget _buildPremiumMetrics(BiProvider provider) {
     final metricasFin = provider.metricasFinancieras;
     final metricasAdmin = provider.metricasAdministrativas;
 
-    if (metricasFin == null && metricasAdmin == null)
-      return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'KPIs Principales',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 20),
-        if (metricasFin != null)
-          _buildKpiCard(
-            'Balance Neto',
-            'Bs. ${metricasFin.balanceNeto.toStringAsFixed(0)}',
-            Icons.account_balance_wallet,
-            metricasFin.balanceNeto >= 0 ? Colors.green : Colors.red,
-          ),
-        if (metricasAdmin != null)
-          _buildKpiCard(
-            'Total Socios',
-            metricasAdmin.totalSocios.toString(),
-            Icons.people,
-            Colors.blue,
-          ),
-        if (metricasAdmin != null)
-          _buildKpiCard(
-            'Socios Activos',
-            metricasAdmin.sociosActivos.toString(),
-            Icons.check_circle,
-            Colors.green,
-          ),
-        if (metricasFin != null)
-          _buildKpiCard(
-            'Total Ingresos',
-            'Bs. ${metricasFin.ingresosTotales.toStringAsFixed(0)}',
-            Icons.trending_up,
-            Colors.green,
-          ),
-      ],
-    );
-  }
-
-  Widget _buildKpiCard(String title, String value, IconData icon, Color color) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.grey.withOpacity(0.05),
             blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Gráfico de líneas para KPIs usando métricas financieras
-  Widget _buildGraficoLineas(BiProvider provider) {
-    final metricasFin = provider.metricasFinancieras;
-    if (metricasFin == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 4),
             spreadRadius: 0,
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1511,79 +1337,92 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.orange.shade600,
-                      Colors.orange.shade400,
+                      Colors.indigo.shade600,
+                      Colors.indigo.shade400,
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
-                  Icons.trending_up_rounded,
+                  Icons.dashboard_rounded,
                   color: Colors.white,
-                  size: 24,
+                  size: 16,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Análisis de KPIs Financieros',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.black87,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Evolución de métricas clave del sistema',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+              const SizedBox(width: 12),
+              const Text(
+                'Métricas Ejecutivas',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black87,
+                  letterSpacing: -0.5,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          Row(
+          const SizedBox(height: 12),
+          Text(
+            'Métricas clave del sistema',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 16),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 4,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 2.0,
             children: [
-              Expanded(
-                child: _buildKpiMetric(
-                  'Ingresos',
+              if (metricasFin != null) ...[
+                _buildCompactMetricCard(
+                  'Balance Neto',
+                  'Bs. ${metricasFin.balanceNeto.toStringAsFixed(0)}',
+                  Icons.account_balance_wallet_rounded,
+                  metricasFin.balanceNeto >= 0 ? Colors.green : Colors.red,
+                ),
+                _buildCompactMetricCard(
+                  'Total Ingresos',
                   'Bs. ${metricasFin.ingresosTotales.toStringAsFixed(0)}',
-                  Icons.trending_up,
+                  Icons.trending_up_rounded,
                   Colors.green,
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildKpiMetric(
-                  'Egresos',
+                _buildCompactMetricCard(
+                  'Total Egresos',
                   'Bs. ${metricasFin.egresosTotales.toStringAsFixed(0)}',
-                  Icons.trending_down,
+                  Icons.trending_down_rounded,
                   Colors.red,
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildKpiMetric(
-                  'Balance',
-                  'Bs. ${metricasFin.balanceNeto.toStringAsFixed(0)}',
-                  Icons.account_balance,
-                  metricasFin.balanceNeto >= 0 ? Colors.blue : Colors.orange,
+                _buildCompactMetricCard(
+                  'Margen',
+                  '${metricasFin.margenRentabilidad.toStringAsFixed(1)}%',
+                  Icons.percent_rounded,
+                  Colors.blue,
                 ),
-              ),
+              ],
+              if (metricasAdmin != null) ...[
+                _buildCompactMetricCard(
+                  'Total Socios',
+                  '${metricasAdmin.totalSocios}',
+                  Icons.people_alt_rounded,
+                  Colors.purple,
+                ),
+                _buildCompactMetricCard(
+                  'Socios Activos',
+                  '${metricasAdmin.sociosActivos}',
+                  Icons.check_circle_rounded,
+                  Colors.green,
+                ),
+              ],
             ],
           ),
         ],
@@ -1591,701 +1430,352 @@ class _BiDashboardScreenState extends State<BiDashboardScreen> {
     );
   }
 
-  Widget _buildKpiMetric(
-      String title, String value, IconData icon, Color color) {
+  Widget _buildCompactMetricCard(String title, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.05),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withOpacity(0.08),
+            color.withOpacity(0.03),
+          ],
+        ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: color.withOpacity(0.15),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+            spreadRadius: 0,
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 8),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      color,
+                      color.withOpacity(0.8),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(0.3),
+                      blurRadius: 3,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(icon, color: Colors.white, size: 16),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.green.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.trending_up_rounded,
+                      color: Colors.green,
+                      size: 10,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      'LIVE',
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           Text(
-            title,
+            value,
             style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
               color: color,
+              letterSpacing: -0.3,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Gráficos de distribución usando top clubes
-  Widget _buildGraficosDistribucion(BiProvider provider) {
-    final topClubes = provider.topClubes;
-    if (topClubes.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 0,
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade100, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.purple.shade600,
-                      Colors.purple.shade400,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.pie_chart_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Distribución por Clubes',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.black87,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Análisis de balance por club',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            height: 200,
-            child: Row(
-              children: topClubes.take(3).map((club) {
-                final balance = club.balance;
-                final color = balance >= 0 ? Colors.green : Colors.red;
-                final percentage = (balance.abs() /
-                        topClubes
-                            .map((c) => c.balance.abs())
-                            .reduce((a, b) => a > b ? a : b)) *
-                    100;
-
-                return Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  bottom: 0,
-                                  left: 0,
-                                  right: 0,
-                                  child: Container(
-                                    height: percentage * 2,
-                                    decoration: BoxDecoration(
-                                      color: color,
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(8),
-                                        topRight: Radius.circular(8),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          club.nombreClub,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'Bs. ${balance.toStringAsFixed(0)}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Top rankings usando top clubes
-  Widget _buildTopRankings(BiProvider provider) {
-    final topClubes = provider.topClubes;
-    if (topClubes.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 0,
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade100, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.amber.shade600,
-                      Colors.amber.shade400,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.emoji_events_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Top Rankings',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.black87,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Clubes con mejor rendimiento financiero',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          ...topClubes.take(5).toList().asMap().entries.map((entry) {
-            final index = entry.key;
-            final club = entry.value;
-            final balance = club.balance;
-            final color = balance >= 0 ? Colors.green : Colors.red;
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${index + 1}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          club.nombreClub,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        Text(
-                          'Balance: Bs. ${balance.toStringAsFixed(0)}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: color,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    balance >= 0 ? Icons.trending_up : Icons.trending_down,
-                    color: color,
-                    size: 24,
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ],
-      ),
-    );
-  }
-
-  // Top Socios usando métricas administrativas
-  Widget _buildTopSocios(BiProvider provider) {
-    final metricasAdmin = provider.metricasAdministrativas;
-    if (metricasAdmin == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 0,
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade100, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.orange.shade600,
-                      Colors.orange.shade400,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.people_alt_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Top Socios del CEAS',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.black87,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Análisis de socios por actividad y participación',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Métricas generales de socios
-          Row(
-            children: [
-              Expanded(
-                child: _buildSocioMetric(
-                  'Total Socios',
-                  metricasAdmin.totalSocios.toString(),
-                  Icons.people,
-                  Colors.blue,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildSocioMetric(
-                  'Socios Activos',
-                  metricasAdmin.sociosActivos.toString(),
-                  Icons.check_circle,
-                  Colors.green,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildSocioMetric(
-                  'Socios Inactivos',
-                  metricasAdmin.sociosInactivos.toString(),
-                  Icons.cancel,
-                  Colors.red,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // Gráfico de distribución de socios
-          Container(
-            height: 200,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                child: Container(
-                                  height: 150,
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue,
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(8),
-                                      topRight: Radius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Total',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        metricasAdmin.totalSocios.toString(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                child: Container(
-                                  height: (metricasAdmin.sociosActivos /
-                                          metricasAdmin.totalSocios) *
-                                      150,
-                                  decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(8),
-                                      topRight: Radius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Activos',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        metricasAdmin.sociosActivos.toString(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Container(
-                            height: (metricasAdmin.sociosInactivos /
-                                    metricasAdmin.totalSocios) *
-                                150,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(8),
-                                topRight: Radius.circular(8),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Inactivos',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        metricasAdmin.sociosInactivos.toString(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Estadísticas adicionales
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Porcentaje de Actividad',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${((metricasAdmin.sociosActivos / metricasAdmin.totalSocios) * 100).toStringAsFixed(1)}%',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Tasa de Retención',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${((metricasAdmin.sociosActivos / metricasAdmin.totalSocios) * 100).toStringAsFixed(1)}%',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSocioMetric(
-      String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 8),
-          Text(
             title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAlertsSection(BiProvider provider) {
+    final alertas = provider.alertas;
+    if (alertas.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.red.shade50,
+            Colors.orange.shade50,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.red.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.red.shade600,
+                      Colors.red.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.warning_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Alertas Críticas',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Requieren atención inmediata',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          ...alertas.map((alerta) => Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    alerta,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'URGENTE',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      padding: const EdgeInsets.all(60),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  CeasColors.primaryBlue,
+                  Colors.purple.shade600,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              strokeWidth: 3,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Cargando Business Intelligence...',
+            style: TextStyle(
+              fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: color,
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            value,
+            'Analizando datos en tiempo real',
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: color,
+              fontSize: 14,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.red.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              Icons.error_outline_rounded,
+              color: Colors.red.shade600,
+              size: 48,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Error al cargar Business Intelligence',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            error,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
             ),
             textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              final authProvider =
+                  Provider.of<AuthProvider>(context, listen: false);
+              if (authProvider.isAuthenticated) {
+                Provider.of<BiProvider>(context, listen: false).loadAllData(
+                  authProvider.user!.accessToken,
+                );
+              }
+            },
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Reintentar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ],
       ),
