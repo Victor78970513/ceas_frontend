@@ -539,7 +539,7 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
                       Expanded(flex: 1, child: _buildHeaderCell('ID')),
                       Expanded(flex: 2, child: _buildHeaderCell('Nombre')),
                       Expanded(flex: 2, child: _buildHeaderCell('Email')),
-                      Expanded(flex: 2, child: _buildHeaderCell('Categoría')),
+                      Expanded(flex: 2, child: _buildHeaderCell('Categoría', TextAlign.center)),
                       Expanded(
                           flex: 1,
                           child: Center(child: _buildHeaderCell('Estado'))),
@@ -599,7 +599,7 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
                                   flex: 2, child: _buildCell(proveedor.email)),
                               Expanded(
                                   flex: 2,
-                                  child: _buildCell(proveedor.categoria)),
+                                  child: _buildCell(proveedor.categoriaDisplay, TextAlign.center)),
                               Expanded(
                                   flex: 1,
                                   child: Center(
@@ -1015,7 +1015,7 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     );
   }
 
-  Widget _buildHeaderCell(String text) {
+  Widget _buildHeaderCell(String text, [TextAlign textAlign = TextAlign.left]) {
     return Text(
       text,
       style: const TextStyle(
@@ -1023,13 +1023,15 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
         color: CeasColors.primaryBlue,
         fontSize: 14,
       ),
+      textAlign: textAlign,
     );
   }
 
-  Widget _buildCell(String text) {
+  Widget _buildCell(String text, [TextAlign textAlign = TextAlign.left]) {
     return Text(
       text,
       style: const TextStyle(fontSize: 14),
+      textAlign: textAlign,
     );
   }
 

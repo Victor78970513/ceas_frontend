@@ -9,6 +9,7 @@ class Proveedor {
   final String direccion;
   final bool estado;
   final String productosServicios;
+  final String categoria;
 
   Proveedor({
     required this.idProveedor,
@@ -19,6 +20,7 @@ class Proveedor {
     required this.direccion,
     required this.estado,
     required this.productosServicios,
+    required this.categoria,
   });
 
   factory Proveedor.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class Proveedor {
       direccion: json['direccion'] ?? '',
       estado: json['estado'] ?? false,
       productosServicios: json['productos_servicios'] ?? '',
+      categoria: json['categoria'] ?? 'Sin Categoria',
     );
   }
 
@@ -44,6 +47,7 @@ class Proveedor {
       'direccion': direccion,
       'estado': estado,
       'productos_servicios': productosServicios,
+      'categoria': categoria,
     };
   }
 
@@ -51,7 +55,7 @@ class Proveedor {
   String get id => 'PROV${idProveedor.toString().padLeft(3, '0')}';
   String get nombre => nombreProveedor;
   String get email => correoElectronico;
-  String get categoria => productosServicios;
+  String get categoriaDisplay => categoria;
   String get estadoDisplay => estado ? 'Activo' : 'Inactivo';
   Color get estadoColor => estado ? Colors.green : Colors.red;
 

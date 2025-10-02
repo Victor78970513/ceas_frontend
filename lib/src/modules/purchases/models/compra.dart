@@ -34,7 +34,7 @@ class Compra {
           ? DateTime.parse(json['fecha_de_entrega'])
           : null,
       cantidadItems: json['cantidad_items'] ?? 0,
-      categoria: json['categoria'] ?? '',
+      categoria: json['categoria_proveedor'] ?? '',
       proveedor: json['proveedor'] ?? '',
     );
   }
@@ -55,6 +55,7 @@ class Compra {
 
   // Getters útiles para la UI
   String get id => 'COMP${idCompra.toString().padLeft(3, '0')}';
+  String get categoriaCompra => categoria;
   String get fecha => _formatDate(fechaDeCompra);
   String get fechaEntrega =>
       fechaDeEntrega != null ? _formatDate(fechaDeEntrega!) : 'N/A';

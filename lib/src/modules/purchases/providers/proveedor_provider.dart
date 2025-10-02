@@ -145,7 +145,7 @@ class ProveedorProvider extends ChangeNotifier {
               .toLowerCase()
               .contains(_searchQuery.toLowerCase()) ||
           proveedor.email.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          proveedor.categoria
+          proveedor.categoriaDisplay
               .toLowerCase()
               .contains(_searchQuery.toLowerCase());
 
@@ -176,7 +176,7 @@ class ProveedorProvider extends ChangeNotifier {
 
   /// Obtiene listas únicas para filtros
   List<String> _getUniqueCategorias() {
-    return _proveedores.map((p) => p.categoria).toSet().toList()..sort();
+    return _proveedores.map((p) => p.categoriaDisplay).toSet().toList()..sort();
   }
 
   /// Selecciona un proveedor específico
