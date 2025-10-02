@@ -335,7 +335,10 @@ class _BiPremiumBarChartState extends State<BiPremiumBarChart>
       widget.metricas.egresosTotales,
       widget.metricas.balanceNeto.abs(),
     ].reduce((a, b) => a > b ? a : b);
-    return (maxValue * 1.3).toDouble();
+    
+    // Asegurar que el valor máximo nunca sea 0 para evitar errores en horizontalInterval
+    final adjustedMaxValue = maxValue > 0 ? maxValue * 1.3 : 1000.0;
+    return adjustedMaxValue.toDouble();
   }
 }
 

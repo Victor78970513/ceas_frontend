@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/bi_personal_metricas_generales.dart';
 import '../models/bi_personal_metricas_asistencia.dart';
-import '../models/bi_personal_asistencia_departamento.dart';
-import '../models/bi_personal_tendencias_mensuales.dart';
 
 // Gráfica de métricas generales de personal
 class BiPersonalMetricasGeneralesChart extends StatelessWidget {
@@ -862,6 +860,9 @@ class BiPersonalMetricasAsistenciaChart extends StatelessWidget {
       data.ausencias,
     ];
     final max = values.reduce((a, b) => a > b ? a : b);
-    return max.toDouble() * 1.2;
+    
+    // Asegurar que el valor máximo nunca sea 0 para evitar errores en interval
+    final adjustedMaxValue = max > 0 ? max * 1.2 : 100.0;
+    return adjustedMaxValue.toDouble();
   }
 }
