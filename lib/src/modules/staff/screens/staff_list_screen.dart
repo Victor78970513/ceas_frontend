@@ -6,6 +6,8 @@ import '../providers/personal_provider.dart';
 import '../providers/asistencia_provider.dart';
 import '../models/asistencia.dart';
 import '../models/empleado.dart';
+import '../widgets/agregar_empleado_bottom_sheet.dart';
+import '../widgets/registrar_asistencia_bottom_sheet.dart';
 
 class StaffListScreen extends StatefulWidget {
   const StaffListScreen({Key? key}) : super(key: key);
@@ -269,12 +271,28 @@ class _StaffListScreenState extends State<StaffListScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Lista de Empleados',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: CeasColors.primaryBlue,
+                  const Expanded(
+                    child: Text(
+                      'Lista de Empleados',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: CeasColors.primaryBlue,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showAgregarEmpleadoDialog(context),
+                    icon: const Icon(Icons.add_rounded),
+                    label: const Text('Agregar Empleado'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: CeasColors.primaryBlue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
                     ),
                   ),
                 ],
@@ -445,6 +463,21 @@ class _StaffListScreenState extends State<StaffListScreen> {
                       ],
                     ),
                   ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showRegistrarAsistenciaDialog(context),
+                    icon: const Icon(Icons.add_rounded),
+                    label: const Text('Registrar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      elevation: 0,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   IconButton(
                     onPressed: () {
                       final authProvider =
@@ -946,6 +979,33 @@ class _StaffListScreenState extends State<StaffListScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _showRegistrarAsistenciaDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => RegistrarAsistenciaBottomSheet(
+        onAsistenciaRegistrada: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
+  void _showAgregarEmpleadoDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AgregarEmpleadoBottomSheet(
+        onEmpleadoCreado: () {
+          // El provider ya recarga automáticamente
+          Navigator.of(context).pop();
+        },
       ),
     );
   }

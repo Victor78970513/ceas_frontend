@@ -100,6 +100,136 @@ class PersonalService {
     }
   }
 
+  /// Registra asistencia de un empleado
+  static Future<Map<String, dynamic>> registrarAsistencia(
+    String token,
+    int idPersonal,
+    String fecha,
+    String horaIngreso,
+    String horaSalida,
+    String observaciones,
+    String estado,
+  ) async {
+    try {
+      print('PersonalService - Registrando asistencia para empleado ID: $idPersonal');
+      
+      final body = {
+        'id_personal': idPersonal,
+        'fecha': fecha,
+        'hora_ingreso': horaIngreso,
+        'hora_salida': horaSalida,
+        'observaciones': observaciones,
+        'estado': estado,
+      };
+
+      print('PersonalService - Body: $body');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/asistencia/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 30));
+
+      print('PersonalService - Response status: ${response.statusCode}');
+      print('PersonalService - Response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 401) {
+        throw Exception('No autorizado. Token inválido o expirado.');
+      } else if (response.statusCode == 400) {
+        throw Exception('Datos inválidos. Verifique la información enviada.');
+      } else if (response.statusCode == 500) {
+        throw Exception('Error interno del servidor');
+      } else {
+        String errorMessage = 'Error al registrar asistencia: ${response.statusCode}';
+        if (response.body.isNotEmpty) {
+          try {
+            final errorBody = response.body;
+            errorMessage += ' - $errorBody';
+          } catch (e) {
+            // Ignorar errores de parsing del body
+          }
+        }
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      if (e.toString().contains('Timeout')) {
+        rethrow;
+      }
+      throw Exception('Error de conexión: $e');
+    }
+  }
+
+  /// Crea un nuevo empleado usando el endpoint /personal/
+  static Future<Map<String, dynamic>> crearEmpleado(
+    String token,
+    String nombres,
+    String apellidos,
+    int cargo,
+    double salario,
+    String correo,
+    String departamento,
+  ) async {
+    try {
+      print('PersonalService - Creando empleado: $nombres $apellidos');
+      
+      final body = {
+        'id_club': 1,
+        'nombres': nombres,
+        'apellidos': apellidos,
+        'cargo': cargo,
+        'salario': salario,
+        'correo': correo,
+        'departamento': departamento,
+        'estado': true,
+      };
+
+      print('PersonalService - Body: $body');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/personal/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 30));
+
+      print('PersonalService - Response status: ${response.statusCode}');
+      print('PersonalService - Response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 401) {
+        throw Exception('No autorizado. Token inválido o expirado.');
+      } else if (response.statusCode == 400) {
+        throw Exception('Datos inválidos. Verifique la información enviada.');
+      } else if (response.statusCode == 500) {
+        throw Exception('Error interno del servidor');
+      } else {
+        String errorMessage = 'Error al crear empleado: ${response.statusCode}';
+        if (response.body.isNotEmpty) {
+          try {
+            final errorBody = response.body;
+            errorMessage += ' - $errorBody';
+          } catch (e) {
+            // Ignorar errores de parsing del body
+          }
+        }
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      if (e.toString().contains('Timeout')) {
+        rethrow;
+      }
+      throw Exception('Error de conexión: $e');
+    }
+  }
+
   /// Crea un nuevo empleado
   static Future<Empleado> createEmpleado(Empleado empleado) async {
     try {

@@ -304,6 +304,43 @@ class FinanceProvider extends ChangeNotifier {
     }
   }
 
+  /// Crea un nuevo movimiento financiero
+  Future<bool> crearMovimiento(
+    String token,
+    String tipoMovimiento,
+    String descripcion,
+    double monto,
+  ) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      print('FinanceProvider - Creando movimiento...');
+      final result = await FinanceService.crearMovimiento(
+        token,
+        tipoMovimiento,
+        descripcion,
+        monto,
+      );
+
+      print('FinanceProvider - Movimiento creado exitosamente: $result');
+
+      // Recargar los movimientos para mostrar el nuevo
+      await loadMovimientos(token);
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('FinanceProvider - Error al crear movimiento: $e');
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Refresca los datos
   Future<void> refresh(String token) async {
     await loadMovimientos(token);

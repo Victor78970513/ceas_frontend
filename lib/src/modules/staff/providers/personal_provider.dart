@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/empleado.dart';
-import '../models/personal.dart';
 import '../services/personal_service.dart';
 
 class PersonalProvider extends ChangeNotifier {
@@ -217,6 +216,89 @@ class PersonalProvider extends ChangeNotifier {
   // Obtener empleados por departamento
   List<Empleado> getEmpleadosPorDepartamento(String departamento) {
     return _empleados.where((e) => e.departamento == departamento).toList();
+  }
+
+  /// Registra asistencia de un empleado
+  Future<bool> registrarAsistencia(
+    String token,
+    int idPersonal,
+    String fecha,
+    String horaIngreso,
+    String horaSalida,
+    String observaciones,
+    String estado,
+  ) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      print('PersonalProvider - Registrando asistencia...');
+      final result = await PersonalService.registrarAsistencia(
+        token,
+        idPersonal,
+        fecha,
+        horaIngreso,
+        horaSalida,
+        observaciones,
+        estado,
+      );
+
+      print('PersonalProvider - Asistencia registrada exitosamente: $result');
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('PersonalProvider - Error al registrar asistencia: $e');
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Crea un nuevo empleado
+  Future<bool> crearEmpleado(
+    String token,
+    String nombres,
+    String apellidos,
+    int cargo,
+    double salario,
+    String correo,
+    String departamento,
+  ) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      print('PersonalProvider - Creando empleado...');
+      final result = await PersonalService.crearEmpleado(
+        token,
+        nombres,
+        apellidos,
+        cargo,
+        salario,
+        correo,
+        departamento,
+      );
+
+      print('PersonalProvider - Empleado creado exitosamente: $result');
+
+      // Recargar los empleados para mostrar el nuevo
+      await loadPersonal(token);
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('PersonalProvider - Error al crear empleado: $e');
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
   }
 
   // Obtener empleados activos

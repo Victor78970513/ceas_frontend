@@ -13,7 +13,6 @@ class QrPaymentService {
     required int modalidadPago,
     required int estadoAccion,
     required String tipoAccion,
-    required double totalPago,
     required String metodoPago,
   }) async {
     try {
@@ -25,6 +24,31 @@ class QrPaymentService {
         throw Exception('Token de autenticación no encontrado');
       }
 
+      // Mapear método de pago a valor más corto para la base de datos
+      String metodoPagoMapeado;
+      switch (metodoPago.toLowerCase()) {
+        case 'efectivo':
+          metodoPagoMapeado = 'efectivo';
+          break;
+        case 'transferencia_bancaria':
+          metodoPagoMapeado = 'transferencia';
+          break;
+        case 'cheque':
+          metodoPagoMapeado = 'cheque';
+          break;
+        case 'tarjeta de crédito':
+          metodoPagoMapeado = 'tarjeta_credito';
+          break;
+        case 'tarjeta de débito':
+          metodoPagoMapeado = 'tarjeta_debito';
+          break;
+        case 'depósito bancario':
+          metodoPagoMapeado = 'deposito';
+          break;
+        default:
+          metodoPagoMapeado = 'efectivo';
+      }
+
       // Preparar el body de la petición
       final body = {
         'id_club': idClub,
@@ -34,11 +58,11 @@ class QrPaymentService {
         'certificado_pdf': null,
         'certificado_cifrado': false,
         'tipo_accion': tipoAccion,
-        'total_pago': totalPago,
-        'metodo_pago': metodoPago,
+        'metodo_pago': metodoPagoMapeado,
       };
 
       print('🚀 Enviando petición a generar QR de pago...');
+      print('📋 Método de pago original: $metodoPago -> Mapeado: $metodoPagoMapeado');
       print('📋 Body: ${json.encode(body)}');
 
       // Hacer la petición POST

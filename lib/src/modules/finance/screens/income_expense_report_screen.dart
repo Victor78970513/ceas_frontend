@@ -4,6 +4,7 @@ import '../../../core/theme/ceas_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/finance_provider.dart';
 import '../models/movimiento_financiero.dart';
+import '../widgets/agregar_movimiento_bottom_sheet.dart';
 
 class IncomeExpenseReportScreen extends StatefulWidget {
   const IncomeExpenseReportScreen({Key? key}) : super(key: key);
@@ -1068,26 +1069,15 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
   }
 
   void _showAgregarMovimientoDialog(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Agregar Movimiento'),
-        content: const Text('Funcionalidad de agregar movimiento (ficticia)'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Movimiento agregado (ficticio)')),
-              );
-            },
-            child: const Text('Agregar'),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AgregarMovimientoBottomSheet(
+        onMovimientoCreado: () {
+          // El provider ya recarga automáticamente
+          Navigator.of(context).pop();
+        },
       ),
     );
   }

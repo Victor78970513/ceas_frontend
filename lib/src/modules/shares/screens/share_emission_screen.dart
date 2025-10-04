@@ -31,14 +31,8 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
   final _valorCuotaController = TextEditingController();
 
   // Variables de estado
-  String _tipoAccion = 'Ordinaria';
-  String _estado = 'Disponible';
   String _metodoPago = 'Efectivo';
-  String _modalidadPago = 'Contado';
-  DateTime _fechaEmision = DateTime.now();
-  DateTime? _fechaPrimerPago;
   bool _isLoading = false;
-  bool _mostrarCamposCuotas = false;
 
   // Variables para manejo de socios
   List<Socio> _socios = [];
@@ -50,6 +44,7 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
 
   // Modos de emisión predefinidos
   String _modoEmision = 'Contado';
+  Map<String, dynamic> _modoEmisionSeleccionado = {};
   final List<Map<String, dynamic>> _modosEmision = [
     {
       'nombre': 'Contado',
@@ -60,6 +55,7 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
       'valorCuota': 10000.0,
       'icon': Icons.payment,
       'color': Colors.green,
+      'modalidadPago': 1, // Contado
     },
     {
       'nombre': '2 Cuotas',
@@ -70,6 +66,7 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
       'valorCuota': 5000.0,
       'icon': Icons.schedule,
       'color': Colors.blue,
+      'modalidadPago': 2, // 2 Cuotas
     },
     {
       'nombre': '5 Cuotas',
@@ -80,6 +77,7 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
       'valorCuota': 2000.0,
       'icon': Icons.credit_card,
       'color': Colors.orange,
+      'modalidadPago': 3, // 5 Cuotas
     },
     {
       'nombre': '10 Cuotas',
@@ -90,40 +88,10 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
       'valorCuota': 1000.0,
       'icon': Icons.account_balance_wallet,
       'color': Colors.purple,
+      'modalidadPago': 4, // 10 Cuotas
     },
   ];
 
-  // Opciones para dropdowns
-  final List<String> _tiposAccion = [
-    'Ordinaria',
-    'Preferencial',
-    'Clase A',
-    'Clase B',
-    'Especial'
-  ];
-
-  final List<String> _estados = [
-    'Disponible',
-    'Reservada',
-    'Vendida',
-    'Cancelada'
-  ];
-
-  final List<String> _metodosPago = [
-    'Efectivo',
-    'Transferencia Bancaria',
-    'Cheque',
-    'Tarjeta de Crédito',
-    'Tarjeta de Débito',
-    'Depósito Bancario'
-  ];
-
-  final List<String> _modalidadesPago = [
-    'Contado',
-    'Cuotas',
-    'Pago Diferido',
-    'Pago Anticipado'
-  ];
 
 
   @override
@@ -133,6 +101,8 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
     _actualizarModoEmision(); // Usar el modo de emisión por defecto
     _cargarSocios();
     _busquedaSocioController.addListener(_filtrarSocios);
+    // Inicializar el modo de emisión seleccionado con Contado por defecto
+    _modoEmisionSeleccionado = _modosEmision.first;
   }
 
   @override
@@ -191,16 +161,6 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
   }
 
 
-  void _actualizarCamposCuotas() {
-    setState(() {
-      _mostrarCamposCuotas = _modalidadPago == 'Cuotas';
-      if (_mostrarCamposCuotas) {
-        _estado = 'Reservada';
-      } else {
-        _estado = 'Disponible';
-      }
-    });
-  }
 
   void _actualizarModoEmision() {
     final modoSeleccionado = _modosEmision.firstWhere(
@@ -216,16 +176,7 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
           modoSeleccionado['numeroCuotas'].toString();
       _valorCuotaController.text = modoSeleccionado['valorCuota'].toString();
 
-      // Actualizar modalidad de pago
-      if (modoSeleccionado['numeroCuotas'] > 1) {
-        _modalidadPago = 'Cuotas';
-        _mostrarCamposCuotas = true;
-        _estado = 'Reservada';
-      } else {
-        _modalidadPago = 'Contado';
-        _mostrarCamposCuotas = false;
-        _estado = 'Disponible';
-      }
+      // Actualizar modalidad de pago según la selección
     });
   }
 
@@ -266,18 +217,21 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
       final idSocio = _socioSeleccionado!.idSocio;
       final totalPago = 5000.0; // Valor fijo por ahora
       final metodoPago = _metodoPago == 'Efectivo' ? 'efectivo' : 'transferencia_bancaria';
+      
+      // Obtener el modalidad_pago según la tarjeta seleccionada
+      final modalidadPago = _modoEmisionSeleccionado['modalidadPago'] as int;
 
       print('🚀 Generando QR de pago...');
-      print('📋 Datos: ID Socio: $idSocio, Total: $totalPago, Método: $metodoPago');
+      print('📋 Datos: ID Socio: $idSocio, Total: $totalPago, Método: $metodoPago, Modalidad: $modalidadPago');
+      print('📋 Tarjeta seleccionada: ${_modoEmisionSeleccionado['nombre']}');
 
       // Llamar al servicio para generar QR
       final qrResponse = await QrPaymentService.generarQrPago(
         idClub: 1,
         idSocio: idSocio,
-        modalidadPago: 1,
+        modalidadPago: modalidadPago,
         estadoAccion: 1,
         tipoAccion: 'compra',
-        totalPago: totalPago,
         metodoPago: metodoPago,
       );
 
@@ -838,6 +792,7 @@ class _ShareEmissionScreenState extends State<ShareEmissionScreen> {
               onTap: () {
                 setState(() {
                   _modoEmision = modo['nombre'];
+                  _modoEmisionSeleccionado = modo; // Actualizar el modo seleccionado
                 });
                 _actualizarModoEmision();
               },

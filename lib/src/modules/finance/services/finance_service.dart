@@ -75,6 +75,68 @@ class FinanceService {
     }
   }
 
+  /// Crea un nuevo movimiento financiero
+  static Future<Map<String, dynamic>> crearMovimiento(
+    String token,
+    String tipoMovimiento,
+    String descripcion,
+    double monto,
+  ) async {
+    try {
+      print('FinanceService - Creando movimiento: $tipoMovimiento - $descripcion - $monto');
+      
+      final body = {
+        'id_club': 1,
+        'tipo_movimiento': tipoMovimiento,
+        'descripcion': descripcion,
+        'monto': monto,
+        'estado': 'confirmado',
+        "referencia_relacionada": "CUOTA-001-2025",
+        "metodo_pago": "transferencia"
+      };
+
+      print('FinanceService - Body: $body');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/finanzas/movimientos/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 30));
+
+      print('FinanceService - Response status: ${response.statusCode}');
+      print('FinanceService - Response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 401) {
+        throw Exception('No autorizado. Token inválido o expirado.');
+      } else if (response.statusCode == 400) {
+        throw Exception('Datos inválidos. Verifique la información enviada.');
+      } else if (response.statusCode == 500) {
+        throw Exception('Error interno del servidor');
+      } else {
+        String errorMessage = 'Error al crear movimiento: ${response.statusCode}';
+        if (response.body.isNotEmpty) {
+          try {
+            final errorBody = response.body;
+            errorMessage += ' - $errorBody';
+          } catch (e) {
+            // Ignorar errores de parsing del body
+          }
+        }
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      if (e.toString().contains('Timeout')) {
+        rethrow;
+      }
+      throw Exception('Error de conexión: $e');
+    }
+  }
+
   /// Obtiene el resumen de finanzas para Business Intelligence
   static Future<FinanzasResumen> getFinanzasResumen(String token) async {
     try {

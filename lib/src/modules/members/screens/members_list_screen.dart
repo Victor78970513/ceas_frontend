@@ -303,10 +303,10 @@ class _MembersListScreenState extends State<MembersListScreen> {
                   child: _buildQuickAction(
                       'Crear Socio', Icons.person_add, CeasColors.primaryBlue)),
               const SizedBox(width: 16),
-              Expanded(
-                  child: _buildQuickAction(
-                      'Importar Lista', Icons.upload_file, Colors.green)),
-              const SizedBox(width: 16),
+              // Expanded(
+              //     child: _buildQuickAction(
+              //         'Importar Lista', Icons.upload_file, Colors.green)),
+              // const SizedBox(width: 16),
               Expanded(
                   child: _buildQuickAction(
                       'Exportar Datos', Icons.download, Colors.orange)),
