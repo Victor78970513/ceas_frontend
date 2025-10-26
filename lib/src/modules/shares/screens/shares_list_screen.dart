@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:html' as html;
 import '../../../core/theme/ceas_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/accion.dart';
 import '../providers/accion_provider.dart';
+import '../services/accion_service.dart';
 import 'share_emission_screen.dart';
 import 'share_certificate_screen.dart';
 import '../widgets/certificate_download_dialog.dart';
@@ -174,24 +176,45 @@ class _SharesListScreenState extends State<SharesListScreen> {
               ],
             ),
           ),
-          ElevatedButton.icon(
-            onPressed: () {
-              print('DEBUG: Botón Emitir Acción presionado');
-              _showEmitAccionDialog();
-            },
-            icon: const Icon(Icons.add_business),
-            label: const Text('Emitir Acción'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: CeasColors.primaryBlue,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              textStyle:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          Row(
+            children: [
+              ElevatedButton.icon(
+                onPressed: () => _descargarReporteAcciones(),
+                icon: const Icon(Icons.assessment),
+                label: const Text('Generar Reporte'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple.shade600,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  textStyle:
+                      const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
               ),
-              elevation: 2,
-            ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
+                onPressed: () {
+                  print('DEBUG: Botón Emitir Acción presionado');
+                  _showEmitAccionDialog();
+                },
+                icon: const Icon(Icons.add_business),
+                label: const Text('Emitir Acción'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: CeasColors.primaryBlue,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  textStyle:
+                      const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -668,6 +691,104 @@ class _SharesListScreenState extends State<SharesListScreen> {
           duration: const Duration(seconds: 3),
         ),
       );
+    }
+  }
+
+  /// Descarga el reporte de acciones en formato PDF
+  Future<void> _descargarReporteAcciones() async {
+    try {
+      // Mostrar diálogo de carga
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Generando reporte PDF...'),
+            ],
+          ),
+        ),
+      );
+
+      // Obtener token de autenticación
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (!authProvider.isAuthenticated) {
+        throw Exception('No autenticado');
+      }
+
+      final accionService = AccionService();
+      final pdfBytes = await accionService.downloadReporteAcciones(
+        token: authProvider.user!.accessToken,
+      );
+
+      // Cerrar diálogo de carga
+      if (mounted) Navigator.of(context).pop();
+
+      if (pdfBytes.isEmpty) {
+        throw Exception('El archivo PDF está vacío');
+      }
+
+      // Crear URL del blob para descarga en web
+      final blob = html.Blob([pdfBytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      
+      // Crear un elemento de enlace temporal
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute('download', 'reporte_acciones_${DateTime.now().millisecondsSinceEpoch}.pdf')
+        ..click();
+      
+      // Limpiar la URL del blob
+      html.Url.revokeObjectUrl(url);
+
+      if (mounted) {
+        // Mostrar mensaje de éxito
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Reporte descargado exitosamente',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      // Cerrar diálogo de carga si está abierto
+      if (mounted) Navigator.of(context).pop();
+
+      print('❌ Error descargando reporte: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Error al descargar reporte: $e',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     }
   }
 }

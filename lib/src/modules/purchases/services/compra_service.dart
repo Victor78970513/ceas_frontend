@@ -59,4 +59,36 @@ class CompraService {
       return false;
     }
   }
+
+  /// Descarga el reporte de compras en formato PDF
+  static Future<List<int>> downloadReporteCompras(String token) async {
+    try {
+      print('📊 CompraService - Descargando reporte de compras...');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/compras/reporte/descargar'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('📡 CompraService - Respuesta del servidor: ${response.statusCode}');
+      print('📄 CompraService - Content-Type: ${response.headers['content-type']}');
+      print('📄 CompraService - Content-Length: ${response.headers['content-length']}');
+
+      if (response.statusCode == 200) {
+        final pdfBytes = response.bodyBytes;
+        print('✅ CompraService - Reporte descargado exitosamente: ${pdfBytes.length} bytes');
+        return pdfBytes;
+      } else {
+        final errorMessage = response.body.isNotEmpty 
+            ? response.body 
+            : 'Error al descargar el reporte';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      print('❌ CompraService - Error descargando reporte: $e');
+      rethrow;
+    }
+  }
 }

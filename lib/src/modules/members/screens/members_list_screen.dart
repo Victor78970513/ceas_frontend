@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:html' as html;
 import '../../../core/theme/ceas_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/socio_provider.dart';
 import '../models/socio.dart';
+import '../services/members_service.dart';
 import 'member_form_screen.dart';
 
 class MembersListScreen extends StatefulWidget {
@@ -323,6 +325,8 @@ class _MembersListScreenState extends State<MembersListScreen> {
       onTap: () {
         if (title == 'Crear Socio') {
           _showCreateMemberDialog(context);
+        } else if (title == 'Generar Reporte') {
+          _descargarReporteSocios();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('$title (ficticio)')),
@@ -1598,6 +1602,96 @@ class _MembersListScreenState extends State<MembersListScreen> {
         ),
       ),
     );
+  }
+
+  /// Descarga el reporte de socios en formato PDF
+  Future<void> _descargarReporteSocios() async {
+    try {
+      // Mostrar diálogo de carga
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Generando reporte PDF...'),
+            ],
+          ),
+        ),
+      );
+
+      final membersService = MembersService();
+      final pdfBytes = await membersService.downloadReporteSocios();
+
+      // Cerrar diálogo de carga
+      if (mounted) Navigator.of(context).pop();
+
+      if (pdfBytes.isEmpty) {
+        throw Exception('El archivo PDF está vacío');
+      }
+
+      // Crear URL del blob para descarga en web
+      final blob = html.Blob([pdfBytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      
+      // Crear un elemento de enlace temporal
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute('download', 'reporte_socios_${DateTime.now().millisecondsSinceEpoch}.pdf')
+        ..click();
+      
+      // Limpiar la URL del blob
+      html.Url.revokeObjectUrl(url);
+
+      if (mounted) {
+        // Mostrar mensaje de éxito
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Reporte descargado exitosamente',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      // Cerrar diálogo de carga si está abierto
+      if (mounted) Navigator.of(context).pop();
+
+      print('❌ Error descargando reporte: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Error al descargar reporte: $e',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 
   String _formatDate(String dateString) {

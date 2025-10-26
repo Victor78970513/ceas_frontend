@@ -193,5 +193,42 @@ class AccionService {
       throw Exception('Error de conexión: $e');
     }
   }
+
+  /// Descarga el reporte de acciones en formato PDF
+  Future<List<int>> downloadReporteAcciones({
+    required String token,
+  }) async {
+    try {
+      print('📊 Descargando reporte de acciones...');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/acciones/reporte/descargar'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('📡 Respuesta del servidor: ${response.statusCode}');
+      print('📄 Content-Type: ${response.headers['content-type']}');
+      print('📄 Content-Length: ${response.headers['content-length']}');
+
+      if (response.statusCode == 200) {
+        final pdfBytes = response.bodyBytes;
+        print('✅ Reporte descargado exitosamente: ${pdfBytes.length} bytes');
+        return pdfBytes;
+      } else {
+        final errorMessage = response.body.isNotEmpty 
+            ? response.body 
+            : 'Error al descargar el reporte';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      print('❌ Error descargando reporte: $e');
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Error de conexión: $e');
+    }
+  }
 }
 

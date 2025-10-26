@@ -181,4 +181,36 @@ class FinanceService {
       throw Exception('Error de conexión: $e');
     }
   }
+
+  /// Descarga el reporte de finanzas en formato PDF
+  static Future<List<int>> downloadReporteFinanzas(String token) async {
+    try {
+      print('📊 FinanceService - Descargando reporte de finanzas...');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/finanzas/reporte/descargar'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 30));
+
+      print('📡 FinanceService - Respuesta del servidor: ${response.statusCode}');
+      print('📄 FinanceService - Content-Type: ${response.headers['content-type']}');
+      print('📄 FinanceService - Content-Length: ${response.headers['content-length']}');
+
+      if (response.statusCode == 200) {
+        final pdfBytes = response.bodyBytes;
+        print('✅ FinanceService - Reporte descargado exitosamente: ${pdfBytes.length} bytes');
+        return pdfBytes;
+      } else {
+        final errorMessage = response.body.isNotEmpty 
+            ? response.body 
+            : 'Error al descargar el reporte';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      print('❌ FinanceService - Error descargando reporte: $e');
+      rethrow;
+    }
+  }
 }

@@ -309,4 +309,36 @@ class PersonalService {
       return false;
     }
   }
+
+  /// Descarga el reporte de personal en formato PDF
+  static Future<List<int>> downloadReportePersonal(String token) async {
+    try {
+      print('📊 PersonalService - Descargando reporte de personal...');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/personal/reporte/descargar'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('📡 PersonalService - Respuesta del servidor: ${response.statusCode}');
+      print('📄 PersonalService - Content-Type: ${response.headers['content-type']}');
+      print('📄 PersonalService - Content-Length: ${response.headers['content-length']}');
+
+      if (response.statusCode == 200) {
+        final pdfBytes = response.bodyBytes;
+        print('✅ PersonalService - Reporte descargado exitosamente: ${pdfBytes.length} bytes');
+        return pdfBytes;
+      } else {
+        final errorMessage = response.body.isNotEmpty 
+            ? response.body 
+            : 'Error al descargar el reporte';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      print('❌ PersonalService - Error descargando reporte: $e');
+      rethrow;
+    }
+  }
 }

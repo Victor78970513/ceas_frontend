@@ -57,8 +57,8 @@ class CeasDrawer extends StatelessWidget {
                     context, 'Finanzas', Icons.account_balance, '/finanzas_reportes'),
                 _drawerItem(context, 'Business Intelligence', Icons.bar_chart, '/bi'),
                 _drawerItem(context, 'Logs del Sistema', Icons.list_alt, '/logs'),
-                _drawerItem(
-                    context, 'Configuración', Icons.settings, '/configuracion'),
+                // _drawerItem(
+                //     context, 'Configuración', Icons.settings, '/configuracion'),
               ],
             ],
           ),

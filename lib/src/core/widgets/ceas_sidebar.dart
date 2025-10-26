@@ -95,7 +95,7 @@ class CeasSidebar extends StatelessWidget {
                         const SizedBox(height: 12),
                         const Divider(color: Colors.white24, thickness: 1, height: 0),
                         _sidebarItem(context, 'Usuarios y seguridad', Icons.security, '/usuarios'),
-                        _sidebarItem(context, 'Configuración', Icons.settings, '/configuracion'),
+                        // _sidebarItem(context, 'Configuración', Icons.settings, '/configuracion'),
                       ],
                     );
                   },

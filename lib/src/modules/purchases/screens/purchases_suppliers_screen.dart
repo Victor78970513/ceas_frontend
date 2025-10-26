@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:html' as html;
 import '../../../core/theme/ceas_colors.dart';
 import '../providers/proveedor_provider.dart';
 import '../providers/compra_provider.dart';
 import '../models/proveedor.dart';
 import '../models/compra.dart';
+import '../services/compra_service.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class PurchasesSuppliersScreen extends StatefulWidget {
@@ -202,6 +204,10 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
                       ],
                     ),
                   ),
+
+                // Acciones rápidas
+                const SizedBox(height: 24),
+                _buildQuickActionsRow(),
 
                 // Tabs
                 Container(
@@ -1381,5 +1387,157 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
         ],
       ),
     );
+  }
+
+  Widget _buildQuickActionsRow() {
+    return Wrap(
+      spacing: 16,
+      children: [
+        SizedBox(
+          width: 250,
+          child: _buildQuickAction(
+            'Generar Reporte',
+            Icons.assessment,
+            Colors.purple,
+            _descargarReporteCompras,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickAction(
+      String title, IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Descarga el reporte de compras en formato PDF
+  Future<void> _descargarReporteCompras() async {
+    try {
+      // Mostrar diálogo de carga
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Generando reporte PDF...'),
+            ],
+          ),
+        ),
+      );
+
+      // Obtener token de autenticación
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (!authProvider.isAuthenticated) {
+        throw Exception('No autenticado');
+      }
+
+      final pdfBytes = await CompraService.downloadReporteCompras(
+        authProvider.user!.accessToken,
+      );
+
+      // Cerrar diálogo de carga
+      if (mounted) Navigator.of(context).pop();
+
+      if (pdfBytes.isEmpty) {
+        throw Exception('El archivo PDF está vacío');
+      }
+
+      // Crear URL del blob para descarga en web
+      final blob = html.Blob([pdfBytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      
+      // Crear un elemento de enlace temporal
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute('download', 'reporte_compras_${DateTime.now().millisecondsSinceEpoch}.pdf')
+        ..click();
+      
+      // Limpiar la URL del blob
+      html.Url.revokeObjectUrl(url);
+
+      if (mounted) {
+        // Mostrar mensaje de éxito
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Reporte descargado exitosamente',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      // Cerrar diálogo de carga si está abierto
+      if (mounted) Navigator.of(context).pop();
+
+      print('❌ Error descargando reporte: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Error al descargar reporte: $e',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 }
