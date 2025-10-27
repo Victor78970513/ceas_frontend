@@ -8,6 +8,8 @@ import '../models/proveedor.dart';
 import '../models/compra.dart';
 import '../services/compra_service.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../widgets/proveedor_card.dart';
+import '../widgets/compra_card.dart';
 
 class PurchasesSuppliersScreen extends StatefulWidget {
   const PurchasesSuppliersScreen({Key? key}) : super(key: key);
@@ -62,14 +64,18 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
       builder: (context, proveedorProvider, compraProvider, child) {
         return Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 1024;
+              
+              return SingleChildScrollView(
+                padding: EdgeInsets.all(isMobile ? 12.0 : 24.0),
+                child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header principal
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(isMobile ? 16 : 24),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -88,70 +94,138 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.shopping_cart_rounded,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
+                  child: isMobile
+                      ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Compras y Proveedores',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.shopping_cart_rounded,
+                                    color: Colors.white,
+                                    size: isMobile ? 24 : 28,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Compras y Proveedores',
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 18 : 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 12),
                             Text(
                               'Gestión de proveedores y control de compras',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: isMobile ? 12 : 14,
                                 color: Colors.white.withOpacity(0.9),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  final authProvider =
+                                      Provider.of<AuthProvider>(context, listen: false);
+                                  if (authProvider.isAuthenticated) {
+                                    proveedorProvider
+                                        .refresh(authProvider.user!.accessToken);
+                                    compraProvider
+                                        .refresh(authProvider.user!.accessToken);
+                                  }
+                                },
+                                icon: const Icon(Icons.refresh_rounded),
+                                label: const Text('Actualizar'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white.withOpacity(0.2),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.shopping_cart_rounded,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Compras y Proveedores',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Gestión de proveedores y control de compras',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white.withOpacity(0.9),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                final authProvider =
+                                    Provider.of<AuthProvider>(context, listen: false);
+                                if (authProvider.isAuthenticated) {
+                                  proveedorProvider
+                                      .refresh(authProvider.user!.accessToken);
+                                  compraProvider
+                                      .refresh(authProvider.user!.accessToken);
+                                }
+                              },
+                              icon: const Icon(Icons.refresh_rounded),
+                              label: const Text('Actualizar'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white.withOpacity(0.2),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          final authProvider =
-                              Provider.of<AuthProvider>(context, listen: false);
-                          if (authProvider.isAuthenticated) {
-                            proveedorProvider
-                                .refresh(authProvider.user!.accessToken);
-                            compraProvider
-                                .refresh(authProvider.user!.accessToken);
-                          }
-                        },
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('Actualizar'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.2),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
                 const SizedBox(height: 24),
 
@@ -275,7 +349,9 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
                   ),
                 ),
               ],
-            ),
+                ),
+              );
+            },
           ),
         );
       },
@@ -291,50 +367,105 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     final totalCompras = estadisticasCompras['total'] ?? 0;
     final montoTotalCompras = estadisticasCompras['montoTotal'] ?? 0.0;
 
-    // Debug info
-    print('Stats - Proveedores totales: $totalProveedores');
-    print('Stats - Compras totales: $totalCompras');
-    print('Stats - Proveedores activos: $proveedoresActivos');
-    print('Stats - Monto total compras: $montoTotalCompras');
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 1024;
 
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            title: 'Proveedores Totales',
-            value: totalProveedores.toString(),
-            icon: Icons.store_mall_directory_rounded,
-            color: Colors.indigo,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            title: 'Proveedores Activos',
-            value: proveedoresActivos.toString(),
-            icon: Icons.verified_rounded,
-            color: Colors.green,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            title: 'Compras Totales',
-            value: totalCompras.toString(),
-            icon: Icons.shopping_bag_rounded,
-            color: Colors.orange,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            title: 'Monto Total (Bs.)',
-            value: montoTotalCompras.toStringAsFixed(0),
-            icon: Icons.payments_rounded,
-            color: Colors.teal,
-          ),
-        ),
-      ],
+        if (isMobile) {
+          // En mobile, mostrar 2 columnas
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              SizedBox(
+                width: (constraints.maxWidth - 16) / 2,
+                child: _buildStatCard(
+                  title: 'Proveedores Totales',
+                  value: totalProveedores.toString(),
+                  icon: Icons.store_mall_directory_rounded,
+                  color: Colors.indigo,
+                  isMobile: true,
+                ),
+              ),
+              SizedBox(
+                width: (constraints.maxWidth - 16) / 2,
+                child: _buildStatCard(
+                  title: 'Proveedores Activos',
+                  value: proveedoresActivos.toString(),
+                  icon: Icons.verified_rounded,
+                  color: Colors.green,
+                  isMobile: true,
+                ),
+              ),
+              SizedBox(
+                width: (constraints.maxWidth - 16) / 2,
+                child: _buildStatCard(
+                  title: 'Compras Totales',
+                  value: totalCompras.toString(),
+                  icon: Icons.shopping_bag_rounded,
+                  color: Colors.orange,
+                  isMobile: true,
+                ),
+              ),
+              SizedBox(
+                width: (constraints.maxWidth - 16) / 2,
+                child: _buildStatCard(
+                  title: 'Monto Total (Bs.)',
+                  value: montoTotalCompras.toStringAsFixed(0),
+                  icon: Icons.payments_rounded,
+                  color: Colors.teal,
+                  isMobile: true,
+                ),
+              ),
+            ],
+          );
+        }
+
+        // En desktop, mostrar 4 columnas
+        return Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                title: 'Proveedores Totales',
+                value: totalProveedores.toString(),
+                icon: Icons.store_mall_directory_rounded,
+                color: Colors.indigo,
+                isMobile: false,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                title: 'Proveedores Activos',
+                value: proveedoresActivos.toString(),
+                icon: Icons.verified_rounded,
+                color: Colors.green,
+                isMobile: false,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                title: 'Compras Totales',
+                value: totalCompras.toString(),
+                icon: Icons.shopping_bag_rounded,
+                color: Colors.orange,
+                isMobile: false,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                title: 'Monto Total (Bs.)',
+                value: montoTotalCompras.toStringAsFixed(0),
+                icon: Icons.payments_rounded,
+                color: Colors.teal,
+                isMobile: false,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -343,9 +474,10 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
     required String value,
     required IconData icon,
     required Color color,
+    required bool isMobile,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isMobile ? 12 : 16),
       decoration: BoxDecoration(
         color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
@@ -354,25 +486,33 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isMobile ? 8 : 12),
             decoration: BoxDecoration(
               color: color.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color),
+            child: Icon(icon, color: color, size: isMobile ? 20 : 24),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isMobile ? 8 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style:
-                        const TextStyle(fontSize: 13, color: Colors.black54)),
-                const SizedBox(height: 4),
-                Text(value,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: isMobile ? 11 : 13,
+                    color: Colors.black54,
+                  ),
+                ),
+                SizedBox(height: isMobile ? 2 : 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: isMobile ? 16 : 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ),
@@ -513,13 +653,45 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
       List<Proveedor> proveedores, ProveedorProvider proveedorProvider) {
     final paginated = proveedorProvider.paginatedProveedores;
 
-    // Debug logs
-    print('Proveedores totales: ${proveedorProvider.totalItems}');
-    print('Página actual: ${proveedorProvider.currentPage}');
-    print('Elementos por página: ${proveedorProvider.itemsPerPage}');
-    print('Elementos paginados: ${paginated.length}');
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 1024;
 
-    return SingleChildScrollView(
+        // En mobile, mostrar tarjetas
+        if (isMobile) {
+          if (paginated.isEmpty) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: const Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.inbox_outlined, size: 48, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      'No hay proveedores para mostrar',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              children: paginated
+                  .map((proveedor) => ProveedorCard(proveedor: proveedor))
+                  .toList(),
+            ),
+          );
+        }
+
+        // En desktop, mostrar tabla
+        return SingleChildScrollView(
       child: Column(
         children: [
           Container(
@@ -762,19 +934,53 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
           ],
         ],
       ),
+        );
+      },
     );
   }
 
   Widget _buildComprasTable(CompraProvider compraProvider) {
     final paginatedCompras = compraProvider.paginatedCompras;
 
-    // Debug logs
-    print('Compras totales: ${compraProvider.totalItems}');
-    print('Página actual: ${compraProvider.currentPage}');
-    print('Elementos por página: ${compraProvider.itemsPerPage}');
-    print('Elementos paginados: ${paginatedCompras.length}');
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 1024;
 
-    return SingleChildScrollView(
+        // En mobile, mostrar tarjetas
+        if (isMobile) {
+          if (paginatedCompras.isEmpty) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: const Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.shopping_bag_outlined, size: 48, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      'No hay compras para mostrar',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              children: paginatedCompras
+                  .map((compra) => CompraCard(compra: compra))
+                  .toList(),
+            ),
+          );
+        }
+
+        // En desktop, mostrar tabla
+        return SingleChildScrollView(
       child: Column(
         children: [
           Container(
@@ -1018,6 +1224,8 @@ class _PurchasesSuppliersScreenState extends State<PurchasesSuppliersScreen>
           ],
         ],
       ),
+        );
+      },
     );
   }
 
