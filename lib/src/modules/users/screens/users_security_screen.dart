@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/ceas_colors.dart';
+import '../widgets/usuario_card.dart';
 
 class UsersSecurityScreen extends StatefulWidget {
   const UsersSecurityScreen({Key? key}) : super(key: key);
@@ -421,21 +422,23 @@ class _UsersSecurityScreenState extends State<UsersSecurityScreen>
                       ],
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     height: 600,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(16),
-                        bottomRight: Radius.circular(16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16),
+                        ),
                       ),
-                    ),
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildUsuariosTab(),
-                        _buildLogsTab(),
-                      ],
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          SingleChildScrollView(child: _buildUsuariosTab()),
+                          SingleChildScrollView(child: _buildLogsTab()),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -456,86 +459,123 @@ class _UsersSecurityScreenState extends State<UsersSecurityScreen>
     final logsHoy =
         logsSistema.where((l) => l['fecha'].startsWith('15/12/2024')).length;
 
-    return Row(
-      children: [
-        _buildStatCard('Total Usuarios', totalUsuarios.toString(),
-            Icons.people_rounded, CeasColors.kpiBlue, 'Usuarios registrados'),
-        const SizedBox(width: 16),
-        _buildStatCard('Activos', usuariosActivos.toString(),
-            Icons.check_circle_rounded, CeasColors.kpiGreen, 'En buen estado'),
-        const SizedBox(width: 16),
-        _buildStatCard('Bloqueados', usuariosBloqueados.toString(),
-            Icons.block_rounded, CeasColors.kpiOrange, 'Acceso restringido'),
-        const SizedBox(width: 16),
-        _buildStatCard('Logs Hoy', logsHoy.toString(), Icons.assignment_rounded,
-            CeasColors.kpiPurple, 'Actividades registradas'),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth <= 768;
+
+        if (isMobile) {
+          // En mobile, mostrar 2 columnas
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              SizedBox(
+                width: (constraints.maxWidth - 8) / 2,
+                child: _buildStatCard('Total Usuarios', totalUsuarios.toString(),
+                    Icons.people_rounded, CeasColors.kpiBlue, 'Usuarios registrados', false),
+              ),
+              SizedBox(
+                width: (constraints.maxWidth - 8) / 2,
+                child: _buildStatCard('Activos', usuariosActivos.toString(),
+                    Icons.check_circle_rounded, CeasColors.kpiGreen, 'En buen estado', false),
+              ),
+              SizedBox(
+                width: (constraints.maxWidth - 8) / 2,
+                child: _buildStatCard('Bloqueados', usuariosBloqueados.toString(),
+                    Icons.block_rounded, CeasColors.kpiOrange, 'Acceso restringido', false),
+              ),
+              SizedBox(
+                width: (constraints.maxWidth - 8) / 2,
+                child: _buildStatCard('Logs Hoy', logsHoy.toString(), Icons.assignment_rounded,
+                    CeasColors.kpiPurple, 'Actividades registradas', false),
+              ),
+            ],
+          );
+        }
+
+        // En desktop, mostrar 4 columnas
+        return Row(
+          children: [
+            _buildStatCard('Total Usuarios', totalUsuarios.toString(),
+                Icons.people_rounded, CeasColors.kpiBlue, 'Usuarios registrados', true),
+            const SizedBox(width: 16),
+            _buildStatCard('Activos', usuariosActivos.toString(),
+                Icons.check_circle_rounded, CeasColors.kpiGreen, 'En buen estado', true),
+            const SizedBox(width: 16),
+            _buildStatCard('Bloqueados', usuariosBloqueados.toString(),
+                Icons.block_rounded, CeasColors.kpiOrange, 'Acceso restringido', true),
+            const SizedBox(width: 16),
+            _buildStatCard('Logs Hoy', logsHoy.toString(), Icons.assignment_rounded,
+                CeasColors.kpiPurple, 'Actividades registradas', true),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildStatCard(
-      String title, String value, IconData icon, Color color, String subtitle) {
-    return Expanded(
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey[200]!, width: 1),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, color: color, size: 20),
+      String title, String value, IconData icon, Color color, String subtitle, bool useExpanded) {
+    final card = Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey[200]!, width: 1),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(useExpanded ? 20 : 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(useExpanded ? 8 : 6),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Text(
-                          value,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
+                  child: Icon(icon, color: color, size: useExpanded ? 20 : 18),
                 ),
+                SizedBox(width: useExpanded ? 12 : 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: useExpanded ? 14 : 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: useExpanded ? 24 : 20,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: useExpanded ? 12 : 10,
+                color: Colors.grey,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+    
+    return useExpanded ? Expanded(child: card) : card;
   }
 
   Widget _buildUsuariosTab() {
@@ -620,28 +660,28 @@ class _UsersSecurityScreenState extends State<UsersSecurityScreen>
           ),
         ),
         const SizedBox(width: 16),
-        _buildFilterDropdown(
-          'Estado',
-          filtroEstado,
-          ['Todos', 'Activo', 'Inactivo', 'Bloqueado'],
-          (value) => setState(() => filtroEstado = value!),
-        ),
-        const SizedBox(width: 16),
-        _buildFilterDropdown(
-          'Rol',
-          filtroRol,
-          [
-            'Todos',
-            'Administrador',
-            'Gerente',
-            'Encargado de Ventas',
-            'Contadora',
-            'Instructor',
-            'Recepcionista',
-            'Mantenimiento'
-          ],
-          (value) => setState(() => filtroRol = value!),
-        ),
+        // _buildFilterDropdown(
+        //   'Estado',
+        //   filtroEstado,
+        //   ['Todos', 'Activo', 'Inactivo', 'Bloqueado'],
+        //   (value) => setState(() => filtroEstado = value!),
+        // ),
+        // const SizedBox(width: 16),
+        // _buildFilterDropdown(
+        //   'Rol',
+        //   filtroRol,
+        //   [
+        //     'Todos',
+        //     'Administrador',
+        //     'Gerente',
+        //     'Encargado de Ventas',
+        //     'Contadora',
+        //     'Instructor',
+        //     'Recepcionista',
+        //     'Mantenimiento'
+        //   ],
+        //   (value) => setState(() => filtroRol = value!),
+        // ),
       ],
     );
   }
@@ -719,7 +759,28 @@ class _UsersSecurityScreenState extends State<UsersSecurityScreen>
     final paginatedUsuarios = filtered.sublist(startIndex, endIndex);
     final totalPages = (filtered.length / itemsPerPageUsuarios).ceil();
 
-    return Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth <= 768;
+        
+        if (isMobile) {
+          // En mobile, mostrar tarjetas
+          return Column(
+            children: [
+              ...paginatedUsuarios.map((usuario) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: UsuarioCard(usuario: usuario),
+                );
+              }).toList(),
+              const SizedBox(height: 16),
+              _buildPagination(startIndex, endIndex, filtered.length, totalPages),
+            ],
+          );
+        }
+        
+        // En desktop, mostrar tabla
+        return Column(
       children: [
         Container(
           decoration: BoxDecoration(
@@ -838,6 +899,57 @@ class _UsersSecurityScreenState extends State<UsersSecurityScreen>
                       : null,
                 ),
               ],
+            ),
+          ],
+        ),
+      ],
+        );
+      },
+    );
+  }
+  
+  Widget _buildPagination(int startIndex, int endIndex, int totalItems, int totalPages) {
+    return Column(
+      children: [
+        Text(
+          'Mostrando $startIndex-$endIndex de $totalItems usuarios',
+          style: const TextStyle(
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left_rounded),
+              onPressed: currentPageUsuarios > 1
+                  ? () => setState(() => currentPageUsuarios--)
+                  : null,
+            ),
+            ...List.generate(
+              totalPages,
+              (index) => TextButton(
+                onPressed: () => setState(() => currentPageUsuarios = index + 1),
+                style: TextButton.styleFrom(
+                  backgroundColor: currentPageUsuarios == index + 1
+                      ? CeasColors.primaryBlue
+                      : Colors.transparent,
+                  foregroundColor: currentPageUsuarios == index + 1
+                      ? Colors.white
+                      : CeasColors.primaryBlue,
+                ),
+                child: Text('${index + 1}'),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right_rounded),
+              onPressed: currentPageUsuarios < totalPages
+                  ? () => setState(() => currentPageUsuarios++)
+                  : null,
             ),
           ],
         ),

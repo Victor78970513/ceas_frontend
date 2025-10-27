@@ -999,136 +999,258 @@ class _StaffListScreenState extends State<StaffListScreen> {
     final startIndex = (currentPage - 1) * itemsPerPage;
     final endIndex = (startIndex + itemsPerPage).clamp(0, totalItems);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        border: Border(
-          top: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Información de la página
-          Text(
-            'Mostrando ${endIndex - startIndex} de $totalItems registros',
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth <= 768;
+
+        return Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 20),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            border: Border(
+              top: BorderSide(
+                color: Colors.grey.shade200,
+                width: 1,
+              ),
             ),
           ),
-
-          // Controles de navegación
-          Row(
-            children: [
-              // Botón anterior
-              IconButton(
-                onPressed: currentPage > 1
-                    ? () => onPageChanged(currentPage - 1)
-                    : null,
-                icon: const Icon(Icons.chevron_left),
-                color: currentPage > 1
-                    ? CeasColors.primaryBlue
-                    : Colors.grey.shade400,
-              ),
-
-              // Número de página actual
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+          child: isMobile
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Información de la página
+                    Text(
+                      'Mostrando ${endIndex - startIndex} de $totalItems registros',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Controles de navegación
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Botón anterior
+                        IconButton(
+                          onPressed: currentPage > 1
+                              ? () => onPageChanged(currentPage - 1)
+                              : null,
+                          icon: const Icon(Icons.chevron_left),
+                          color: currentPage > 1
+                              ? CeasColors.primaryBlue
+                              : Colors.grey.shade400,
+                        ),
+                        // Número de página actual
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: CeasColors.primaryBlue,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '$currentPage',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        // Separador
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            ' de $totalPages',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        // Botón siguiente
+                        IconButton(
+                          onPressed: currentPage < totalPages
+                              ? () => onPageChanged(currentPage + 1)
+                              : null,
+                          icon: const Icon(Icons.chevron_right),
+                          color: currentPage < totalPages
+                              ? CeasColors.primaryBlue
+                              : Colors.grey.shade400,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Selector de elementos por página
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Mostrar: ',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        DropdownButton<int>(
+                          value: itemsPerPage,
+                          onChanged: (int? newValue) {
+                            if (newValue != null) {
+                              if (totalItems ==
+                                  Provider.of<PersonalProvider>(context, listen: false)
+                                      .personal
+                                      .length) {
+                                setState(() {
+                                  this.itemsPerPage = newValue;
+                                  onPageChanged(1);
+                                });
+                              } else {
+                                setState(() {
+                                  itemsPerPageAsistencia = newValue;
+                                  onPageChanged(1);
+                                });
+                              }
+                            }
+                          },
+                          items: [5, 10, 20, 50].map((int value) {
+                            return DropdownMenuItem<int>(
+                              value: value,
+                              child: Text('$value'),
+                            );
+                          }).toList(),
+                          underline: Container(),
+                          style: TextStyle(
+                            color: CeasColors.primaryBlue,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Información de la página
+                    Text(
+                      'Mostrando ${endIndex - startIndex} de $totalItems registros',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    // Controles de navegación
+                    Row(
+                      children: [
+                        // Botón anterior
+                        IconButton(
+                          onPressed: currentPage > 1
+                              ? () => onPageChanged(currentPage - 1)
+                              : null,
+                          icon: const Icon(Icons.chevron_left),
+                          color: currentPage > 1
+                              ? CeasColors.primaryBlue
+                              : Colors.grey.shade400,
+                        ),
+                        // Número de página actual
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: CeasColors.primaryBlue,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '$currentPage',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        // Separador
+                        Text(
+                          ' de $totalPages',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        // Botón siguiente
+                        IconButton(
+                          onPressed: currentPage < totalPages
+                              ? () => onPageChanged(currentPage + 1)
+                              : null,
+                          icon: const Icon(Icons.chevron_right),
+                          color: currentPage < totalPages
+                              ? CeasColors.primaryBlue
+                              : Colors.grey.shade400,
+                        ),
+                      ],
+                    ),
+                    // Selector de elementos por página
+                    Row(
+                      children: [
+                        Text(
+                          'Mostrar: ',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        DropdownButton<int>(
+                          value: itemsPerPage,
+                          onChanged: (int? newValue) {
+                            if (newValue != null) {
+                              if (totalItems ==
+                                  Provider.of<PersonalProvider>(context, listen: false)
+                                      .personal
+                                      .length) {
+                                setState(() {
+                                  this.itemsPerPage = newValue;
+                                  onPageChanged(1);
+                                });
+                              } else {
+                                setState(() {
+                                  itemsPerPageAsistencia = newValue;
+                                  onPageChanged(1);
+                                });
+                              }
+                            }
+                          },
+                          items: [5, 10, 20, 50].map((int value) {
+                            return DropdownMenuItem<int>(
+                              value: value,
+                              child: Text('$value'),
+                            );
+                          }).toList(),
+                          underline: Container(),
+                          style: TextStyle(
+                            color: CeasColors.primaryBlue,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                decoration: BoxDecoration(
-                  color: CeasColors.primaryBlue,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '$currentPage',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-
-              // Separador
-              Text(
-                ' de $totalPages',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-
-              // Botón siguiente
-              IconButton(
-                onPressed: currentPage < totalPages
-                    ? () => onPageChanged(currentPage + 1)
-                    : null,
-                icon: const Icon(Icons.chevron_right),
-                color: currentPage < totalPages
-                    ? CeasColors.primaryBlue
-                    : Colors.grey.shade400,
-              ),
-            ],
-          ),
-
-          // Selector de elementos por página
-          Row(
-            children: [
-              Text(
-                'Mostrar: ',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(width: 8),
-              DropdownButton<int>(
-                value: itemsPerPage,
-                onChanged: (int? newValue) {
-                  if (newValue != null) {
-                    // Actualizar itemsPerPage según la tabla
-                    if (totalItems ==
-                        Provider.of<PersonalProvider>(context, listen: false)
-                            .personal
-                            .length) {
-                      setState(() {
-                        this.itemsPerPage = newValue;
-                        onPageChanged(1); // Reset a la primera página
-                      });
-                    } else {
-                      setState(() {
-                        itemsPerPageAsistencia = newValue;
-                        onPageChanged(1); // Reset a la primera página
-                      });
-                    }
-                  }
-                },
-                items: [5, 10, 20, 50].map((int value) {
-                  return DropdownMenuItem<int>(
-                    value: value,
-                    child: Text('$value'),
-                  );
-                }).toList(),
-                underline: Container(),
-                style: TextStyle(
-                  color: CeasColors.primaryBlue,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
