@@ -60,7 +60,7 @@ class _CeasMainLayoutState extends State<CeasMainLayout> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isMobile = constraints.maxWidth <= 768;
+        final isMobile = constraints.maxWidth < 1024; // Cambiado a 1024px para tablets
 
         if (isMobile) {
           return _buildMobileLayout();
@@ -72,13 +72,13 @@ class _CeasMainLayoutState extends State<CeasMainLayout> {
   }
 
   Widget _buildMobileLayout() {
+    final screenTitle = _getScreenTitle(_selectedRoute);
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        title: const Text(
-            ''), // Título vacío para que solo se vea el icono del drawer
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Colors.black87),
@@ -87,9 +87,35 @@ class _CeasMainLayoutState extends State<CeasMainLayout> {
             },
           ),
         ),
-        actions: const [], // Sin acciones adicionales
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E3A8A).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Icon(
+                Icons.sports_soccer,
+                color: Color(0xFF1E3A8A),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              screenTitle,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        actions: const [],
       ),
       drawer: Drawer(
+        width: 280,
         child: CeasSidebar(
           selected: _selectedRoute,
           onSelect: (route) {
@@ -102,6 +128,33 @@ class _CeasMainLayoutState extends State<CeasMainLayout> {
       ),
       body: _getScreen(_selectedRoute),
     );
+  }
+
+  String _getScreenTitle(String route) {
+    switch (route) {
+      case '/dashboard':
+        return 'Panel Principal';
+      case '/socios':
+        return 'Socios';
+      case '/acciones':
+        return 'Acciones';
+      case '/finanzas_reportes':
+        return 'Finanzas';
+      case '/compras_proveedores':
+        return 'Compras';
+      case '/personal':
+        return 'Personal';
+      case '/usuarios':
+        return 'Usuarios';
+      case '/configuracion':
+        return 'Configuración';
+      case '/bi':
+        return 'BI';
+      case '/socio-acciones':
+        return 'Mis Acciones';
+      default:
+        return 'CEAS ERP';
+    }
   }
 
   Widget _buildDesktopLayout() {
