@@ -110,20 +110,7 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                           ],
                         ),
                       ),
-                      ElevatedButton.icon(
-                        onPressed: () => _showAgregarMovimientoDialog(context),
-                        icon: const Icon(Icons.add_rounded),
-                        label: const Text('Agregar Movimiento'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: CeasColors.primaryBlue,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                      ),
+                      const Spacer(),
                     ],
                   ),
                 ),
@@ -1328,6 +1315,15 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
     return Wrap(
       spacing: 16,
       children: [
+        SizedBox(
+          width: 250,
+          child: _buildQuickAction(
+            'Agregar Movimiento',
+            Icons.add_rounded,
+            CeasColors.primaryBlue,
+            () => _showAgregarMovimientoDialog(context),
+          ),
+        ),
         SizedBox(
           width: 250,
           child: _buildQuickAction(

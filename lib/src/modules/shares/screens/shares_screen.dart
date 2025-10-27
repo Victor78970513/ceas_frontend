@@ -16,6 +16,8 @@ import '../providers/accion_provider.dart';
 import '../services/accion_service.dart';
 import 'share_emission_screen.dart';
 import '../widgets/certificate_download_dialog.dart';
+import '../widgets/action_card.dart';
+import '../widgets/stats_section.dart';
 
 class SharesScreen extends StatefulWidget {
   const SharesScreen({Key? key}) : super(key: key);
@@ -106,101 +108,126 @@ class _SharesScreenState extends State<SharesScreen> {
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.assignment_turned_in_rounded,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 1024;
+                      
+                      if (isMobile) {
+                        return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Gestión de Acciones',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Administra las acciones emitidas y certificados del CEAS',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.assignment_turned_in_rounded,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Gestión de Acciones',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Gestión de acciones y certificados',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white.withOpacity(0.9),
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          _showEmitirAccionDialog(context);
-                        },
-                        icon: const Icon(Icons.add_rounded),
-                        label: const Text('Emitir Acción'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: CeasColors.primaryBlue,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                      ),
-                    ],
+                        );
+                      }
+                      
+                      return Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.assignment_turned_in_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Gestión de Acciones',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Administra las acciones emitidas y certificados del CEAS',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 24),
 
                 // Estadísticas
-                Row(
-                  children: [
-                    _buildStatCard(
-                        'Total Acciones',
-                        totalAcciones.toString(),
-                        Icons.assignment_rounded,
-                        CeasColors.kpiBlue,
-                        'Acciones emitidas'),
-                    const SizedBox(width: 16),
-                    _buildStatCard(
-                        'Completamente Pagadas',
-                        accionesCompletamentePagadas.toString(),
-                        Icons.check_circle_rounded,
-                        CeasColors.kpiGreen,
-                        '100% pagadas'),
-                    const SizedBox(width: 16),
-                    _buildStatCard(
-                        'Parcialmente Pagadas',
-                        accionesParcialmentePagadas.toString(),
-                        Icons.payment_rounded,
-                        CeasColors.kpiOrange,
-                        'Pagos parciales'),
-                    const SizedBox(width: 16),
-                    _buildStatCard(
-                        'Pendientes',
-                        accionesPendientes.toString(),
-                        Icons.warning_rounded,
-                        CeasColors.kpiPurple,
-                        'Sin pagos'),
-                  ],
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 1024;
+                    return StatsSection(
+                      totalAcciones: totalAcciones,
+                      completamentePagadas: accionesCompletamentePagadas,
+                      parcialmentePagadas: accionesParcialmentePagadas,
+                      pendientes: accionesPendientes,
+                      isMobile: isMobile,
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
 
                 // Acciones rápidas
-                _buildQuickActionsRow(),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 1024;
+                    return _buildQuickActionsRow(isMobile: isMobile);
+                  },
+                ),
                 const SizedBox(height: 24),
 
                 // Filtros y búsqueda
@@ -241,82 +268,139 @@ class _SharesScreenState extends State<SharesScreen> {
                           ],
                         ),
                         const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[50],
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.grey[200]!),
-                                ),
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    hintText:
-                                        'Buscar por socio o ID de acción...',
-                                    hintStyle:
-                                        TextStyle(color: Colors.grey[500]),
-                                    prefixIcon: const Icon(Icons.search_rounded,
-                                        color: Colors.grey),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 16),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isMobile = constraints.maxWidth < 1024;
+                            
+                            if (isMobile) {
+                              return Column(
+                                children: [
+                                  // TextField arriba
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[50],
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.grey[200]!),
+                                    ),
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                        hintText: 'Buscar por socio o ID de acción...',
+                                        hintStyle: TextStyle(color: Colors.grey[500]),
+                                        prefixIcon: const Icon(Icons.search_rounded, color: Colors.grey),
+                                        border: InputBorder.none,
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                      ),
+                                      onChanged: (v) => setState(() => search = v),
+                                    ),
                                   ),
-                                  onChanged: (v) => setState(() => search = v),
+                                  const SizedBox(height: 16),
+                                  // Filtros abajo en un Row
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[50],
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(color: Colors.grey[200]!),
+                                          ),
+                                          child: DropdownButton<String>(
+                                            value: estadoAccion,
+                                            items: estadosAccion.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                                            onChanged: (v) => setState(() => estadoAccion = v ?? 'Todos'),
+                                            underline: Container(),
+                                            style: const TextStyle(fontWeight: FontWeight.w500, color: CeasColors.primaryBlue),
+                                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                                            isExpanded: true,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[50],
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(color: Colors.grey[200]!),
+                                          ),
+                                          child: DropdownButton<String>(
+                                            value: tipoAccion,
+                                            items: tiposAccion.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                                            onChanged: (v) => setState(() => tipoAccion = v ?? 'Todos'),
+                                            underline: Container(),
+                                            style: const TextStyle(fontWeight: FontWeight.w500, color: CeasColors.primaryBlue),
+                                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                                            isExpanded: true,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            }
+                            
+                            // Desktop layout - Row original
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[50],
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.grey[200]!),
+                                    ),
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                        hintText: 'Buscar por socio o ID de acción...',
+                                        hintStyle: TextStyle(color: Colors.grey[500]),
+                                        prefixIcon: const Icon(Icons.search_rounded, color: Colors.grey),
+                                        border: InputBorder.none,
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                      ),
+                                      onChanged: (v) => setState(() => search = v),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey[200]!),
-                              ),
-                              child: DropdownButton<String>(
-                                value: estadoAccion,
-                                items: estadosAccion
-                                    .map((e) => DropdownMenuItem(
-                                        value: e, child: Text(e)))
-                                    .toList(),
-                                onChanged: (v) =>
-                                    setState(() => estadoAccion = v ?? 'Todos'),
-                                underline: Container(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: CeasColors.primaryBlue),
-                                icon: const Icon(
-                                    Icons.keyboard_arrow_down_rounded),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey[200]!),
-                              ),
-                              child: DropdownButton<String>(
-                                value: tipoAccion,
-                                items: tiposAccion
-                                    .map((e) => DropdownMenuItem(
-                                        value: e, child: Text(e)))
-                                    .toList(),
-                                onChanged: (v) =>
-                                    setState(() => tipoAccion = v ?? 'Todos'),
-                                underline: Container(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: CeasColors.primaryBlue),
-                                icon: const Icon(
-                                    Icons.keyboard_arrow_down_rounded),
-                              ),
-                            ),
-                          ],
+                                const SizedBox(width: 16),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[50],
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.grey[200]!),
+                                  ),
+                                  child: DropdownButton<String>(
+                                    value: estadoAccion,
+                                    items: estadosAccion.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                                    onChanged: (v) => setState(() => estadoAccion = v ?? 'Todos'),
+                                    underline: Container(),
+                                    style: const TextStyle(fontWeight: FontWeight.w500, color: CeasColors.primaryBlue),
+                                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[50],
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.grey[200]!),
+                                  ),
+                                  child: DropdownButton<String>(
+                                    value: tipoAccion,
+                                    items: tiposAccion.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                                    onChanged: (v) => setState(() => tipoAccion = v ?? 'Todos'),
+                                    underline: Container(),
+                                    style: const TextStyle(fontWeight: FontWeight.w500, color: CeasColors.primaryBlue),
+                                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -336,47 +420,103 @@ class _SharesScreenState extends State<SharesScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: CeasColors.primaryBlue.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.table_chart_rounded,
-                                color: CeasColors.primaryBlue,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Acciones Emitidas',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: CeasColors.primaryBlue,
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: CeasColors.primaryBlue.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                '${accionProvider.totalItems} acciones encontradas (Página ${accionProvider.currentPage} de ${accionProvider.totalPages})',
-                                style: const TextStyle(
-                                  color: CeasColors.primaryBlue,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isMobile = constraints.maxWidth < 1024;
+                            
+                            if (isMobile) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: CeasColors.primaryBlue.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Icon(
+                                          Icons.table_chart_rounded,
+                                          color: CeasColors.primaryBlue,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Expanded(
+                                        child: Text(
+                                          'Acciones Emitidas',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: CeasColors.primaryBlue,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: CeasColors.primaryBlue.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      '${accionProvider.totalItems} acciones encontradas (Página ${accionProvider.currentPage} de ${accionProvider.totalPages})',
+                                      style: const TextStyle(
+                                        color: CeasColors.primaryBlue,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+                            
+                            return Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: CeasColors.primaryBlue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.table_chart_rounded,
+                                    color: CeasColors.primaryBlue,
+                                    size: 20,
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'Acciones Emitidas',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: CeasColors.primaryBlue,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: CeasColors.primaryBlue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    '${accionProvider.totalItems} acciones encontradas (Página ${accionProvider.currentPage} de ${accionProvider.totalPages})',
+                                    style: const TextStyle(
+                                      color: CeasColors.primaryBlue,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                       Container(
@@ -387,49 +527,56 @@ class _SharesScreenState extends State<SharesScreen> {
                         child: Column(
                           children: [
                             // Header de la tabla
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 16),
-                              decoration: BoxDecoration(
-                                color: CeasColors.primaryBlue.withOpacity(0.05),
-                                border: Border(
-                                  bottom: BorderSide(
-                                      color: Colors.grey[200]!, width: 1),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  // Expanded(
-                                  //     flex: 1, child: _buildHeaderCell('ID')),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildHeaderCell('Socio Titular')),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildHeaderCell(
-                                          'Tipo', TextAlign.center)),
-                                  Flexible(
-                                      flex: 1,
-                                      child: Center(
-                                          child: _buildHeaderCell('Estado'))),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildHeaderCell('Modalidad')),
-                                  // Expanded(
-                                  //     flex: 1,
-                                  //     child: _buildHeaderCell('Valor')),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildHeaderCell('Saldo')),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildHeaderCell('Progreso')),
-                                  Expanded(
-                                      flex: 2,
-                                      child: _buildHeaderCell(
-                                          'Acciones', TextAlign.center)),
-                                ],
-                              ),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isMobile = constraints.maxWidth < 1024;
+                                
+                                // No mostrar el header en mobile
+                                if (isMobile) {
+                                  return const SizedBox.shrink();
+                                }
+                                
+                                // Mostrar header solo en desktop
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: CeasColors.primaryBlue.withOpacity(0.05),
+                                    border: Border(
+                                      bottom: BorderSide(
+                                          color: Colors.grey[200]!, width: 1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                          flex: 1,
+                                          child: _buildHeaderCell('Socio Titular')),
+                                      Expanded(
+                                          flex: 1,
+                                          child: _buildHeaderCell(
+                                              'Tipo', TextAlign.center)),
+                                      Flexible(
+                                          flex: 1,
+                                          child: Center(
+                                              child: _buildHeaderCell('Estado'))),
+                                      Expanded(
+                                          flex: 1,
+                                          child: _buildHeaderCell('Modalidad')),
+                                      Expanded(
+                                          flex: 1,
+                                          child: _buildHeaderCell('Saldo')),
+                                      Expanded(
+                                          flex: 1,
+                                          child: _buildHeaderCell('Progreso')),
+                                      Expanded(
+                                          flex: 2,
+                                          child: _buildHeaderCell(
+                                              'Acciones', TextAlign.center)),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                             // Filas de la tabla
                             ...(accionProvider.paginatedAcciones.isNotEmpty
@@ -440,7 +587,21 @@ class _SharesScreenState extends State<SharesScreen> {
                                     final index = entry.key;
                                     final accion = entry.value;
 
-                                    return Container(
+                                    // Usar LayoutBuilder para detectar si es mobile
+                                    return LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        final isMobile = constraints.maxWidth < 1024;
+                                        
+                                        // Si es mobile, mostrar tarjeta
+                                        if (isMobile) {
+                                          return ActionCard(
+                                            accion: accion,
+                                            onEmitirCertificado: () => _showCertificadoDialog(context, accion),
+                                          );
+                                        }
+                                        
+                                        // Si es desktop, mostrar fila de tabla
+                                        return Container(
                                       decoration: BoxDecoration(
                                         color: index.isEven
                                             ? Colors.grey[50]
@@ -507,7 +668,8 @@ class _SharesScreenState extends State<SharesScreen> {
                                           ],
                                         ),
                                       ),
-                                    );
+                                      ); // Container
+                                    }); // LayoutBuilder builder
                                   }).toList()
                                 : []),
 
@@ -1771,12 +1933,38 @@ class _SharesScreenState extends State<SharesScreen> {
     );
   }
 
-  Widget _buildQuickActionsRow() {
-    return Wrap(
-      spacing: 16,
+  Widget _buildQuickActionsRow({required bool isMobile}) {
+    if (isMobile) {
+      return Wrap(
+        spacing: 16,
+        runSpacing: 12,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: _buildQuickAction(
+              'Emitir Acción',
+              Icons.add_rounded,
+              CeasColors.primaryBlue,
+              () => _showEmitirAccionDialog(context),
+            ),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: _buildQuickAction(
+              'Generar Reporte',
+              Icons.assessment,
+              Colors.purple,
+              _descargarReporteAcciones,
+            ),
+          ),
+        ],
+      );
+    }
+    
+    // Desktop - usar Expanded
+    return Row(
       children: [
-        SizedBox(
-          width: 200,
+        Expanded(
           child: _buildQuickAction(
             'Emitir Acción',
             Icons.add_rounded,
@@ -1784,8 +1972,8 @@ class _SharesScreenState extends State<SharesScreen> {
             () => _showEmitirAccionDialog(context),
           ),
         ),
-        SizedBox(
-          width: 200,
+        const SizedBox(width: 16),
+        Expanded(
           child: _buildQuickAction(
             'Generar Reporte',
             Icons.assessment,
