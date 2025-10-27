@@ -7,6 +7,7 @@ import '../providers/finance_provider.dart';
 import '../services/finance_service.dart';
 import '../models/movimiento_financiero.dart';
 import '../widgets/agregar_movimiento_bottom_sheet.dart';
+import '../widgets/movimiento_card.dart';
 
 class IncomeExpenseReportScreen extends StatefulWidget {
   const IncomeExpenseReportScreen({Key? key}) : super(key: key);
@@ -72,46 +73,97 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.account_balance_rounded,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 1024;
+                      
+                      if (isMobile) {
+                        return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Gestión Financiera',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.account_balance_rounded,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Text(
+                                    'Gestión Financiera',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 8),
                             Text(
-                              'Administra ingresos, egresos y reportes financieros',
+                              'Gestión financiera completa',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: Colors.white.withOpacity(0.9),
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
-                        ),
-                      ),
-                      const Spacer(),
-                    ],
+                        );
+                      }
+                      
+                      return Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.account_balance_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Gestión Financiera',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Administra ingresos, egresos y reportes financieros',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -139,46 +191,115 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                       )
                     : financeProvider.errorResumen != null
                         ? _buildErrorCard(financeProvider.errorResumen!)
-                        : Row(
-                            children: [
-                              _buildStatCard(
-                                  'Balance Total',
-                                  'Bs. ${balance.toStringAsFixed(0)}',
-                                  Icons.account_balance_wallet_rounded,
-                                  balance >= 0 ? Colors.green : Colors.red,
-                                  financeProvider.getPeriodoResumen() ??
-                                      'Saldo actual'),
-                              const SizedBox(width: 16),
-                              _buildStatCard(
-                                  'Ingresos',
-                                  'Bs. ${totalIngresos.toStringAsFixed(0)}',
-                                  Icons.trending_up_rounded,
-                                  Colors.green,
-                                  financeProvider.getPeriodoResumen() ??
-                                      'Este mes'),
-                              const SizedBox(width: 16),
-                              _buildStatCard(
-                                  'Egresos',
-                                  'Bs. ${totalEgresos.toStringAsFixed(0)}',
-                                  Icons.trending_down_rounded,
-                                  Colors.red,
-                                  financeProvider.getPeriodoResumen() ??
-                                      'Este mes'),
-                              const SizedBox(width: 16),
-                              _buildStatCard(
-                                  'Movimientos',
-                                  financeProvider
-                                      .getMovimientosCount()
-                                      .toString(),
-                                  Icons.swap_horiz_rounded,
-                                  CeasColors.primaryBlue,
-                                  'Total del período'),
-                            ],
+                        : LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isMobile = constraints.maxWidth < 1024;
+                              
+                              if (isMobile) {
+                                return Wrap(
+                                  spacing: 16,
+                                  runSpacing: 16,
+                                  children: [
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: _buildStatCard(
+                                          'Balance Total',
+                                          'Bs. ${balance.toStringAsFixed(0)}',
+                                          Icons.account_balance_wallet_rounded,
+                                          balance >= 0 ? Colors.green : Colors.red,
+                                          financeProvider.getPeriodoResumen() ??
+                                              'Saldo actual'),
+                                    ),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: _buildStatCard(
+                                          'Ingresos',
+                                          'Bs. ${totalIngresos.toStringAsFixed(0)}',
+                                          Icons.trending_up_rounded,
+                                          Colors.green,
+                                          financeProvider.getPeriodoResumen() ??
+                                              'Este mes'),
+                                    ),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: _buildStatCard(
+                                          'Egresos',
+                                          'Bs. ${totalEgresos.toStringAsFixed(0)}',
+                                          Icons.trending_down_rounded,
+                                          Colors.red,
+                                          financeProvider.getPeriodoResumen() ??
+                                              'Este mes'),
+                                    ),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: _buildStatCard(
+                                          'Movimientos',
+                                          financeProvider
+                                              .getMovimientosCount()
+                                              .toString(),
+                                          Icons.swap_horiz_rounded,
+                                          CeasColors.primaryBlue,
+                                          'Total del período'),
+                                    ),
+                                  ],
+                                );
+                              }
+                              
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildStatCard(
+                                        'Balance Total',
+                                        'Bs. ${balance.toStringAsFixed(0)}',
+                                        Icons.account_balance_wallet_rounded,
+                                        balance >= 0 ? Colors.green : Colors.red,
+                                        financeProvider.getPeriodoResumen() ??
+                                            'Saldo actual'),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _buildStatCard(
+                                        'Ingresos',
+                                        'Bs. ${totalIngresos.toStringAsFixed(0)}',
+                                        Icons.trending_up_rounded,
+                                        Colors.green,
+                                        financeProvider.getPeriodoResumen() ??
+                                            'Este mes'),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _buildStatCard(
+                                        'Egresos',
+                                        'Bs. ${totalEgresos.toStringAsFixed(0)}',
+                                        Icons.trending_down_rounded,
+                                        Colors.red,
+                                        financeProvider.getPeriodoResumen() ??
+                                            'Este mes'),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: _buildStatCard(
+                                        'Movimientos',
+                                        financeProvider
+                                            .getMovimientosCount()
+                                            .toString(),
+                                        Icons.swap_horiz_rounded,
+                                        CeasColors.primaryBlue,
+                                        'Total del período'),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                 const SizedBox(height: 24),
 
                 // Acciones rápidas
-                _buildQuickActionsRow(),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 1024;
+                    return _buildQuickActionsRow(isMobile: isMobile);
+                  },
+                ),
                 const SizedBox(height: 24),
 
                 // Saldos mensuales por club
@@ -316,162 +437,231 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                             ),
                             const SizedBox(height: 12),
 
-                            Row(
-                              children: [
-                                // Filtro de búsqueda
-                                Expanded(
-                                  flex: 2,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isMobile = constraints.maxWidth < 1024;
+                                
+                                if (isMobile) {
+                                  return Column(
                                     children: [
-                                      const Text(
-                                        'Buscar',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
+                                      // TextField arriba en mobile
                                       Container(
                                         decoration: BoxDecoration(
                                           color: Colors.grey[50],
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border: Border.all(
-                                              color: Colors.grey[200]!),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.grey[200]!),
                                         ),
                                         child: TextField(
                                           decoration: InputDecoration(
-                                            hintText:
-                                                'Buscar por descripción o ID...',
-                                            hintStyle: TextStyle(
-                                                color: Colors.grey[500]),
-                                            prefixIcon: const Icon(
-                                                Icons.search_rounded,
-                                                color: Colors.grey),
+                                            hintText: 'Buscar por descripción o ID...',
+                                            hintStyle: TextStyle(color: Colors.grey[500]),
+                                            prefixIcon: const Icon(Icons.search_rounded, color: Colors.grey),
                                             border: InputBorder.none,
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 16),
+                                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                           ),
-                                          onChanged: (v) =>
-                                              financeProvider.updateSearch(v),
+                                          onChanged: (v) => financeProvider.updateSearch(v),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      // Filtros abajo en mobile
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildFilterDropdown(
+                                              'Tipo',
+                                              financeProvider.filterTipo,
+                                              financeProvider.tiposMovimiento,
+                                              (v) => financeProvider.updateFilterTipo(v),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: _buildFilterDropdown(
+                                              'Estado',
+                                              financeProvider.filterEstado,
+                                              financeProvider.estadosMovimiento,
+                                              (v) => financeProvider.updateFilterEstado(v),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      ElevatedButton.icon(
+                                        onPressed: () => _limpiarTodosLosFiltros(),
+                                        icon: const Icon(Icons.clear_all_rounded),
+                                        label: const Text('Limpiar Filtros'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.grey.shade300,
+                                          foregroundColor: Colors.grey.shade700,
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
                                         ),
                                       ),
                                     ],
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-
-                                // Filtro de tipo
-                                Expanded(
-                                  flex: 1,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Tipo de Movimiento',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      _buildFilterDropdown(
-                                          'Tipo',
-                                          financeProvider.filterTipo,
-                                          financeProvider.tiposMovimiento,
-                                          (v) => financeProvider
-                                              .updateFilterTipo(v)),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-
-                                // Filtro de estado
-                                Expanded(
-                                  flex: 1,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Estado del Movimiento',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      _buildFilterDropdown(
-                                          'Estado',
-                                          financeProvider.filterEstado,
-                                          financeProvider.estadosMovimiento,
-                                          (v) => financeProvider
-                                              .updateFilterEstado(v)),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-
-                                // Filtro de club
-                                Expanded(
-                                  flex: 1,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Club',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      _buildFilterDropdown(
-                                          'Club',
-                                          financeProvider.filterClub,
-                                          financeProvider.clubs,
-                                          (v) => financeProvider
-                                              .updateFilterClub(v)),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-
-                                // Botón de limpiar filtros
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  );
+                                }
+                                
+                                // Desktop layout - Row original
+                                return Row(
                                   children: [
-                                    const SizedBox(
-                                        height:
-                                            20), // Espacio para alinear con los campos
-                                    ElevatedButton.icon(
-                                      onPressed: () =>
-                                          _limpiarTodosLosFiltros(),
-                                      icon: const Icon(Icons.clear_all_rounded),
-                                      label: const Text('Limpiar'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.grey.shade300,
-                                        foregroundColor: Colors.grey.shade700,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 12),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12)),
+                                    // Filtro de búsqueda
+                                    Expanded(
+                                      flex: 2,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Buscar',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[50],
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                  color: Colors.grey[200]!),
+                                            ),
+                                            child: TextField(
+                                              decoration: InputDecoration(
+                                                hintText:
+                                                    'Buscar por descripción o ID...',
+                                                hintStyle: TextStyle(
+                                                    color: Colors.grey[500]),
+                                                prefixIcon: const Icon(
+                                                    Icons.search_rounded,
+                                                    color: Colors.grey),
+                                                border: InputBorder.none,
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 16,
+                                                        vertical: 16),
+                                              ),
+                                              onChanged: (v) =>
+                                                  financeProvider.updateSearch(v),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                    const SizedBox(width: 16),
+
+                                    // Filtro de tipo
+                                    Expanded(
+                                      flex: 1,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Tipo de Movimiento',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          _buildFilterDropdown(
+                                              'Tipo',
+                                              financeProvider.filterTipo,
+                                              financeProvider.tiposMovimiento,
+                                              (v) => financeProvider
+                                                  .updateFilterTipo(v)),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+
+                                    // Filtro de estado
+                                    Expanded(
+                                      flex: 1,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Estado del Movimiento',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          _buildFilterDropdown(
+                                              'Estado',
+                                              financeProvider.filterEstado,
+                                              financeProvider.estadosMovimiento,
+                                              (v) => financeProvider
+                                                  .updateFilterEstado(v)),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+
+                                    // Filtro de club
+                                    Expanded(
+                                      flex: 1,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Club',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          _buildFilterDropdown(
+                                              'Club',
+                                              financeProvider.filterClub,
+                                              financeProvider.clubs,
+                                              (v) => financeProvider
+                                                  .updateFilterClub(v)),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+
+                                    // Botón de limpiar filtros
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(
+                                            height:
+                                                20), // Espacio para alinear con los campos
+                                        ElevatedButton.icon(
+                                          onPressed: () =>
+                                              _limpiarTodosLosFiltros(),
+                                          icon: const Icon(Icons.clear_all_rounded),
+                                          label: const Text('Limpiar'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.grey.shade300,
+                                            foregroundColor: Colors.grey.shade700,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 12),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ],
-                                ),
-                              ],
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -492,61 +682,106 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: CeasColors.primaryBlue.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.swap_horiz_rounded,
-                                color: CeasColors.primaryBlue,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Movimientos Financieros',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: CeasColors.primaryBlue,
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: CeasColors.primaryBlue.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                '${financeProvider.totalItems} movimientos encontrados (Página ${financeProvider.currentPage} de ${financeProvider.totalPages})',
-                                style: const TextStyle(
-                                  color: CeasColors.primaryBlue,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isMobile = constraints.maxWidth < 1024;
+                            
+                            if (isMobile) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: CeasColors.primaryBlue.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Icon(
+                                          Icons.swap_horiz_rounded,
+                                          color: CeasColors.primaryBlue,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Expanded(
+                                        child: Text(
+                                          'Movimientos',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: CeasColors.primaryBlue,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: CeasColors.primaryBlue.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      '${financeProvider.totalItems} movimientos (Página ${financeProvider.currentPage} de ${financeProvider.totalPages})',
+                                      style: const TextStyle(
+                                        color: CeasColors.primaryBlue,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+                            
+                            // Desktop layout
+                            return Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: CeasColors.primaryBlue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.swap_horiz_rounded,
+                                    color: CeasColors.primaryBlue,
+                                    size: 20,
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            ElevatedButton.icon(
-                              onPressed: () => _exportarBalances(),
-                              icon: const Icon(Icons.download_rounded),
-                              label: const Text('Exportar'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: CeasColors.primaryBlue,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ],
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'Movimientos Financieros',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: CeasColors.primaryBlue,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: CeasColors.primaryBlue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    '${financeProvider.totalItems} movimientos encontrados (Página ${financeProvider.currentPage} de ${financeProvider.totalPages})',
+                                    style: const TextStyle(
+                                      color: CeasColors.primaryBlue,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                       Container(
@@ -557,97 +792,122 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
                         child: Column(
                           children: [
                             // Header de la tabla
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 16),
-                              decoration: BoxDecoration(
-                                color: CeasColors.primaryBlue.withOpacity(0.05),
-                                border: Border(
-                                  bottom: BorderSide(
-                                      color: Colors.grey[200]!, width: 1),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                      flex: 1, child: _buildHeaderCell('ID')),
-                                  Expanded(
-                                      flex: 2,
-                                      child: _buildHeaderCell('Descripción')),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildHeaderCell(
-                                          'Tipo', TextAlign.center)),
-                                  Flexible(
-                                      flex: 1,
-                                      child: Center(
-                                          child: _buildHeaderCell('Estado'))),
-                                  Expanded(
-                                      flex: 1, child: _buildHeaderCell('Club')),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildHeaderCell('Monto')),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildHeaderCell('Fecha')),
-                                  Expanded(
-                                      flex: 1,
-                                      child: _buildHeaderCell(
-                                          'Acciones', TextAlign.center)),
-                                ],
-                              ),
-                            ),
-                            // Filas de la tabla
-                            ...financeProvider.paginatedMovimientos
-                                .asMap()
-                                .entries
-                                .map((entry) {
-                              final index = entry.key;
-                              final m = entry.value;
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: index.isEven
-                                      ? Colors.grey[50]
-                                      : Colors.white,
-                                  border: Border(
-                                    bottom: BorderSide(
-                                        color: Colors.grey[100]!, width: 0.5),
-                                  ),
-                                ),
-                                child: Padding(
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isMobile = constraints.maxWidth < 1024;
+                                
+                                if (isMobile) {
+                                  // Ocultar header en mobile
+                                  return const SizedBox.shrink();
+                                }
+                                
+                                return Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 12),
+                                      horizontal: 20, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: CeasColors.primaryBlue.withOpacity(0.05),
+                                    border: Border(
+                                      bottom: BorderSide(
+                                          color: Colors.grey[200]!, width: 1),
+                                    ),
+                                  ),
                                   child: Row(
                                     children: [
                                       Expanded(
-                                          flex: 1, child: _buildCell(m.id)),
+                                          flex: 1, child: _buildHeaderCell('ID')),
                                       Expanded(
                                           flex: 2,
-                                          child: _buildCell(m.descripcion)),
+                                          child: _buildHeaderCell('Descripción')),
                                       Expanded(
                                           flex: 1,
-                                          child: Center(
-                                              child: _buildTipoMovimientoCell(
-                                                  m.tipo))),
+                                          child: _buildHeaderCell(
+                                              'Tipo', TextAlign.center)),
                                       Flexible(
                                           flex: 1,
                                           child: Center(
-                                              child: _buildEstadoMovimientoCell(
-                                                  m.estadoDisplay))),
+                                              child: _buildHeaderCell('Estado'))),
                                       Expanded(
-                                          flex: 1, child: _buildCell(m.club)),
-                                      Expanded(
-                                          flex: 1,
-                                          child: _buildMoneyCell(m.monto)),
+                                          flex: 1, child: _buildHeaderCell('Club')),
                                       Expanded(
                                           flex: 1,
-                                          child: _buildCell(m.fechaDisplay)),
+                                          child: _buildHeaderCell('Monto')),
                                       Expanded(
                                           flex: 1,
-                                          child: _buildAccionesCell(m)),
+                                          child: _buildHeaderCell('Fecha')),
+                                      Expanded(
+                                          flex: 1,
+                                          child: _buildHeaderCell(
+                                              'Acciones', TextAlign.center)),
                                     ],
                                   ),
-                                ),
+                                );
+                              },
+                            ),
+                            // Filas de la tabla
+                            ...financeProvider.paginatedMovimientos
+                                .map((m) {
+                              return LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final isMobile = constraints.maxWidth < 1024;
+                                  
+                                  if (isMobile) {
+                                    // Renderizar tarjeta para mobile
+                                    return MovimientoCard(
+                                      movimiento: m,
+                                      onVerDetalle: () {
+                                        // TODO: Implementar ver detalle
+                                      },
+                                      onEditar: () {
+                                        // TODO: Implementar editar
+                                      },
+                                    );
+                                  }
+                                  
+                                  // Renderizar fila de tabla para desktop
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border(
+                                        bottom: BorderSide(
+                                            color: Colors.grey[100]!, width: 0.5),
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 12),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                              flex: 1, child: _buildCell(m.id)),
+                                          Expanded(
+                                              flex: 2,
+                                              child: _buildCell(m.descripcion)),
+                                          Expanded(
+                                              flex: 1,
+                                              child: Center(
+                                                  child: _buildTipoMovimientoCell(
+                                                      m.tipo))),
+                                          Flexible(
+                                              flex: 1,
+                                              child: Center(
+                                                  child: _buildEstadoMovimientoCell(
+                                                      m.estadoDisplay))),
+                                          Expanded(
+                                              flex: 1, child: _buildCell(m.club)),
+                                          Expanded(
+                                              flex: 1,
+                                              child: _buildMoneyCell(m.monto)),
+                                          Expanded(
+                                              flex: 1,
+                                              child: _buildCell(m.fechaDisplay)),
+                                          Expanded(
+                                              flex: 1,
+                                              child: _buildAccionesCell(m)),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             }).toList(),
 
@@ -1311,12 +1571,38 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
     );
   }
 
-  Widget _buildQuickActionsRow() {
-    return Wrap(
-      spacing: 16,
+  Widget _buildQuickActionsRow({required bool isMobile}) {
+    if (isMobile) {
+      return Wrap(
+        spacing: 16,
+        runSpacing: 12,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: _buildQuickAction(
+              'Agregar Movimiento',
+              Icons.add_rounded,
+              CeasColors.primaryBlue,
+              () => _showAgregarMovimientoDialog(context),
+            ),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: _buildQuickAction(
+              'Generar Reporte',
+              Icons.assessment,
+              Colors.purple,
+              _descargarReporteFinanzas,
+            ),
+          ),
+        ],
+      );
+    }
+    
+    // Desktop - usar Expanded en Row
+    return Row(
       children: [
-        SizedBox(
-          width: 250,
+        Expanded(
           child: _buildQuickAction(
             'Agregar Movimiento',
             Icons.add_rounded,
@@ -1324,8 +1610,8 @@ class _IncomeExpenseReportScreenState extends State<IncomeExpenseReportScreen> {
             () => _showAgregarMovimientoDialog(context),
           ),
         ),
-        SizedBox(
-          width: 250,
+        const SizedBox(width: 16),
+        Expanded(
           child: _buildQuickAction(
             'Generar Reporte',
             Icons.assessment,

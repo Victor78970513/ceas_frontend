@@ -6,6 +6,7 @@ import '../providers/bi_provider.dart';
 import '../widgets/bi_movimientos_chart.dart';
 import '../widgets/bi_personal_charts.dart';
 import '../widgets/bi_premium_charts.dart';
+import '../widgets/responsive_kpi_section.dart';
 
 class BiDashboardScreen extends StatefulWidget {
   const BiDashboardScreen({Key? key}) : super(key: key);
@@ -72,7 +73,7 @@ class _BiDashboardScreenState extends State<BiDashboardScreen>
                           _buildErrorState(biProvider.error!)
                         else if (biProvider.hasData) ...[
                           // KPIs principales con diseño premium
-                          _buildPremiumKpis(biProvider),
+                          ResponsiveKpiSection(provider: biProvider),
                           const SizedBox(height: 24),
 
                           // Métricas ejecutivas (métricas clave del sistema)
