@@ -63,10 +63,14 @@ class _BiDashboardScreenState extends State<BiDashboardScreen>
               SliverToBoxAdapter(
                 child: FadeTransition(
                   opacity: _fadeAnimation,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      children: [
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 1024;
+                      
+                      return Padding(
+                        padding: EdgeInsets.all(isMobile ? 16.0 : 24.0),
+                        child: Column(
+                          children: [
                         if (biProvider.isLoading)
                           _buildLoadingState()
                         else if (biProvider.error != null)
@@ -82,33 +86,38 @@ class _BiDashboardScreenState extends State<BiDashboardScreen>
 
                           // Métricas financieras destacadas
                           _buildFinancialMetrics(biProvider),
-                          const SizedBox(height: 24),
+                          
+                          // Para mobile, mostrar solo métricas esenciales
+                          if (!isMobile) ...[
+                            const SizedBox(height: 24),
+                            // Gráficos premium
+                            _buildPremiumCharts(biProvider),
+                            const SizedBox(height: 32),
 
-                          // Gráficos premium
-                          _buildPremiumCharts(biProvider),
-                          const SizedBox(height: 32),
+                            // Análisis de rendimiento
+                            _buildPerformanceAnalysis(biProvider),
+                            const SizedBox(height: 32),
 
-                          // Análisis de rendimiento
-                          _buildPerformanceAnalysis(biProvider),
-                          const SizedBox(height: 32),
+                            // Gráficos interactivos
+                            _buildInteractiveCharts(biProvider),
+                            const SizedBox(height: 32),
 
-                          // Gráficos interactivos
-                          _buildInteractiveCharts(biProvider),
-                          const SizedBox(height: 32),
+                            // Top performers
+                            _buildTopPerformers(biProvider),
+                            const SizedBox(height: 32),
 
-                          // Top performers
-                          _buildTopPerformers(biProvider),
-                          const SizedBox(height: 32),
+                            // Personal y asistencia
+                            _buildPersonalInsights(biProvider),
+                            const SizedBox(height: 32),
 
-                          // Personal y asistencia
-                          _buildPersonalInsights(biProvider),
-                          const SizedBox(height: 32),
-
-                          // Alertas y notificaciones
-                          _buildAlertsSection(biProvider),
+                            // Alertas y notificaciones
+                            _buildAlertsSection(biProvider),
+                          ],
                         ],
-                      ],
-                    ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -542,38 +551,74 @@ class _BiDashboardScreenState extends State<BiDashboardScreen>
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildMetricCard(
-                  'Ingresos Totales',
-                  'Bs. ${metricasFin.ingresosTotales.toStringAsFixed(0)}',
-                  Icons.trending_up_rounded,
-                  Colors.green,
-                  '+15.3% vs mes anterior',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildMetricCard(
-                  'Egresos Totales',
-                  'Bs. ${metricasFin.egresosTotales.toStringAsFixed(0)}',
-                  Icons.trending_down_rounded,
-                  Colors.red,
-                  '+8.7% vs mes anterior',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildMetricCard(
-                  'Margen de Rentabilidad',
-                  '${metricasFin.margenRentabilidad.toStringAsFixed(1)}%',
-                  Icons.percent_rounded,
-                  Colors.blue,
-                  '+2.1% vs mes anterior',
-                ),
-              ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 1024;
+              
+              if (isMobile) {
+                return Column(
+                  children: [
+                    _buildMetricCard(
+                      'Ingresos Totales',
+                      'Bs. ${metricasFin.ingresosTotales.toStringAsFixed(0)}',
+                      Icons.trending_up_rounded,
+                      Colors.green,
+                      '+15.3% vs mes anterior',
+                    ),
+                    const SizedBox(height: 12),
+                    _buildMetricCard(
+                      'Egresos Totales',
+                      'Bs. ${metricasFin.egresosTotales.toStringAsFixed(0)}',
+                      Icons.trending_down_rounded,
+                      Colors.red,
+                      '+8.7% vs mes anterior',
+                    ),
+                    const SizedBox(height: 12),
+                    _buildMetricCard(
+                      'Margen de Rentabilidad',
+                      '${metricasFin.margenRentabilidad.toStringAsFixed(1)}%',
+                      Icons.percent_rounded,
+                      Colors.blue,
+                      '+2.1% vs mes anterior',
+                    ),
+                  ],
+                );
+              }
+              
+              return Row(
+                children: [
+                  Expanded(
+                    child: _buildMetricCard(
+                      'Ingresos Totales',
+                      'Bs. ${metricasFin.ingresosTotales.toStringAsFixed(0)}',
+                      Icons.trending_up_rounded,
+                      Colors.green,
+                      '+15.3% vs mes anterior',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricCard(
+                      'Egresos Totales',
+                      'Bs. ${metricasFin.egresosTotales.toStringAsFixed(0)}',
+                      Icons.trending_down_rounded,
+                      Colors.red,
+                      '+8.7% vs mes anterior',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricCard(
+                      'Margen de Rentabilidad',
+                      '${metricasFin.margenRentabilidad.toStringAsFixed(1)}%',
+                      Icons.percent_rounded,
+                      Colors.blue,
+                      '+2.1% vs mes anterior',
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -1376,14 +1421,20 @@ class _BiDashboardScreenState extends State<BiDashboardScreen>
             ),
           ),
           const SizedBox(height: 16),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 4,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 2.0,
-            children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 1024;
+              final crossAxisCount = isMobile ? 2 : 4;
+              final childAspectRatio = isMobile ? 1.0 : 2.0;
+              
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: isMobile ? 8 : 12,
+                mainAxisSpacing: isMobile ? 8 : 12,
+                childAspectRatio: childAspectRatio,
+                children: [
               if (metricasFin != null) ...[
                 _buildCompactMetricCard(
                   'Balance Neto',
@@ -1425,6 +1476,8 @@ class _BiDashboardScreenState extends State<BiDashboardScreen>
                 ),
               ],
             ],
+              );
+            },
           ),
         ],
       ),
