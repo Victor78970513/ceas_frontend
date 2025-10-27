@@ -10,6 +10,8 @@ import '../models/asistencia.dart';
 import '../models/empleado.dart';
 import '../widgets/agregar_empleado_bottom_sheet.dart';
 import '../widgets/registrar_asistencia_bottom_sheet.dart';
+import '../widgets/empleado_card.dart';
+import '../widgets/asistencia_card.dart';
 
 class StaffListScreen extends StatefulWidget {
   const StaffListScreen({Key? key}) : super(key: key);
@@ -151,32 +153,89 @@ class _StaffListScreenState extends State<StaffListScreen> {
 
   Widget _buildStatsRow(PersonalProvider personalProvider,
       AsistenciaProvider asistenciaProvider) {
-    return Row(
-      children: [
-        _buildStatCard('Total Empleados', '${personalProvider.personal.length}',
-            Icons.people, CeasColors.primaryBlue),
-        const SizedBox(width: 16),
-        _buildStatCard(
-          'Activos',
-          '${personalProvider.personal.where((e) => e.estado == 'ACTIVO').length}',
-          Icons.check_circle,
-          Colors.green,
-        ),
-        const SizedBox(width: 16),
-        _buildStatCard(
-          'Presentes Hoy',
-          '${asistenciaProvider.asistencia.where((a) => a.estado == 'Presente').length}',
-          Icons.today,
-          Colors.orange,
-        ),
-        const SizedBox(width: 16),
-        _buildStatCard(
-          'Retrasos Hoy',
-          '${asistenciaProvider.asistencia.where((a) => a.estado == 'Retraso').length}',
-          Icons.schedule,
-          Colors.red,
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth <= 768;
+
+        if (isMobile) {
+          // En mobile, mostrar 2 columnas
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              SizedBox(
+                width: (constraints.maxWidth - 8) / 2,
+                child: _buildStatCard('Total Empleados', '${personalProvider.personal.length}',
+                    Icons.people, CeasColors.primaryBlue),
+              ),
+              SizedBox(
+                width: (constraints.maxWidth - 8) / 2,
+                child: _buildStatCard(
+                  'Activos',
+                  '${personalProvider.personal.where((e) => e.estado == 'ACTIVO').length}',
+                  Icons.check_circle,
+                  Colors.green,
+                ),
+              ),
+              SizedBox(
+                width: (constraints.maxWidth - 8) / 2,
+                child: _buildStatCard(
+                  'Presentes Hoy',
+                  '${asistenciaProvider.asistencia.where((a) => a.estado == 'Presente').length}',
+                  Icons.today,
+                  Colors.orange,
+                ),
+              ),
+              SizedBox(
+                width: (constraints.maxWidth - 8) / 2,
+                child: _buildStatCard(
+                  'Retrasos Hoy',
+                  '${asistenciaProvider.asistencia.where((a) => a.estado == 'Retraso').length}',
+                  Icons.schedule,
+                  Colors.red,
+                ),
+              ),
+            ],
+          );
+        }
+
+        // En desktop, mostrar 4 columnas
+        return Row(
+          children: [
+            Expanded(
+              child: _buildStatCard('Total Empleados', '${personalProvider.personal.length}',
+                  Icons.people, CeasColors.primaryBlue),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildStatCard(
+                'Activos',
+                '${personalProvider.personal.where((e) => e.estado == 'ACTIVO').length}',
+                Icons.check_circle,
+                Colors.green,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildStatCard(
+                'Presentes Hoy',
+                '${asistenciaProvider.asistencia.where((a) => a.estado == 'Presente').length}',
+                Icons.today,
+                Colors.orange,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildStatCard(
+                'Retrasos Hoy',
+                '${asistenciaProvider.asistencia.where((a) => a.estado == 'Retraso').length}',
+                Icons.schedule,
+                Colors.red,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -322,89 +381,124 @@ class _StaffListScreenState extends State<StaffListScreen> {
     final paginatedEmpleados =
         personalProvider.personal.sublist(startIndex, endIndex);
 
-    return Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: CeasColors.primaryBlue.withOpacity(0.05),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(flex: 5, child: _buildHeaderCell('Empleado')),
-                    Expanded(flex: 3, child: _buildHeaderCell('Cargo')),
-                    Expanded(flex: 3, child: _buildHeaderCell('Departamento')),
-                    Expanded(flex: 2, child: _buildHeaderCell('F. Ingreso')),
-                    Expanded(flex: 2, child: _buildHeaderCell('Salario')),
-                    Expanded(
-                        flex: 2,
-                        child: Center(child: _buildHeaderCell('Estado'))),
-                    Expanded(flex: 2, child: _buildHeaderCell('Acciones')),
-                  ],
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth <= 768;
+
+        if (isMobile) {
+          // En mobile, mostrar tarjetas
+          if (paginatedEmpleados.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text('No hay empleados para mostrar'),
               ),
-              ...paginatedEmpleados.asMap().entries.map((entry) {
-                final index = entry.key;
-                final empleado = entry.value;
-                return Container(
-                  decoration: BoxDecoration(
-                    color: index.isEven ? Colors.grey[50] : Colors.white,
-                    border: Border(
-                        bottom:
-                            BorderSide(color: Colors.grey[100]!, width: 0.5)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
+            );
+          }
+
+          return Column(
+            children: [
+              Column(
+                children: paginatedEmpleados
+                    .map((empleado) => EmpleadoCard(empleado: empleado))
+                    .toList(),
+              ),
+              const SizedBox(height: 16),
+              _buildPagination(
+                  personalProvider.personal.length, currentPage, itemsPerPage,
+                  (page) {
+                setState(() => currentPage = page);
+              }),
+            ],
+          );
+        }
+
+        // En desktop, mostrar tabla
+        return Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: CeasColors.primaryBlue.withOpacity(0.05),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
                     child: Row(
                       children: [
-                        Expanded(
-                            flex: 5,
-                            child: _buildEmpleadoCell(empleado.nombreCompleto)),
-                        Expanded(flex: 3, child: _buildCell(empleado.cargo)),
-                        Expanded(
-                            flex: 3, child: _buildCell(empleado.departamento)),
-                        Expanded(
-                            flex: 2,
-                            child:
-                                _buildCell(empleado.fechaContratacionDisplay)),
+                        Expanded(flex: 5, child: _buildHeaderCell('Empleado')),
+                        Expanded(flex: 3, child: _buildHeaderCell('Cargo')),
+                        Expanded(flex: 3, child: _buildHeaderCell('Departamento')),
+                        Expanded(flex: 2, child: _buildHeaderCell('F. Ingreso')),
+                        Expanded(flex: 2, child: _buildHeaderCell('Salario')),
                         Expanded(
                             flex: 2,
-                            child:
-                                _buildMoneyCell(empleado.salario.toString())),
-                        Expanded(
-                            flex: 2,
-                            child: Center(
-                                child: _buildEstadoCell(empleado.estado,
-                                    _getEstadoColor(empleado.estado)))),
-                        Expanded(flex: 2, child: _buildOpcionesCell(empleado)),
+                            child: Center(child: _buildHeaderCell('Estado'))),
+                        Expanded(flex: 2, child: _buildHeaderCell('Acciones')),
                       ],
                     ),
                   ),
-                );
-              }).toList(),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        _buildPagination(
-            personalProvider.personal.length, currentPage, itemsPerPage,
-            (page) {
-          setState(() => currentPage = page);
-        }),
-      ],
+                  ...paginatedEmpleados.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final empleado = entry.value;
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: index.isEven ? Colors.grey[50] : Colors.white,
+                        border: Border(
+                            bottom:
+                                BorderSide(color: Colors.grey[100]!, width: 0.5)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                                flex: 5,
+                                child: _buildEmpleadoCell(empleado.nombreCompleto)),
+                            Expanded(flex: 3, child: _buildCell(empleado.cargo)),
+                            Expanded(
+                                flex: 3, child: _buildCell(empleado.departamento)),
+                            Expanded(
+                                flex: 2,
+                                child:
+                                    _buildCell(empleado.fechaContratacionDisplay)),
+                            Expanded(
+                                flex: 2,
+                                child:
+                                    _buildMoneyCell(empleado.salario.toString())),
+                            Expanded(
+                                flex: 2,
+                                child: Center(
+                                    child: _buildEstadoCell(empleado.estado,
+                                        _getEstadoColor(empleado.estado)))),
+                            Expanded(flex: 2, child: _buildOpcionesCell(empleado)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildPagination(
+                personalProvider.personal.length, currentPage, itemsPerPage,
+                (page) {
+              setState(() => currentPage = page);
+            }),
+          ],
+        );
+      },
     );
   }
 
@@ -517,117 +611,168 @@ class _StaffListScreenState extends State<StaffListScreen> {
     final paginatedAsistencia =
         asistenciaProvider.asistencia.sublist(startIndex, endIndex);
 
-    return Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.05),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth <= 768;
+
+        if (isMobile) {
+          // En mobile, mostrar tarjetas
+          if (paginatedAsistencia.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
                   children: [
-                    Expanded(flex: 3, child: _buildHeaderCell('Empleado')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Fecha')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Entrada')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Salida')),
-                    Expanded(flex: 1, child: _buildHeaderCell('Horas')),
-                    Expanded(
-                        flex: 1,
-                        child: Center(child: _buildHeaderCell('Estado'))),
-                    Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
+                    Icon(
+                      Icons.schedule_outlined,
+                      size: 32,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      'No hay registros de asistencia para mostrar',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              if (paginatedAsistencia.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  child: const Center(
-                    child: Column(
+            );
+          }
+
+          return Column(
+            children: [
+              Column(
+                children: paginatedAsistencia
+                    .map((asistencia) => AsistenciaCard(asistencia: asistencia))
+                    .toList(),
+              ),
+              const SizedBox(height: 16),
+              _buildPagination(asistenciaProvider.asistencia.length,
+                  currentPageAsistencia, itemsPerPageAsistencia, (page) {
+                setState(() => currentPageAsistencia = page);
+              }),
+            ],
+          );
+        }
+
+        // En desktop, mostrar tabla
+        return Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.05),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: Row(
                       children: [
-                        Icon(
-                          Icons.schedule_outlined,
-                          size: 32,
-                          color: Colors.grey,
-                        ),
-                        SizedBox(height: 12),
-                        Text(
-                          'No hay registros de asistencia para mostrar',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        Expanded(flex: 3, child: _buildHeaderCell('Empleado')),
+                        Expanded(flex: 1, child: _buildHeaderCell('Fecha')),
+                        Expanded(flex: 1, child: _buildHeaderCell('Entrada')),
+                        Expanded(flex: 1, child: _buildHeaderCell('Salida')),
+                        Expanded(flex: 1, child: _buildHeaderCell('Horas')),
+                        Expanded(
+                            flex: 1,
+                            child: Center(child: _buildHeaderCell('Estado'))),
+                        Expanded(flex: 1, child: _buildHeaderCell('Acciones')),
                       ],
                     ),
                   ),
-                )
-              else
-                ...paginatedAsistencia.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final registro = entry.value;
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: index.isEven ? Colors.grey[50] : Colors.white,
-                      border: Border(
-                          bottom:
-                              BorderSide(color: Colors.grey[100]!, width: 0.5)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                              flex: 3,
-                              child: _buildCell(registro.nombreEmpleado)),
-                          Expanded(
-                              flex: 1,
-                              child: _buildCell(registro.fechaDisplay)),
-                          Expanded(
-                              flex: 1,
-                              child: _buildCell(registro.horaEntrada ?? 'N/A')),
-                          Expanded(
-                              flex: 1,
-                              child: _buildCell(registro.horaSalida ?? 'N/A')),
-                          Expanded(
-                              flex: 1,
-                              child: _buildCell(
-                                  '${registro.horaEntrada ?? 'N/A'} - ${registro.horaSalida ?? 'N/A'}')),
-                          Expanded(
-                              flex: 1,
-                              child: Center(
-                                  child: _buildAsistenciaEstadoCell(
-                                      registro.estado))),
-                          Expanded(
-                              flex: 1,
-                              child: _buildAsistenciaOpcionesCell(registro)),
-                        ],
+                  if (paginatedAsistencia.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      child: const Center(
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.schedule_outlined,
+                              size: 32,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: 12),
+                            Text(
+                              'No hay registros de asistencia para mostrar',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }).toList(),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        _buildPagination(asistenciaProvider.asistencia.length,
-            currentPageAsistencia, itemsPerPageAsistencia, (page) {
-          setState(() => currentPageAsistencia = page);
-        }),
-      ],
+                    )
+                  else
+                    ...paginatedAsistencia.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final registro = entry.value;
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: index.isEven ? Colors.grey[50] : Colors.white,
+                          border: Border(
+                              bottom:
+                                  BorderSide(color: Colors.grey[100]!, width: 0.5)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  flex: 3,
+                                  child: _buildCell(registro.nombreEmpleado)),
+                              Expanded(
+                                  flex: 1,
+                                  child: _buildCell(registro.fechaDisplay)),
+                              Expanded(
+                                  flex: 1,
+                                  child: _buildCell(registro.horaEntrada ?? 'N/A')),
+                              Expanded(
+                                  flex: 1,
+                                  child: _buildCell(registro.horaSalida ?? 'N/A')),
+                              Expanded(
+                                  flex: 1,
+                                  child: _buildCell(
+                                      '${registro.horaEntrada ?? 'N/A'} - ${registro.horaSalida ?? 'N/A'}')),
+                              Expanded(
+                                  flex: 1,
+                                  child: Center(
+                                      child: _buildAsistenciaEstadoCell(
+                                          registro.estado))),
+                              Expanded(
+                                  flex: 1,
+                                  child: _buildAsistenciaOpcionesCell(registro)),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildPagination(asistenciaProvider.asistencia.length,
+                currentPageAsistencia, itemsPerPageAsistencia, (page) {
+              setState(() => currentPageAsistencia = page);
+            }),
+          ],
+        );
+      },
     );
   }
 
